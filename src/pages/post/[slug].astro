@@ -20,7 +20,7 @@ const ld = {
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(ld)} />
   <article class="wrap post">
     <header>
-      <p class="crumbs"><a href={url('/all-articles')}>Articles</a>{post.categories.map((c) => <> / <a href={url(`/all-articles/categories/${c}`)}>{c[0].toUpperCase() + c.slice(1)}</a></>)}</p>
+      <p class="crumbs">{post.categories.map((c, i) => <>{i > 0 ? ' / ' : ''}<a href={url(`/all-articles/categories/${c}`)}>{c[0].toUpperCase() + c.slice(1)}</a></>)}</p>
       {post.closed && <p class="closed-note"><span class="badge-closed">Closed</span> This business is no longer operating. The review below is kept for reference.</p>}
       <h1>{post.title}</h1>
       <p class="meta">By {post.author}, {fmtDate(post.date, { month: 'long', day: 'numeric', year: 'numeric' })}. {post.readMin} min read.</p>
@@ -49,7 +49,7 @@ const ld = {
   </article>
   <section class="section tint">
     <div class="wrap">
-      <div class="section-head"><h2>Keep reading</h2><a href={url('/all-articles')}>All articles</a></div>
+      <div class="section-head"><h2>Keep reading</h2></div>
       <div class="grid">{more.map((p) => <PostCard post={p} />)}</div>
     </div>
   </section>
