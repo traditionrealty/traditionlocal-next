@@ -172,7 +172,7 @@ const basePath = url('/').replace(/\/$/, '');
 
   <section class="section">
     <div class="wrap">
-      <div class="section-head"><h2>What's new</h2><a href={url('/all-articles')}>View all posts</a></div>
+      <div class="section-head"><h2>What's new</h2></div>
       <PostCard post={lead} large />
       <div class="grid three">{latest.map((p) => <PostCard post={p} />)}</div>
     </div>
