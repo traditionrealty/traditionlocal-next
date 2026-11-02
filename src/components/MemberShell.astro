@@ -11,7 +11,7 @@ interface Props { active: 'account' | 'journey' | 'profile' }
 const { active } = Astro.props;
 const ready = Boolean(config.supabaseUrl && config.supabaseAnonKey);
 const items = [
-  { key: 'profile', label: 'Profile', href: '/members/profile', icon: 'user' },
+  
   { key: 'account', label: 'My Account', href: '/members/account', icon: 'user' },
   { key: 'journey', label: 'Real Estate Journey', href: '/members/journey', icon: 'home' },
 ];
