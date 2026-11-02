@@ -7,6 +7,10 @@ import events from '../../data/events.json';
 import { config } from '../../config';
 import { url, img, fmtDate } from '../../lib/util';
 
+// Pulled from the More menu and hidden behind coming-soon for now. Set ready to true to bring it back.
+const ready = false;
+if (!ready) return Astro.redirect(url('/coming-soon/'));
+
 const dated = posts.filter((p: any) => p.date);
 const byRecent = [...dated].sort((a: any, b: any) => (a.date < b.date ? 1 : -1));
 const featured = byRecent[0];
