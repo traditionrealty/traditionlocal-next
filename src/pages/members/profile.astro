@@ -1,6 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
 import { url } from '../../lib/util';
+
+// Pulled from the member menus and hidden behind coming-soon for now. Set ready to true to bring it back.
+const ready = false;
+if (!ready) return Astro.redirect(url('/coming-soon/'));
 import areas from '../../data/areas.json';
 const areaNames = [...new Set((areas as any[]).map((a) => a.name))].sort();
 ---
