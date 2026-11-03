@@ -16,8 +16,20 @@ const placeCrumb = place && place !== b.city ? place : null;
 const hasReview = Boolean(b.review);
 const nearbySub = subdivisions.find((s) => s.area === b.area);
 const firstName = (b.reviewAuthor || 'Sara Loren').split(' ')[0];
+const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+const SCHEMA_DAY = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+const hours: string[] | null = Array.isArray(b.hours) && b.hours.some(Boolean) ? b.hours : null;
+const to24 = (t: string) => { const m = t.match(/^(\d{1,2}):(\d{2}) (AM|PM)$/); if (!m) return null; const h = (Number(m[1]) % 12) + (m[3] === 'PM' ? 12 : 0); return String(h).padStart(2, '0') + ':' + m[2]; };
+const openingHours = hours ? hours.map((h, i) => {
+  if (!h || h === 'Closed') return null;
+  const parts = h.split(', ').map((r) => r.split(' to ').map(to24));
+  return parts.every((p) => p.length === 2 && p[0] && p[1]) ? SCHEMA_DAY[i] + ' ' + parts.map((p) => p.join('-')).join(',') : null;
+}).filter(Boolean) : [];
+const fullAddress = b.address ? `${b.address}, ${b.city}, TX${b.zip ? ' ' + b.zip : ''}` : '';
+const verifiedOn = b.factsVerified ? new Date(b.factsVerified + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '';
 const ld = { '@context': 'https://schema.org', '@type': 'LocalBusiness', name: b.name,
-  address: b.address || undefined, telephone: b.phone || undefined, url: b.website || undefined };
+  address: b.address ? { '@type': 'PostalAddress', streetAddress: b.address, addressLocality: b.city, addressRegion: 'TX', postalCode: b.zip || undefined } : undefined,
+  telephone: b.phone || undefined, url: b.website || undefined, openingHours: openingHours.length ? openingHours : undefined };
 ---
 <Base title={`${b.name}, ${place}`} description={b.description}>
   <script type="application/ld+json" slot="head" set:html={JSON.stringify(ld)} />
@@ -152,11 +164,14 @@ const ld = { '@context': 'https://schema.org', '@type': 'LocalBusiness', name: b
           <p class="plan-label">Location</p>
           <p class="plan-value">{place}{place !== b.city ? `, ${b.city}` : ''}</p>
           {b.address || b.phone
-            ? <p class="muted small">{b.address}{b.address && b.phone ? ' \u00b7 ' : ''}{b.phone && <a href={`tel:${b.phone}`}>{b.phone}</a>}</p>
+            ? <p class="muted small">{fullAddress}{b.address && b.phone ? ' \u00b7 ' : ''}{b.phone && <a href={`tel:${b.phone}`}>{b.phone}</a>}</p>
             : <p class="muted small ph-text">[Street address, ZIP code, phone]</p>}
 
           <p class="plan-label">Hours</p>
-          <p class="plan-value ph-text">[Current hours: awaiting verification]</p>
+          {hours
+            ? <dl class="hrs">{hours.map((h: string, i: number) => <><dt>{DAYS[i]}</dt><dd>{h || 'Not listed'}</dd></>)}</dl>
+            : <p class="plan-value ph-text">[Current hours: awaiting verification]</p>}
+          {verifiedOn && <p class="muted small">Details verified {verifiedOn}. Confirm hours and phone with the business before you go.</p>}
 
           <p class="plan-label">Before you go</p>
           <p class="muted small ph-text">[Menu &amp; prices, parking, accessibility]</p>
@@ -240,6 +255,7 @@ const ld = { '@context': 'https://schema.org', '@type': 'LocalBusiness', name: b
   .plan-label { font-size: 12px; color: var(--brown); margin: 16px 0 2px; text-transform: uppercase; letter-spacing: .03em; }
   .plan-label:first-of-type { margin-top: 4px; }
   .plan-value { margin: 0; font-weight: 600; color: var(--navy); }
+  .hrs { display: grid; grid-template-columns: 44px 1fr; gap: 3px 10px; margin: 4px 0 8px; font-size: 15px; } .hrs dt { color: var(--muted); } .hrs dd { margin: 0; }
   .side-link { display: block; font-weight: 600; font-size: 14px; margin-top: 10px; }
   .side-btn-row { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
   .suggest { margin-top: 14px; color: var(--muted); font-weight: 500; }
