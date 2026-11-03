@@ -984,3 +984,7 @@ for name, obj in [("posts", posts), ("categories", categories), ("events", event
 if not (OUT / "image-map.json").exists():
     json.dump({}, open(OUT / "image-map.json", "w"))
 print("images", len(images))
+
+# Places to visit (parks, museums, murals, landmarks) come from their own CSV.
+import subprocess, sys
+subprocess.run([sys.executable, str(ROOT / 'scripts' / 'prepare_things.py')], check=True)
