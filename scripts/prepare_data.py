@@ -988,3 +988,5 @@ print("images", len(images))
 # Places to visit (parks, museums, murals, landmarks) come from their own CSV.
 import subprocess, sys
 subprocess.run([sys.executable, str(ROOT / 'scripts' / 'prepare_things.py')], check=True)
+# Verified business facts (address, phone, hours) are merged into businesses.json after it is written.
+subprocess.run([sys.executable, str(ROOT / 'scripts' / 'prepare_facts.py')], check=True)
