@@ -1,0 +1,69 @@
+---
+import Base from '../../layouts/Base.astro';
+import things from '../../data/things.json';
+import { url } from '../../lib/util';
+const types = Object.entries(
+  (things as any[]).reduce((m: Record<string, { label: string; n: number }>, t) => { (m[t.type] ||= { label: t.typeLabel, n: 0 }).n++; return m; }, {})
+).sort((a, b) => b[1].n - a[1].n);
+const cities = [...new Set((things as any[]).map((t) => t.city))].sort();
+const upcoming = (things as any[]).filter((t) => t.status !== 'open').length;
+---
+<Base title="Places to visit in Greater Houston" description="Parks, museums, murals, landmarks and nature sites across Greater Houston and Southeast Texas, with addresses and where to eat nearby.">
+  <section class="band">
+    <div class="wrap">
+      <p class="crumb"><a href={url('/')}>Home</a> <span aria-hidden="true">&rsaquo;</span> <a href={url('/living')}>Things to Do</a> <span aria-hidden="true">&rsaquo;</span> Places to visit</p>
+      <p class="kicker">Things to do</p>
+      <h1>Places to visit around Greater Houston</h1>
+      <p class="lede">Parks, museums, murals and landmarks, from the Heights to Galveston and out to the Big Thicket. Pick one, then find somewhere good to eat nearby.</p>
+      <div class="stats"><div><strong>{things.length}</strong><span>places</span></div><div><strong>{types.length}</strong><span>kinds of outing</span></div><div><strong>{cities.length}</strong><span>cities and towns</span></div></div>
+    </div>
+  </section>
+  <section class="wrap listing">
+    <div class="filters" role="group" aria-label="Filter places">
+      <input type="search" id="pq" placeholder="Search by name or city" aria-label="Search places" />
+      <select id="pt" aria-label="Kind of place"><option value="">All kinds</option>{types.map(([k, v]) => <option value={k}>{v.label} ({v.n})</option>)}</select>
+      <select id="pc" aria-label="City"><option value="">All cities</option>{cities.map((c) => <option value={c}>{c}</option>)}</select>
+      <span class="count" id="pn" aria-live="polite">{things.length} places</span>
+    </div>
+    <div class="grid" id="pg">
+      {things.map((t: any) => (
+        <a class="pcard" href={url('/things-to-do/' + t.slug)} data-type={t.type} data-city={t.city} data-q={(t.name + ' ' + t.city + ' ' + t.kind).toLowerCase()}>
+          <span class="ptype">{t.typeLabel}</span>
+          <h3>{t.name}</h3>
+          <span class="muted small">{t.kind} &middot; {t.city}</span>
+          {t.status !== 'open' && <span class="pclosed">Temporarily closed</span>}
+        </a>
+      ))}
+    </div>
+    <p class="empty" id="pe" hidden>No places match. Try a different kind or city.</p>
+  </section>
+</Base>
+<script>
+  const q = document.getElementById('pq') as HTMLInputElement, t = document.getElementById('pt') as HTMLSelectElement, c = document.getElementById('pc') as HTMLSelectElement;
+  const cards = [...document.querySelectorAll<HTMLElement>('#pg .pcard')];
+  function run() {
+    const s = q.value.trim().toLowerCase(); let n = 0;
+    cards.forEach((el) => { const ok = (!s || el.dataset.q!.includes(s)) && (!t.value || el.dataset.type === t.value) && (!c.value || el.dataset.city === c.value); el.hidden = !ok; if (ok) n++; });
+    document.getElementById('pn')!.textContent = n + (n === 1 ? ' place' : ' places');
+    document.getElementById('pe')!.hidden = n > 0;
+  }
+  [q, t, c].forEach((el) => el.addEventListener('input', run));
+</script>
+<style>
+  .crumb { font-size: 14px; color: rgba(255,255,255,.8); margin: 0 0 16px; } .crumb a { color: #dfe6fb; }
+  .stats { display: flex; gap: 28px 56px; flex-wrap: wrap; margin-top: 8px; }
+  .stats strong { display: block; font: 600 clamp(24px, 3vw, 32px)/1.2 var(--serif); color: #fff; } .stats span { color: rgba(255,255,255,.8); font-size: 15px; }
+  .listing { padding-top: 32px; padding-bottom: 56px; }
+  .filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 22px; }
+  .filters input, .filters select { height: 46px; border: 1.5px solid var(--line); border-radius: 999px; padding: 0 18px; font: 16px var(--sans); background: #fff; color: var(--ink); }
+  .filters input { flex: 1; min-width: 220px; }
+  .count { color: var(--muted); font-size: 14px; margin-left: auto; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .pcard { display: flex; flex-direction: column; gap: 6px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 18px; text-decoration: none; color: var(--ink); }
+  .pcard:hover { border-color: var(--blue); box-shadow: 0 6px 22px rgba(32,69,94,.12); text-decoration: none; }
+  .pcard[hidden] { display: none; }
+  .pcard h3 { font-size: 21px; line-height: 1.2; margin: 0; color: var(--navy); }
+  .ptype { align-self: flex-start; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: var(--gold-soft); color: var(--brown); border-radius: 99px; padding: 3px 10px; }
+  .pclosed { align-self: flex-start; font-size: 12px; font-weight: 700; background: #fbe9e7; color: #8a2c1f; border-radius: 99px; padding: 3px 10px; }
+  .small { font-size: 14px; } .muted { color: var(--muted); } .empty { color: var(--muted); padding: 24px 0; }
+</style>
