@@ -17,13 +17,15 @@ for r in rows:
         'county': r['county'], 'website': r['website'], 'status': r['status'], 'kind': r['original_type'],
         'note': r['status_note'] if r['status'] != 'open' else '', 'verified': r['last_verified'],
     })
-# New or split places (rice, upper-kirby...) may not have their own page yet. Attach them to the combined area page that
-# contains the name, so the link still works until the split pages exist.
+# New or split places (rice, upper-kirby...) may not have their own page yet. Point them at the combined area page that
+# now covers them. Only the places listed here are redirected, so a town with a similar name is never matched by accident.
+SPLIT_TO_PAGE = {'rice': 'rice-museum-district', 'southbelt': 'southbelt-ellington', 'richmond': 'richmond-rosenberg',
+                 'porter': 'porter-new-caney', 'upper-kirby': 'upper-kirby-greenway', 'summerwood': 'summerwood-lakeshore'}
 site_areas = [a['slug'] for a in json.load(open(ROOT / 'src' / 'data' / 'areas.json'))]
 for t in out:
     if t['area'] and t['area'] not in site_areas:
-        hit = [s for s in site_areas if re.search(r'(^|-)' + re.escape(t['area']) + r'(-|$)', s)]
-        t['area'] = hit[0] if hit else ''
+        page = SPLIT_TO_PAGE.get(t['area'])
+        t['area'] = page if page in site_areas else ''
 out.sort(key=lambda t: t['name'].lower())
 (ROOT / 'src' / 'data' / 'things.json').write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding='utf-8')
 print('things to do', len(out), '| linked to an area:', sum(1 for t in out if t['area']))
