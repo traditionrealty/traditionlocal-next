@@ -31,9 +31,10 @@ const nav = [
     sub: [],
   },
   {
-    id: 'todo', label: 'Things To Do', href: '/living', match: ['/living', '/event-details', '/events', '/weekend-ideas', '/local-events'],
+    id: 'todo', label: 'Things To Do', href: '/living', match: ['/living', '/event-details', '/events', '/weekend-ideas', '/local-events', '/things-to-do'],
     sub: [
       { label: 'Weekend Ideas', href: '/weekend-ideas' },
+      { label: 'Places to Visit', href: '/things-to-do' },
       { label: 'Upcoming Events', href: '/living#featured' },
       { label: 'Calendar', href: '/local-events' },
     ],
@@ -56,7 +57,7 @@ const activeNav = nav.find((n) => n.match.some((m) => path.startsWith(m)));
 const searchable = !/^\/(404|sign-in|join|reset-password|members|search)(\/|$)/.test(path);
 const searchType = /^\/(food|eat)(\/|$)/.test(path) ? 'Food'
   : /^\/(cities|copy-of-neighborhoods-1|traditionneighborhoods|subdivisions|make-it-home|new-builds)(\/|$)/.test(path) ? 'Neighborhoods'
-  : /^\/(living|event-details|events|weekend-ideas)(\/|$)/.test(path) ? 'Things To Do'
+  : /^\/(living|event-details|events|weekend-ideas|things-to-do)(\/|$)/.test(path) ? 'Things To Do'
   : /^\/(post|all-articles)(\/|$)/.test(path) ? 'Blog'
   : 'Pages';
 const popularSearches = ['coffee', 'brunch', 'Sugar Land', 'new builds', 'events'];
