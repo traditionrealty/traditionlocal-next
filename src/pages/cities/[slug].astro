@@ -9,6 +9,7 @@ import { url, img } from '../../lib/util';
 import ideas from '../../data/ideas.json';
 import events from '../../data/events.json';
 import areaEvents from '../../data/area-events.json';
+import things from '../../data/things.json';
 import { houstonToday } from '../../lib/weekend';
 import { perfectSaturday, toSatEvents } from '../../lib/saturday';
 
@@ -32,6 +33,7 @@ const stories = posts.filter((p) => p.title.toLowerCase().includes(a.name.toLowe
 const parent = a.parent ? areas.find((x) => x.slug === a.parent) : null;
 const children = areas.filter((x) => x.parent === a.slug);
 const areaSubdivisions = subdivisions.filter((s) => s.area === a.slug);
+const places = (things as any[]).filter((t) => t.area === a.slug);
 const sameRegion = areas.filter((x) => x.region === a.region && x.slug !== a.slug).slice(0, 8);
 
 // Real data we have: vibe, bestFor, homes (typical home type), schools, take, subdivisions with
@@ -141,6 +143,16 @@ const sameRegion = areas.filter((x) => x.region === a.region && x.slug !== a.slu
         </div>
         <a href={satPlan.upcoming ? satPlan.upcoming.href : url('/living')} target={satPlan.upcoming?.ext ? '_blank' : undefined} rel={satPlan.upcoming?.ext ? 'noopener' : undefined}>Details &rarr;</a>
       </div>
+      {places.length > 0 && (
+        <div class="places-block">
+          <div class="section-head"><div><p class="eyebrow">Places to visit</p><h2>Parks, museums and landmarks in {a.name}</h2></div><a href={url('/things-to-do')}>All places &rarr;</a></div>
+          <div class="places-grid">
+            {places.slice(0, 6).map((p: any) => (
+              <a class="place-chip" href={url('/things-to-do/' + p.slug)}><span class="pt">{p.typeLabel}</span><strong>{p.name}</strong><span class="muted small">{p.kind}</span></a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   </section>
 
@@ -318,6 +330,12 @@ const sameRegion = areas.filter((x) => x.region === a.region && x.slug !== a.slu
 
   .subnav { background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 10; }
   .subnav-inner { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding: 14px 0; }
+  .places-block { margin-top: 34px; }
+  .places-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .place-chip { display: flex; flex-direction: column; gap: 4px; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; text-decoration: none; color: var(--ink); }
+  .place-chip:hover { border-color: var(--blue); text-decoration: none; }
+  .place-chip strong { font: 400 19px var(--serif); color: var(--navy); }
+  .place-chip .pt { align-self: flex-start; font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: var(--gold-soft); color: var(--brown); border-radius: 99px; padding: 2px 9px; }
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; }
   .tab { padding: 8px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--navy); text-decoration: none; }
   .tab.active { background: var(--navy); color: #fff; }
