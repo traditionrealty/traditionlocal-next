@@ -112,7 +112,7 @@ label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
   .hero .ph, .hero img.photo { height: 240px !important; }
   img.photo[style*="height:420px"] { height: 260px !important; }
   .subnav .wrap { flex-wrap: nowrap; overflow-x: auto; gap: 22px; white-space: nowrap; }
-  .foot a { display: inline-block; padding: 8px 0; }
+  .foot a { display: inline-block; padding: 11px 0; }
   .foot a.logo { padding: 0; }
   .ribbon { font-size: 12px; padding: 6px 0; }
   .tag { font-size: 13px; }

@@ -1,1 +1,0 @@
-{"__patches":[{"path":"src/styles/global.css","find":"  .foot a { display: inline-block; padding: 8px 0; }","replace":"  .foot a { display: inline-block; padding: 11px 0; }"}]}
