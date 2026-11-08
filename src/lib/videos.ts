@@ -4,7 +4,7 @@ import { readTable, profiles, href } from './data';
 
 export type Video = {
   id: string; title: string; display: string; duration: string; source: string;
-  tour: boolean; thumb: string; place: string; placeName: string;
+  tour: boolean; short: boolean; thumb: string; place: string; placeName: string;
 };
 
 const ytId = (u: string) => (String(u || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/|live\/))([\w-]{11})/) || [])[1] || '';
@@ -19,9 +19,9 @@ const findPlace = (title: string, named: string) => {
   const t = norm(title);
   return places.filter((p) => t.includes(norm(p.name))).sort((a, b) => norm(b.name).length - norm(a.name).length)[0];
 };
-const make = (id: string, title: string, duration: string, source: string, named: string, match = true): Video => {
+const make = (id: string, title: string, duration: string, source: string, named: string, match = true, short = false): Video => {
   const p = match ? findPlace(title, named) : undefined;
-  return { id, title, display: clean(title) || title, duration, source, tour: match && /walking tour|tour|spotlight/i.test(title), thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg', place: p ? href(p) : '', placeName: p ? p.name : '' };
+  return { id, title, display: clean(title) || title, duration, source, tour: match && /walking tour|tour|spotlight/i.test(title), short, thumb: 'https://i.ytimg.com/vi/' + id + (short ? '/oar2.jpg' : '/hqdefault.jpg'), place: p ? href(p) : '', placeName: p ? p.name : '' };
 };
 
 // Links pasted on a sheet row (Profiles or Content), shown first.
@@ -38,9 +38,9 @@ export const videos: Video[] = [...fromSheet, ...fromChannel];
 
 // Other channels we feature on the Videos page, in the order they appear. Rows live in data/channels.csv.
 export const CHANNELS = [
-  { key: 'dillon', source: 'Dillon Loren on YouTube', url: 'https://www.youtube.com/@dillonloren', eyebrow: 'Dillon Loren', title: 'Houston real estate, from Dillon.', blurb: 'Market updates and guidance for buyers, sellers, and people relocating, plus episodes of the Tradition Show.' },
-  { key: 'trg', source: 'Tradition Realty Group on YouTube', url: 'https://www.youtube.com/@traditionrealtygroup', eyebrow: 'Tradition Realty Group', title: 'Market news and home tours.', blurb: 'Houston real estate and mortgage updates, news roundups, and home tours from Tradition Realty Group.' },
-  { key: 'trending', source: 'Trending Houston on YouTube', url: 'https://www.youtube.com/@TrendingHouston', eyebrow: 'Trending Houston', title: 'Quick takes on what is new.', blurb: 'Short videos on what is being built, opened, and planned around Houston.' },
+  { key: 'dillon', shorts: false, source: 'Dillon Loren on YouTube', url: 'https://www.youtube.com/@dillonloren', eyebrow: 'Dillon Loren', title: 'Houston real estate, from Dillon.', blurb: 'Market updates and guidance for buyers, sellers, and people relocating, plus episodes of the Tradition Show.' },
+  { key: 'trg', shorts: false, source: 'Tradition Realty Group on YouTube', url: 'https://www.youtube.com/@traditionrealtygroup', eyebrow: 'Tradition Realty Group', title: 'Market news and home tours.', blurb: 'Houston real estate and mortgage updates, news roundups, and home tours from Tradition Realty Group.' },
+  { key: 'trending', shorts: true, source: 'Trending Houston on YouTube', url: 'https://www.youtube.com/@TrendingHouston', eyebrow: 'Trending Houston', title: 'Quick takes on what is new.', blurb: 'Short videos on what is being built, opened, and planned around Houston.' },
 ];
-const more = readTable('channels.csv').filter((r) => r.id && r.title).map((r) => ({ source: r.source, v: make(r.id, r.title, r.duration, r.source, '', false) }));
+const more = readTable('channels.csv').filter((r) => r.id && r.title).map((r) => ({ source: r.source, v: make(r.id, r.title, r.duration, r.source, '', false, CHANNELS.some((c) => c.source === r.source && c.shorts)) }));
 export const channelVideos = CHANNELS.map((c) => ({ ...c, videos: more.filter((m) => m.source === c.source && !seen.has(m.v.id)).map((m) => m.v) }));

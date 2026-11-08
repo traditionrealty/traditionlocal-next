@@ -1,7 +1,7 @@
 ---
 const { v } = Astro.props;
 ---
-<div class="card vcard" data-kind={v.tour ? 'tour' : 'food'}>
+<div class={v.short ? 'card vcard vshort' : 'card vcard'} data-kind={v.tour ? 'tour' : 'food'}>
   <button type="button" class="vthumb" data-id={v.id} data-title={v.display} aria-label={'Play ' + v.display}>
     <img src={v.thumb} alt="" loading="lazy" />
     <span class="vplay" aria-hidden="true"></span>
@@ -23,4 +23,5 @@ const { v } = Astro.props;
   .vcard { overflow: hidden; }
   .vcard .vbody { padding: 18px 20px 20px; }
   .vcard iframe { width: 100%; aspect-ratio: 16 / 9; border: 0; display: block; }
+  .vshort .vthumb, .vshort iframe { aspect-ratio: 9 / 16; }
 </style>

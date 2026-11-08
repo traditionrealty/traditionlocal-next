@@ -57,7 +57,7 @@ const suggest = 'mailto:traditionlocal@gmail.com?subject=Video%20idea';
           <a class="btn line" href={c.url} rel="noopener">Watch on YouTube</a>
         </div>
         <p class="meta" style="margin-bottom:24px;font-size:17px;max-width:720px">{c.blurb}</p>
-        <div class="grid g3">{c.videos.map((v, j) => <div class={j >= 6 ? 'vmore-' + c.key + ' hidden' : ''}><VideoCard v={v} /></div>)}</div>
+        <div class={c.shorts ? 'grid g4' : 'grid g3'}>{c.videos.map((v, j) => <div class={j >= 6 ? 'vmore-' + c.key + ' hidden' : ''}><VideoCard v={v} /></div>)}</div>
         {c.videos.length > 6 && <p style="margin-top:24px"><button class="btn line vmore-btn" type="button" data-k={c.key}>Show more</button></p>}
       </div>
     </section>
