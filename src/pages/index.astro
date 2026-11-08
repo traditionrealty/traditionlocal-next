@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { businesses, ofType, reviewsFor, upcomingEvents, eventDates, href, media, stars, url } from '../lib/data';
+import { businesses, ofType, reviews, reviewsFor, byName, upcomingEvents, eventDates, dateText, href, media, stars, url } from '../lib/data';
 import { config } from '../config';
 import { isFood, foodTab, category, topRating } from '../lib/helpers';
 const events = upcomingEvents(5);
@@ -8,6 +8,11 @@ const areas = [...new Set(businesses().map((b) => b.area).filter(Boolean))].sort
 const picks = businesses().filter(isFood).map((b) => ({ b, r: reviewsFor(b.name).sort((x, y) => stars(y.rating) - stars(x.rating))[0] })).filter((x) => x.r && stars(x.r.rating) >= 4)
   .sort((x, y) => stars(y.r.rating) - stars(x.r.rating)).slice(0, 4);
 const places = ofType('Neighborhood', 'City').filter((p) => p.show.living).slice(0, 8);
+const ts = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? +new Date(+m[3], +m[1] - 1, +m[2]) : 0; };
+const snippet = (r: any) => { const t = (r.summary || r.body || '').replace(/\s+/g, ' ').trim(); return t.length > 150 ? t.slice(0, 150).replace(/\s+\S*$/, '') + '...' : t; };
+const written = reviews().filter((r) => snippet(r));
+const feedPool = (written.length >= 6 ? written : reviews()).slice().sort((a, b) => ts(b.reviewDate) - ts(a.reviewDate)).slice(0, 18);
+const feed = feedPool.map((r) => { const biz = byName(r.profile); return { r, biz, text: snippet(r), m: media(r) || (biz ? media(biz) : null) }; });
 const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed').map((b) => ({ n: b.name, u: href(b), a: b.area, c: category(b), r: topRating(b.name), t: foodTab(b) }));
 ---
 <Base title="Home" active="">
@@ -17,15 +22,15 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
         <p class="eyebrow">Houston, with a local perspective</p>
         <h1 style="margin-bottom:20px">Where should we go?</h1>
         <p class="lead" style="margin-bottom:28px">Honest reviews, weekend plans, and neighborhood guides from people who live here. Tell us what you're in the mood for.</p>
-        <form class="card" id="finder" method="get" action={url('/food')} style="padding:24px;display:grid;grid-template-columns:1fr 1fr auto;gap:14px;align-items:end">
+        <form class="card" id="finder" method="get" action={url('/food')} style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end">
           <div><label for="h-area">Area</label><select id="h-area" name="area"><option value="">Anywhere</option>{areas.map((a) => <option>{a}</option>)}</select></div>
           <div><label for="h-craving">Craving</label><select id="h-craving"><option value="">Anything</option><option value="coffee">Coffee and cafes</option><option value="restaurant">Restaurants</option><option value="sweets">Bakeries and sweets</option><option value="market">Markets</option></select></div>
-          <button class="btn" type="submit">Show me</button>
+          <div style="grid-column:1/-1;display:flex;gap:12px;flex-wrap:wrap"><button class="btn" type="submit">Show me</button><button class="btn line" type="button" id="surprise">Surprise me</button></div>
         </form>
         <div id="finder-out" class="hidden" style="margin-top:20px" aria-live="polite">
           <p class="eyebrow" id="finder-h" style="margin-bottom:10px"></p>
           <div class="grid g2" id="finder-list"></div>
-          <p style="margin-top:14px"><a id="finder-more" href={url('/food')} style="font-weight:700">See all food</a></p>
+          <p style="margin-top:14px;display:flex;gap:18px;align-items:center;flex-wrap:wrap"><button class="btn line sm hidden" id="finder-again" type="button">Another one</button><a id="finder-more" href={url('/food')} style="font-weight:700">See all food</a></p>
         </div>
       </div>
       <div style="grid-column:span 5"><div class="ph" style="height:400px;border-radius:16px">Photo</div></div>
@@ -82,8 +87,43 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
     </div>
   </section>
 
+  {feed.length > 0 && (
+    <section class="band" id="feed">
+      <div class="wrap">
+        <p class="eyebrow">The feed</p>
+        <h2 style="margin-bottom:8px">Fresh from Sara and Dillon</h2>
+        <p class="meta" style="margin-bottom:28px;font-size:17px">The newest reviews and stories, written by people who live here.</p>
+        <div class="grid g3" id="feed-grid">
+          {feed.map((x, i) => (
+            <a class={i >= 6 ? 'card pad feed-more hidden' : 'card pad'} href={href(x.r)} style="text-decoration:none">
+              {x.m && <img class="photo" style="height:150px;border-radius:8px;margin-bottom:14px" src={x.m.src} alt={x.m.alt} />}
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><span class="tag">Review</span>{stars(x.r.rating) > 0 && <span class="tag soft">{stars(x.r.rating)} out of 5</span>}{x.biz && x.biz.area && <span class="tag soft">{x.biz.area}</span>}</div>
+              <h4 style="margin-bottom:8px">{x.biz ? x.biz.name : x.r.title}</h4>
+              <p class="meta" style="font-size:15px;margin-bottom:12px">{x.text}</p>
+              <p class="meta" style="font-weight:700;color:var(--blue)">Read the review{x.r.reviewDate ? ', ' + dateText(x.r.reviewDate) : ''}</p>
+            </a>
+          ))}
+        </div>
+        <p style="margin-top:28px;display:flex;gap:18px;align-items:center;flex-wrap:wrap">{feed.length > 6 && <button class="btn line" id="feed-more-btn" type="button">Show more</button>}<a href={url('/food')} style="font-weight:700">See every place we have reviewed</a></p>
+      </div>
+    </section>
+  )}
+
+  <section class="band tint" id="meet">
+    <div class="wrap" style="display:flex;gap:48px;align-items:center;flex-wrap:wrap">
+      <div style="flex:1 1 320px;max-width:460px"><div class="ph" style="height:340px;border-radius:12px">Photo of Sara and Dillon coming soon</div></div>
+      <div style="flex:1 1 380px">
+        <p class="eyebrow">Who we are</p>
+        <h2 style="margin-bottom:16px">Meet Sara and Dillon</h2>
+        <p style="font-size:18px;margin-bottom:14px">We started Tradition Local to help people feel connected to their neighborhood, community, and city.</p>
+        <p style="font-size:18px;margin-bottom:24px">Sara visits the places she writes about, then shares what she found, honestly and kindly. Dillon is a Realtor who loves these neighborhoods and answers questions personally.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/about')}>Meet Sara and Dillon</a><a class="btn line" href={url('/ask-dillon')}>Ask Dillon</a></div>
+      </div>
+    </div>
+  </section>
+
   {places.length > 0 && (
-    <section class="band tint">
+    <section class="band">
       <div class="wrap">
         <p class="eyebrow">Neighborhood guides</p>
         <h2 style="margin-bottom:16px">Where do you call home?</h2>
@@ -108,11 +148,29 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
         var a = $('h-area').value, c = $('h-craving').value;
         var list = FOOD.filter(function (x) { return (!a || x.a === a) && (!c || x.t === c); }).sort(function (x, y) { return y.r - x.r; }).slice(0, 4);
         $('finder-out').classList.remove('hidden');
+        $('finder-again').classList.add('hidden');
         $('finder-h').textContent = a ? "Sara's favorites in " + a : "Sara's favorites";
         $('finder-list').innerHTML = list.length ? list.map(function (x) { return '<a class="card pad" href="' + esc(x.u) + '" style="text-decoration:none">' + (x.r ? '<span class="tag">' + x.r + ' out of 5</span>' : '') + '<h4 style="margin:12px 0 4px">' + esc(x.n) + '</h4><p class="meta">' + esc([x.c, x.a].filter(Boolean).join(', ')) + '</p></a>'; }).join('') : '<p class="meta" style="grid-column:1/-1">No reviews match yet. Try another area or craving.</p>';
         $('finder-more').href = FOODURL + (a ? '?area=' + encodeURIComponent(a) : '');
         $('finder-more').textContent = a ? 'See all food in ' + a : 'See all food';
       });
+      var last = '';
+      function surprise() {
+        var a = $('h-area').value, c = $('h-craving').value;
+        var pool = FOOD.filter(function (x) { return (!a || x.a === a) && (!c || x.t === c); });
+        var liked = pool.filter(function (x) { return x.r >= 4; }); if (liked.length) pool = liked;
+        $('finder-out').classList.remove('hidden');
+        if (!pool.length) { $('finder-h').textContent = 'Nothing to surprise you with yet'; $('finder-list').innerHTML = '<p class="meta" style="grid-column:1/-1">Try another area or craving.</p>'; $('finder-again').classList.add('hidden'); return; }
+        var x; do { x = pool[Math.floor(Math.random() * pool.length)]; } while (pool.length > 1 && x.n === last); last = x.n;
+        $('finder-h').textContent = 'How about this one?' + (a ? ' In ' + a : '');
+        $('finder-list').innerHTML = '<a class="card pad" href="' + esc(x.u) + '" style="text-decoration:none">' + (x.r ? '<span class="tag">' + x.r + ' out of 5</span>' : '') + '<h4 style="margin:12px 0 4px">' + esc(x.n) + '</h4><p class="meta">' + esc([x.c, x.a].filter(Boolean).join(', ')) + '</p></a>';
+        $('finder-again').classList.remove('hidden');
+        $('finder-more').href = FOODURL + (a ? '?area=' + encodeURIComponent(a) : '');
+        $('finder-more').textContent = a ? 'See all food in ' + a : 'See all food';
+      }
+      $('surprise').addEventListener('click', surprise); $('finder-again').addEventListener('click', surprise);
+      var fm = $('feed-more-btn');
+      if (fm) fm.addEventListener('click', function () { var hid = document.querySelectorAll('.feed-more.hidden'); for (var i = 0; i < Math.min(6, hid.length); i++) hid[i].classList.remove('hidden'); if (document.querySelectorAll('.feed-more.hidden').length === 0) fm.classList.add('hidden'); });
       $('home-locally').addEventListener('submit', function () { try { var v = $('hl-area').value; if (v) localStorage.setItem('tl_area', JSON.stringify(v)); } catch (e) {} });
     })();
   </script>
