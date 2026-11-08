@@ -1,0 +1,33 @@
+name: Export old site data
+
+# Reshapes the live site's data into the columns of the Simple Master sheet and saves it in legacy/.
+# The sheet reads these files when it builds version 2.0.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: traditionrealty/traditionlocal-site
+          path: old
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: pip install pandas openpyxl pyyaml markdown
+      - name: Rebuild the old site data
+        run: cd old && python scripts/prepare_data.py
+      - name: Reshape it for the sheet
+        run: python scripts/legacy_to_sheet.py old legacy
+      - name: Save the files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add legacy
+          git commit -m "Export old site data for the sheet" || echo "Nothing new"
+          git push
