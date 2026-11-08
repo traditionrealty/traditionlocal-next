@@ -1,1 +1,0 @@
-{"__patches":[{"path":"data/redirects.json","find":"  \"/videos\": \"/\",\n","replace":""}]}
