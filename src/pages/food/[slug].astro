@@ -1,12 +1,13 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { businesses, byName, reviewsFor, inArea, href, media, stars, dateText, url } from '../../lib/data';
+import { businesses, byName, reviewsFor, inArea, href, media, galleryMedia, stars, dateText, url } from '../../lib/data';
 import { config } from '../../config';
 import { category } from '../../lib/helpers';
 import Prefs from '../../components/Prefs.astro';
 export function getStaticPaths() { return businesses().map((b) => ({ params: { slug: b.slug }, props: { b } })); }
 const { b } = Astro.props;
 const m = media(b);
+const gallery = galleryMedia(b).filter((g) => !m || g.src !== m.src);
 const reviews = reviewsFor(b.name);
 const top = reviews[0];
 const area = byName(b.area);
@@ -73,6 +74,15 @@ const web = b.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
       </div>
     </div>
   </section>
+
+  {b.show.media && gallery.length > 0 && (
+    <section class="band tint">
+      <div class="wrap">
+        <p class="eyebrow">Photos</p><h2 style="margin-bottom:24px">A look inside</h2>
+        <div class="grid g3">{gallery.map((g) => <figure style="margin:0"><img class="photo" style="height:240px;border-radius:12px" src={g.src} alt={g.alt || 'Photo at ' + b.name} loading="lazy" />{g.credit && <figcaption class="credit">{g.credit}</figcaption>}</figure>)}</div>
+      </div>
+    </section>
+  )}
 
   {b.show.nearby && nearby.length > 0 && (
     <section class="band tint">

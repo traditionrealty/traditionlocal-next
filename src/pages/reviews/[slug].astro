@@ -1,10 +1,11 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { reviews, byName, reviewsFor, href, media, stars, dateText, url } from '../../lib/data';
+import { reviews, byName, reviewsFor, href, media, galleryMedia, stars, dateText, url } from '../../lib/data';
 export function getStaticPaths() { return reviews().map((r) => ({ params: { slug: r.slug }, props: { r } })); }
 const { r } = Astro.props;
 const biz = byName(r.profile);
 const m = media(r) || (biz ? media(biz) : null);
+const gallery = r.showMedia ? galleryMedia(r).filter((g) => !m || g.src !== m.src) : [];
 const paras = r.body.split(/\n\s*\n/).filter(Boolean);
 const more = biz ? reviewsFor(biz.name).filter((x) => x.slug !== r.slug) : [];
 ---
@@ -23,6 +24,7 @@ const more = biz ? reviewsFor(biz.name).filter((x) => x.slug !== r.slug) : [];
       <div class="main" style="max-width:720px">
         {m ? <figure style="margin:0 0 32px"><img class="photo" style="height:420px;border-radius:12px" src={m.src} alt={m.alt} />{m.credit && <figcaption class="credit">{m.credit}</figcaption>}</figure> : <div class="ph" style="height:320px;border-radius:12px;margin-bottom:32px">Photo from the visit</div>}
         {paras.map((p) => <p style="font-size:19px;line-height:1.7;margin-bottom:20px">{p}</p>)}
+        {gallery.length > 0 && <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:32px">{gallery.map((g) => <figure style="margin:0"><img class="photo" style="height:200px;border-radius:10px" src={g.src} alt={g.alt || 'Photo from the visit'} loading="lazy" />{g.credit && <figcaption class="credit">{g.credit}</figcaption>}</figure>)}</div>}
       </div>
       {biz && (
         <div class="side">

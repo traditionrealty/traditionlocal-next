@@ -17,7 +17,7 @@ export type Content = {
   author: string; reviewDate: string; rating: string; heroImage: string; heroAlt: string; heroCredit: string;
   heroRights: string; gallery: string[]; starts: string; ends: string; eventLink: string; cost: string;
   venue: string; address: string; city: string; zip: string; eventType: string; startTime: string; endTime: string; tags: string[];
-  faqs: { q: string; a: string }[]; published: boolean;
+  faqs: { q: string; a: string }[]; published: boolean; showMedia: boolean;
 };
 
 // preview shows drafts and media that still needs review. production shows only what is approved.
@@ -71,7 +71,7 @@ export const content: Content[] = rawContent.filter((r) => r.title).map((r) => (
   reviewDate: r.review_date, rating: r.rating, heroImage: r.hero_image, heroAlt: r.hero_alt, heroCredit: r.hero_credit, heroRights: r.hero_rights,
   gallery: list(r.gallery), starts: r.starts, ends: r.ends, eventLink: r.event_link, cost: r.cost, venue: r.venue_name, address: r.address,
   city: r.city, zip: r.zip_code, eventType: r.event_type, startTime: r.start_time, endTime: r.end_time, tags: list(r.tags), faqs: faqs(r.faqs),
-  published: (r.page_status || '').toLowerCase() === 'published',
+  published: (r.page_status || '').toLowerCase() === 'published', showMedia: on(r.show_media),
 })).filter((c) => IS_PREVIEW || c.published);
 
 export const byName = (name: string) => profiles.find((p) => p.name === name);
@@ -105,6 +105,14 @@ export function media(e: { heroImage: string; heroAlt: string; heroCredit: strin
   const approved = e.heroRights.toLowerCase() === 'approved';
   if (!src || !embeddable || (!approved && !IS_PREVIEW)) return null;
   return { src: /^\//.test(src) ? url(src) : src, alt: e.heroAlt || '', credit: e.heroCredit || '', needsReview: !approved };
+}
+
+// Gallery photos follow the same rule as the hero: copied photos (site paths) and Wikimedia, approved only in production.
+export function galleryMedia(e: { gallery: string[]; heroRights: string; heroAlt: string; heroCredit: string }) {
+  const approved = e.heroRights.toLowerCase() === 'approved';
+  if (!approved && !IS_PREVIEW) return [];
+  return (e.gallery || []).filter((s) => /^\//.test(s) || /^https:\/\/[^/]*wikimedia\.org/.test(s))
+    .map((s) => ({ src: /^\//.test(s) ? url(s) : s, alt: e.heroAlt || '', credit: e.heroCredit || '' }));
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
