@@ -1,1 +1,0 @@
-{"__patches":[{"path":"src/pages/neighborhoods/index.astro","find":"  <script is:inline>\n    var q = document.getElementById('n-q'),","replace":"  <script is:inline>\n    (function () {\n    var q = document.getElementById('n-q'),"},{"path":"src/pages/neighborhoods/index.astro","find":"run(); });\n  </script>\n</Base>","replace":"run(); });\n    })();\n  </script>\n</Base>"}]}
