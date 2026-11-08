@@ -3,12 +3,12 @@ import Base from '../../layouts/Base.astro';
 import Prefs from '../../components/Prefs.astro';
 import '../../styles/pages.css';
 import { href, url } from '../../lib/data';
-import { areaPages, bizIn, subsIn, placesIn, topRating, category, cleanList } from '../../lib/helpers';
+import { areaPages, foodIn, subsIn, placesIn, topRating, category, cleanList } from '../../lib/helpers';
 import { config } from '../../config';
 export function getStaticPaths() { return areaPages().map((p) => ({ params: { slug: p.slug }, props: { p } })); }
 const { p } = Astro.props;
-const biz = bizIn(p.name).map((b) => ({ b, r: topRating(b.name) })).sort((x, y) => y.r - x.r).slice(0, 8);
-const bizTotal = bizIn(p.name).length;
+const biz = foodIn(p.name).map((b) => ({ b, r: topRating(b.name) })).sort((x, y) => y.r - x.r).slice(0, 8);
+const bizTotal = foodIn(p.name).length;
 const subs = subsIn(p.name), places = placesIn(p.name).slice(0, 6);
 const glance = p.bestFor || p.typicalHomes || p.schools;
 const schools = cleanList(p.schools);

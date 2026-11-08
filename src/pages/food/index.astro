@@ -3,9 +3,9 @@ import Base from '../../layouts/Base.astro';
 import Prefs from '../../components/Prefs.astro';
 import '../../styles/pages.css';
 import { businesses, href, url } from '../../lib/data';
-import { category, foodTab, cuisineRegion, topRating, FOOD_TABS, WORLD } from '../../lib/helpers';
+import { category, foodTab, cuisineRegion, topRating, isFood, FOOD_TABS, WORLD } from '../../lib/helpers';
 
-const cards = businesses().filter((b) => b.status !== 'Closed').map((b) => ({ b, cat: category(b), tab: foodTab(b), world: cuisineRegion(b), rating: topRating(b.name) }))
+const cards = businesses().filter((b) => b.status !== 'Closed' && isFood(b)).map((b) => ({ b, cat: category(b), tab: foodTab(b), world: cuisineRegion(b), rating: topRating(b.name) }))
   .sort((x, y) => y.rating - x.rating || x.b.name.localeCompare(y.b.name));
 const areaCount: Record<string, number> = {};
 cards.forEach((c) => { if (c.b.area) areaCount[c.b.area] = (areaCount[c.b.area] || 0) + 1; });

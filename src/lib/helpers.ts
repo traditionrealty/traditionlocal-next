@@ -14,6 +14,21 @@ export const placesIn = (name: string) => profiles.filter((p) => p.type === 'Pla
 export const topRating = (name: string) => reviewsFor(name).reduce((m, r) => Math.max(m, stars(r.rating)), 0);
 export const category = (p: Profile) => p.tags[0] || p.subCategory || '';
 
+// The Business type also holds salons, shops, and services. Food pages only use food and drink.
+const FOOD_WORDS = ['restaurant', 'food', 'cafe', 'coffee', 'bakery', 'bakeries', 'dessert', 'donut', 'doughnut', 'ice cream', 'frozen yogurt', 'creper', 'candy', 'chocolate', 'cake', 'cookie', 'brew', 'juice', 'smoothie',
+  'deli', 'grocery', 'supermarket', 'farmers market', 'butcher', 'catering', 'brunch', 'breakfast', 'sandwich', 'pizza', 'burger', 'bbq', 'barbecue', 'sushi', 'steak', 'seafood', 'noodle', 'buffet', 'grill', 'eatery',
+  'diner', 'bistro', 'tavern', 'wine', 'cocktail', 'vegan', 'vegetarian', 'boba', 'bubble tea', 'tapas', 'taco', 'wings', 'chicken', 'gelato', 'tea room', 'bagel', 'pancake', 'waffle', 'dumpling', 'soup', 'salad', 'lounge',
+  'thai', 'vietnam', 'chinese', 'japan', 'korea', 'indian', 'ramen', 'dim sum', 'asian', 'taiwan', 'malay', 'filipin', 'pakistan', 'hot pot', 'middle eastern', 'mediterranean', 'persian', 'iranian', 'halal', 'turkish', 'greek',
+  'lebanese', 'moroccan', 'afghan', 'falafel', 'kebab', 'mexican', 'tex-mex', 'latin', 'cuban', 'peru', 'argentin', 'caribbean', 'salvador', 'venezuel', 'colombia', 'brazil', 'empanada', 'french', 'italian', 'german', 'spanish',
+  'british', 'polish', 'czech', 'european', 'american', 'southern', 'cajun', 'creole', 'ethiopian', 'nigerian', 'african'];
+const FOOD_TOKENS = new Set(['bar', 'bars', 'pub', 'pubs', 'tea', 'pho', 'deli']);
+export function isFood(p: Profile): boolean {
+  const c = (p.tags.join(' ') + ' ' + p.subCategory).toLowerCase();
+  if (!c.trim()) return false;
+  return FOOD_WORDS.some((w) => c.includes(w)) || c.split(/[^a-z-]+/).some((t) => FOOD_TOKENS.has(t));
+}
+export const foodIn = (name: string) => bizIn(name).filter(isFood);
+
 // Food groupings
 const has = (cat: string, words: string[]) => { const c = cat.toLowerCase(); return words.some((w) => c.includes(w)); };
 export const FOOD_TABS: [string, string][] = [['all', 'All food and drink'], ['coffee', 'Coffee and cafes'], ['restaurant', 'Restaurants'], ['sweets', 'Bakeries and sweets'], ['market', 'Markets']];

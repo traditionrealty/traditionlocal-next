@@ -2,12 +2,12 @@
 import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
 import { profiles, byName, href, url } from '../../lib/data';
-import { subsIn, bizIn, topRating, category } from '../../lib/helpers';
+import { subsIn, foodIn, topRating, category } from '../../lib/helpers';
 export function getStaticPaths() { return profiles.filter((p) => p.type === 'Subdivision').map((p) => ({ params: { slug: p.slug }, props: { p } })); }
 const { p } = Astro.props;
 const area = byName(p.area);
 const sibs = subsIn(p.area).filter((x) => x.slug !== p.slug).slice(0, 6);
-const eats = bizIn(p.area).map((b) => ({ b, r: topRating(b.name) })).sort((x, y) => y.r - x.r).slice(0, 3);
+const eats = foodIn(p.area).map((b) => ({ b, r: topRating(b.name) })).sort((x, y) => y.r - x.r).slice(0, 3);
 ---
 <Base title={p.name} description={p.summary} active="Neighborhoods">
   <section class="band hero">
