@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import { IS_PREVIEW, url } from '../lib/data';
 import { config } from '../config';
+import SearchBox from '../components/SearchBox.astro';
 interface Props { title: string; description?: string; active?: string; sub?: string; }
 const { title, description = 'Honest reviews, weekend plans, and neighborhood guides from people who live here.', active = '', sub = '' } = Astro.props;
 const main = [['Food', '/food'], ['Neighborhoods', '/neighborhoods'], ['Things to do', '/things-to-do']];
@@ -40,6 +41,7 @@ const moreOn = sub !== '' || active === 'More';
         <span class="sep"></span>
         <a class="btn sm" href={url('/newsletters')}>Join In the Loop</a>
         <a class="chip" href={url('/account')}>Sign in</a>
+        <button class="chip srch-open" type="button" aria-label="Search" aria-haspopup="dialog" title="Search (press /)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
       </nav>
     </div>
   </header>
@@ -91,5 +93,6 @@ const moreOn = sub !== '' || active === 'More';
     if (r) r.value = location.origin + location.pathname;
     if (q && m) { m.hidden = false; m.textContent = q === 'ok' ? 'Thanks, you are subscribed. Welcome to Tradition Local.' : q === 'invalid' ? 'That email address does not look right. Please try again.' : 'Something went wrong. Please try again, or email us.'; }
   </script>
+  <SearchBox />
 </body>
 </html>

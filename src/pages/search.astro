@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/pages.css';
+import { url } from '../lib/data';
+---
+<Base title="Search" active="" description="Search places, neighborhoods, events, and videos on Tradition Local.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">Search</p>
+      <h1 style="margin-bottom:20px">What are you looking for?</h1>
+      <form class="srch-form" action={url('/search')} method="get" role="search" style="max-width:720px">
+        <input id="srch-page-q" name="q" type="search" placeholder="Search places, neighborhoods, events, videos" autocomplete="off" aria-label="Search" />
+        <button class="btn" type="submit">Search</button>
+      </form>
+      <p class="meta" id="srch-page-count" style="margin-top:14px" aria-live="polite"></p>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap"><div id="srch-page-out"><noscript><p class="meta">Search needs JavaScript. You can browse Food, Neighborhoods, Things to do, and Videos from the menu.</p></noscript></div></div>
+  </section>
+</Base>
