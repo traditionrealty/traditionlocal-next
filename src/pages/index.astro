@@ -1,9 +1,15 @@
 ---
 import Base from '../layouts/Base.astro';
-import { businesses, ofType, reviews, reviewsFor, byName, upcomingEvents, eventDates, dateText, href, media, stars, url } from '../lib/data';
+import { businesses, ofType, reviews, reviewsFor, byName, events as allEvents, upcomingEvents, eventDates, dateText, href, media, stars, url } from '../lib/data';
 import { config } from '../config';
-import { isFood, foodTab, category, topRating } from '../lib/helpers';
+import { isFood, foodTab, category, topRating, venuePlace } from '../lib/helpers';
+import OpeningsPanel from '../components/OpeningsPanel.astro';
+import { openingsOf } from '../lib/openings';
 const events = upcomingEvents(5);
+const hasNew = openingsOf('open').length + openingsOf('watch').length + openingsOf('closed').length > 0;
+const wkDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
+const wkIso = (d: Date) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+const weekData = allEvents().map((e) => { const a = wkDate(e.starts), b = wkDate(e.ends || e.starts), pl = venuePlace(e); return a && b ? { t: e.title, s: wkIso(a), f: wkIso(b), v: pl ? pl.name : (e.venue || e.profile || ''), u: href(e) } : null; }).filter(Boolean);
 const areas = [...new Set(businesses().map((b) => b.area).filter(Boolean))].sort();
 const picks = businesses().filter(isFood).map((b) => ({ b, r: reviewsFor(b.name).sort((x, y) => stars(y.rating) - stars(x.rating))[0] })).filter((x) => x.r && stars(x.r.rating) >= 4)
   .sort((x, y) => stars(y.r.rating) - stars(x.r.rating)).slice(0, 4);
@@ -37,8 +43,21 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
     </div>
   </section>
 
+  <section class="band" id="home-week">
+    <div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:12px;flex-wrap:wrap;gap:12px">
+        <div><p class="eyebrow">This week</p><h2>What is on this week</h2></div>
+        <a class="btn line" href={url('/things-to-do') + '#this-week'}>See the full week</a>
+      </div>
+      <p class="meta" id="hw-range" style="margin-bottom:24px">&nbsp;</p>
+      <div class="grid g4" id="hw-grid"></div>
+      <div class="card pad hidden" id="hw-empty"><b>Nothing listed for the rest of this week yet.</b><p class="meta" style="margin-top:4px">See what is coming up below, or browse everything on the calendar.</p></div>
+      <p class="meta" id="hw-ongoing" style="margin-top:18px"></p>
+    </div>
+  </section>
+
   {events.length > 0 && (
-    <section class="band">
+    <section class="band tint">
       <div class="wrap">
         <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
           <div><p class="eyebrow">This weekend and beyond</p><h2>Good ways to spend it</h2></div>
@@ -47,6 +66,18 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
         <div class="grid g4">
           {events.map((e) => <a class="card pad" href={href(e)} style="text-decoration:none"><span class="tag">{eventDates(e)}</span><h4 style="margin:12px 0 6px">{e.title}</h4><p class="meta">{e.venue || e.profile}</p></a>)}
         </div>
+      </div>
+    </section>
+  )}
+
+  {hasNew && (
+    <section class="band" id="new-this-month">
+      <div class="wrap">
+        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
+          <div><p class="eyebrow">New this month</p><h2>Openings and closings</h2></div>
+          <a class="btn line" href={url('/openings-and-closings')}>See openings and closings</a>
+        </div>
+        <OpeningsPanel limit={3} />
       </div>
     </section>
   )}
@@ -140,6 +171,26 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
     </section>
   )}
   <script is:inline>document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });</script>
+  <script is:inline define:vars={{ WK: weekData }}>
+    (function () {
+      var now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var SH = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'], DAYN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+      function p(s) { var a = s.split('-'); return new Date(+a[0], +a[1] - 1, +a[2]); }
+      function iso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+      function span(e) { return Math.round((p(e.f) - p(e.s)) / 86400000) + 1; }
+      function label(e) { var a = p(e.s), b = p(e.f), x = SH[a.getMonth()] + ' ' + a.getDate(); return e.s === e.f ? x : x + ' to ' + SH[b.getMonth()] + ' ' + b.getDate(); }
+      var dow = (today.getDay() + 6) % 7, mon = new Date(today); mon.setDate(today.getDate() - dow);
+      var sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+      var from = iso(today), to = iso(sun);
+      document.getElementById('hw-range').textContent = DAYN[mon.getDay()] + ' ' + SH[mon.getMonth()] + ' ' + mon.getDate() + ' to ' + DAYN[sun.getDay()] + ' ' + SH[sun.getMonth()] + ' ' + sun.getDate();
+      var hits = WK.filter(function (e) { return e.f >= from && e.s <= to; }).sort(function (a, b) { return a.s < b.s ? -1 : a.s > b.s ? 1 : 0; });
+      var shortOnes = hits.filter(function (e) { return span(e) <= 14; }), longOnes = hits.filter(function (e) { return span(e) > 14; });
+      document.getElementById('hw-grid').innerHTML = shortOnes.slice(0, 4).map(function (e) { return '<a class="card pad" href="' + esc(e.u) + '" style="text-decoration:none"><span class="tag">' + esc(label(e)) + '</span><h4 style="margin:12px 0 6px">' + esc(e.t) + '</h4><p class="meta">' + esc(e.v) + '</p></a>'; }).join('');
+      document.getElementById('hw-empty').classList.toggle('hidden', shortOnes.length > 0);
+      document.getElementById('hw-ongoing').innerHTML = longOnes.length ? 'Also on all week: ' + longOnes.slice(0, 4).map(function (e) { return '<a href="' + esc(e.u) + '" style="font-weight:700">' + esc(e.t) + '</a>'; }).join(', ') + '.' : '';
+    })();
+  </script>
   <script is:inline define:vars={{ FOOD: foodIdx, FOODURL: url('/food') }}>
     (function () {
       var $ = function (id) { return document.getElementById(id); };

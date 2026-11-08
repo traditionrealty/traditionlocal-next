@@ -1,0 +1,71 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/pages.css';
+import { url, href, IS_PREVIEW } from '../lib/data';
+import { openingsOf, whenText, profileHref, closedReviewed, lastChecked } from '../lib/openings';
+const groups = [
+  { id: 'now-open', eyebrow: 'Now open', title: 'Fresh on the list.', rows: openingsOf('open') },
+  { id: 'places-to-watch', eyebrow: 'Places to watch', title: 'Coming soon.', rows: openingsOf('watch') },
+  { id: 'recently-closed', eyebrow: 'Recently closed', title: 'Saying goodbye.', rows: openingsOf('closed') },
+];
+const gone = closedReviewed();
+const any = groups.some((g) => g.rows.length > 0);
+const checked = lastChecked();
+const tip = 'mailto:traditionlocal@gmail.com?subject=Opening%20or%20closing%20tip';
+---
+<Base title="Openings and closings" active="Food" description="What just opened, what is on the way, and what Houston said goodbye to.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">Openings and closings</p>
+      <h1 style="margin-bottom:16px;max-width:900px">What is new in Houston food and drink.</h1>
+      <p class="lead" style="max-width:720px">What just opened, what is on the way, and what we said goodbye to. Every tip shows where it came from.{checked && (' Last checked ' + checked + '.')}</p>
+      {IS_PREVIEW && <p class="meta" style="margin-top:14px;max-width:720px">Preview note: items tagged Needs check stay hidden on the live site until they are marked verified.</p>}
+    </div>
+  </section>
+
+  {!any && (
+    <section class="band"><div class="wrap"><div class="card pad"><b>Nothing new to report yet.</b><p class="meta" style="margin-top:4px">Check back soon, or tell us about a place we should know.</p></div></div></section>
+  )}
+
+  {groups.filter((g) => g.rows.length > 0).map((g, gi) => (
+    <section class={gi % 2 === 0 ? 'band' : 'band tint'} id={g.id}>
+      <div class="wrap">
+        <p class="eyebrow">{g.eyebrow}</p><h2 style="margin-bottom:28px">{g.title}</h2>
+        <div class="grid g3">
+          {g.rows.map((o) => {
+            const h = profileHref(o);
+            return (
+              <div class="card pad">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+                  {whenText(o) && <span class="tag">{whenText(o)}</span>}
+                  {o.area && <span class="tag soft">{o.area}</span>}
+                  {IS_PREVIEW && !o.verified && <span class="tag soft">Needs check</span>}
+                </div>
+                <h4 style="margin-bottom:6px">{h ? <a href={h}>{o.name}</a> : o.link ? <a href={o.link} rel="noopener">{o.name}</a> : o.name}</h4>
+                <p class="meta" style="font-size:15px;margin-bottom:10px">{o.detail}</p>
+                {o.source && <p class="meta" style="font-size:13px">Source: {o.sourceUrl ? <a href={o.sourceUrl} rel="noopener">{o.source}</a> : o.source}</p>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  ))}
+
+  {gone.length > 0 && (
+    <section class="band" id="reviewed-closed">
+      <div class="wrap">
+        <p class="eyebrow">From our reviews</p><h2 style="margin-bottom:8px">Places we reviewed that have closed.</h2>
+        <p class="meta" style="font-size:17px;margin-bottom:24px;max-width:720px">{gone.length} places we have reviewed are marked closed in our latest check. Their reviews stay up as a record.</p>
+        <div class="grid g3">{gone.map((b) => <a class="card pad" href={href(b)} style="text-decoration:none"><h4 style="margin-bottom:4px">{b.name}</h4><p class="meta">{b.area || 'Houston area'}</p></a>)}</div>
+      </div>
+    </section>
+  )}
+
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Know about an opening or a closing?</h3><p style="font-size:17px">Send us a tip, and we will take a look.</p></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={tip}>Send a tip</a><a class="btn line" href={url('/food')}>Explore Food</a></div>
+    </div>
+  </section>
+</Base>

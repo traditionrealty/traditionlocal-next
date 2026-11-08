@@ -1,0 +1,31 @@
+---
+import { openingsOf, whenText, profileHref } from '../lib/openings';
+import { url } from '../lib/data';
+const { limit = 3 } = Astro.props;
+const groups = [
+  { id: 'now-open', title: 'Now open', rows: openingsOf('open') },
+  { id: 'places-to-watch', title: 'Places to watch', rows: openingsOf('watch') },
+  { id: 'recently-closed', title: 'Recently closed', rows: openingsOf('closed') },
+].filter((g) => g.rows.length > 0);
+---
+{groups.length > 0 && (
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px">
+    {groups.map((g) => (
+      <div class="card pad">
+        <p class="eyebrow" style="margin-bottom:6px">{g.title}</p>
+        {g.rows.slice(0, limit).map((o, i) => {
+          const h = profileHref(o);
+          return (
+            <div class="row" style={i === 0 ? 'border-top:0;padding:12px 0' : 'padding:12px 0'}>
+              <div style="flex:1;min-width:0">
+                {h ? <a href={h} style="font-weight:700">{o.name}</a> : <b>{o.name}</b>}<br />
+                <span class="meta" style="font-size:15px">{[o.area, whenText(o)].filter(Boolean).join(', ')}</span>
+              </div>
+            </div>
+          );
+        })}
+        <p style="margin-top:12px"><a href={url('/openings-and-closings') + '#' + g.id} style="font-weight:700">{g.rows.length > limit ? 'See all ' + g.rows.length : 'See details'}</a></p>
+      </div>
+    ))}
+  </div>
+)}

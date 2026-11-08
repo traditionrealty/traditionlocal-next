@@ -1,5 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
+import OpeningsPanel from '../../components/OpeningsPanel.astro';
+import { openingsOf } from '../../lib/openings';
 import Prefs from '../../components/Prefs.astro';
 import '../../styles/pages.css';
 import { businesses, href, url } from '../../lib/data';
@@ -32,7 +34,19 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
     </div>
   </section>
 
-  <section class="band" id="browse">
+  {openingsOf('open').length + openingsOf('watch').length + openingsOf('closed').length > 0 && (
+    <section class="band" id="openings">
+      <div class="wrap">
+        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
+          <div><p class="eyebrow">Openings and closings</p><h2>Come along for the first bite</h2></div>
+          <a class="btn line" href={url('/openings-and-closings')}>See openings and closings</a>
+        </div>
+        <OpeningsPanel limit={4} />
+      </div>
+    </section>
+  )}
+
+  <section class="band" id="browse" style="border-top:1px solid var(--line)">
     <div class="wrap">
       <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:24px;flex-wrap:wrap;gap:12px">
         <div><p class="eyebrow">Browse</p><h2>Every place we have reviewed</h2><p class="meta" id="f-count" style="margin-top:6px">{cards.length} places</p></div>

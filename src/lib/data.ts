@@ -37,7 +37,7 @@ function parseCSV(text: string): string[][] {
   if (f.length || row.length) { row.push(f); rows.push(row); }
   return rows.filter((r) => r.some((x) => x.trim() !== ''));
 }
-function readTable(file: string): Record<string, string>[] {
+export function readTable(file: string): Record<string, string>[] {
   const p = path.join(process.cwd(), 'data', file);
   if (!fs.existsSync(p)) return [];
   const [head, ...rows] = parseCSV(fs.readFileSync(p, 'utf8'));
