@@ -6,6 +6,7 @@
   --radius: 12px; --shadow: 0 4px 14px rgba(29, 26, 109, .08);
 }
 * { box-sizing: border-box; }
+.hidden { display: none !important; }
 body { margin: 0; font-family: var(--sans); color: var(--navy); background: var(--white); line-height: 1.6; }
 h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; margin: 0; color: var(--navy); }
 h1 { font-size: clamp(38px, 5vw, 60px); line-height: 1.05; }

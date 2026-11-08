@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { businesses, ofType, reviews, reviewsFor, byName, events as allEvents, upcomingEvents, eventDates, dateText, href, media, stars, url } from '../lib/data';
 import { config } from '../config';
-import { isFood, foodTab, category, topRating, venuePlace } from '../lib/helpers';
+import { isFood, foodTab, category, topRating, venuePlace, areaPages } from '../lib/helpers';
 import OpeningsPanel from '../components/OpeningsPanel.astro';
 import { openingsOf } from '../lib/openings';
 import VideoCard from '../components/VideoCard.astro';
@@ -10,6 +10,13 @@ import VideoScript from '../components/VideoScript.astro';
 import { videos } from '../lib/videos';
 const events = upcomingEvents(5);
 const homeVideos = videos.slice(0, 3);
+const tiles = [
+  { n: businesses().filter((b) => b.status !== 'Closed' && isFood(b) && topRating(b.name) > 0).length, unit: 'places reviewed', title: 'Where to eat', blurb: 'Honest reviews, sorted by what you are craving.', cta: 'Browse food', path: '/food' },
+  { n: areaPages().length, unit: 'neighborhood guides', title: 'Neighborhoods', blurb: 'Find the part of Houston that fits your life.', cta: 'Explore areas', path: '/neighborhoods' },
+  { n: upcomingEvents(999).length, unit: 'coming up', title: 'Things to do', blurb: 'Festivals, markets, and weekend plans.', cta: 'See the calendar', path: '/things-to-do' },
+  { n: videos.length, unit: 'walks and reviews', title: 'Videos', blurb: 'Watch the neighborhood before you go.', cta: 'Watch now', path: '/videos' },
+  { n: 6, unit: 'ways we can help', title: 'Make it home', blurb: 'Moving, renting, or buying? Start with the neighborhood.', cta: 'Start here', path: '/make-it-home' },
+];
 const hasNew = openingsOf('open').length + openingsOf('watch').length + openingsOf('closed').length > 0;
 const wkDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
 const wkIso = (d: Date) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -47,16 +54,61 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
     </div>
   </section>
 
-  <section class="band" id="home-week">
+  <section class="band" id="home-explore">
     <div class="wrap">
-      <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:12px;flex-wrap:wrap;gap:12px">
-        <div><p class="eyebrow">This week</p><h2>What is on this week</h2></div>
-        <a class="btn line" href={url('/things-to-do') + '#this-week'}>See the full week</a>
+      <p class="eyebrow">Start exploring</p>
+      <h2 style="margin-bottom:28px">Find your way around.</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px">
+        {tiles.map((t) => (
+          <a class="card pad tile" href={url(t.path)} style="text-decoration:none">
+            <div style="font-family:var(--serif);font-weight:600;font-size:40px;line-height:1">{t.n}</div>
+            <p class="meta" style="margin:4px 0 14px;font-size:14px">{t.unit}</p>
+            <h4 style="margin-bottom:6px">{t.title}</h4>
+            <p class="meta" style="font-size:15px;margin-bottom:14px">{t.blurb}</p>
+            <span style="font-weight:700;color:var(--blue)">{t.cta}</span>
+          </a>
+        ))}
       </div>
-      <p class="meta" id="hw-range" style="margin-bottom:24px">&nbsp;</p>
-      <div class="grid g4" id="hw-grid"></div>
-      <div class="card pad hidden" id="hw-empty"><b>Nothing listed for the rest of this week yet.</b><p class="meta" style="margin-top:4px">See what is coming up below, or browse everything on the calendar.</p></div>
-      <p class="meta" id="hw-ongoing" style="margin-top:18px"></p>
+    </div>
+  </section>
+
+  {picks.length > 0 && (
+    <section class="band tint" id="home-picks">
+      <div class="wrap">
+        <p class="eyebrow">Sara's Picks</p>
+        <h2 style="margin-bottom:28px">Places we love, and why</h2>
+        <div class="grid g4">
+          {picks.map(({ b, r }) => { const m = media(b); return (
+            <a class="card" href={href(b)} style="text-decoration:none">
+              {m ? <img class="photo" style="height:180px" src={m.src} alt={m.alt} loading="lazy" /> : <div class="ph" style="height:180px">Photo coming soon</div>}
+              <div class="pad"><span class="tag">{stars(r.rating)} out of 5</span><h4 style="margin:12px 0 4px">{b.name}</h4><p class="meta">{b.area}</p></div>
+            </a>); })}
+        </div>
+        <p style="margin-top:24px"><a href={url('/food')} style="font-weight:700">See every place we have reviewed</a></p>
+      </div>
+    </section>
+  )}
+
+  <section class="band" id="home-events">
+    <div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+        <div><p class="eyebrow">What is on</p><h2>Plan something fun</h2></div>
+        <a class="btn line" href={url('/things-to-do')}>See the full calendar</a>
+      </div>
+      <div class="tabs" id="ev-tabs" style="margin-bottom:22px"><button class="chip on" data-p="week" aria-pressed="true">This week</button>{events.length > 0 && <button class="chip" data-p="soon" aria-pressed="false">Coming up</button>}</div>
+      <div id="ev-week">
+        <p class="meta" id="hw-range" style="margin-bottom:20px">&nbsp;</p>
+        <div class="grid g4" id="hw-grid"></div>
+        <div class="card pad hidden" id="hw-empty"><b>Nothing listed for the rest of this week yet.</b><p class="meta" style="margin-top:4px">Browse everything on the calendar, or check back soon.</p></div>
+        <p class="meta" id="hw-ongoing" style="margin-top:18px"></p>
+      </div>
+      {events.length > 0 && (
+        <div id="ev-soon" class="hidden">
+          <div class="grid g4">
+            {events.map((e) => <a class="card pad" href={href(e)} style="text-decoration:none"><span class="tag">{eventDates(e)}</span><h4 style="margin:12px 0 6px">{e.title}</h4><p class="meta">{e.venue || e.profile}</p></a>)}
+          </div>
+        </div>
+      )}
     </div>
   </section>
 
@@ -68,22 +120,6 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
           <a class="btn line" href={url('/openings-and-closings')}>See openings and closings</a>
         </div>
         <OpeningsPanel limit={3} />
-      </div>
-    </section>
-  )}
-
-  {picks.length > 0 && (
-    <section class="band">
-      <div class="wrap">
-        <p class="eyebrow">Sara's Picks</p>
-        <h2 style="margin-bottom:28px">Places we love, and why</h2>
-        <div class="grid g4">
-          {picks.map(({ b, r }) => { const m = media(b); return (
-            <a class="card" href={href(b)} style="text-decoration:none">
-              {m ? <img class="photo" style="height:180px" src={m.src} alt={m.alt} loading="lazy" /> : <div class="ph" style="height:180px">Photo coming soon</div>}
-              <div class="pad"><span class="tag">{stars(r.rating)} out of 5</span><h4 style="margin:12px 0 4px">{b.name}</h4><p class="meta">{b.area}</p></div>
-            </a>); })}
-        </div>
       </div>
     </section>
   )}
@@ -109,6 +145,37 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
     </div>
   </section>
 
+  {places.length > 0 && (
+    <section class="band" id="home-hood">
+      <div class="wrap">
+        <p class="eyebrow">Neighborhood guides</p>
+        <h2 style="margin-bottom:16px">Where do you call home?</h2>
+        <p style="font-size:17px;margin-bottom:20px">Pick an area to see what is good nearby.</p>
+        <div class="chips">{places.map((p) => <a class="chip" href={href(p)}>{p.name}</a>)}</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px"><a class="btn line" href={url('/neighborhoods')}>Browse all neighborhoods</a><a class="btn line" href={url('/find-your-fit')}>Not sure? Find your fit</a></div>
+        <form class="card pad" id="home-locally" action={config.newsletterAction} method="post" style="margin-top:28px;max-width:760px;display:grid;gap:14px">
+          <div><p class="eyebrow">Locally</p><h3 style="margin-bottom:6px">Your neighborhood, in your inbox.</h3><p class="meta" style="font-size:16px">For now, signing up joins In the Loop, and Locally for your area follows when it opens. Your area is saved on this device.</p></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label for="hl-area">Your area</label><select id="hl-area"><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}</select></div><div><label for="hl-email">Your email</label><input id="hl-email" name="email" type="email" required placeholder="name@email.com" /></div></div>
+          <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
+          <div><button class="btn" type="submit">Get Locally</button></div>
+        </form>
+      </div>
+    </section>
+  )}
+  <script is:inline>document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });</script>
+  {homeVideos.length > 0 && (
+    <section class="band tint" id="home-videos">
+      <div class="wrap">
+        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
+          <div><p class="eyebrow">Local videos</p><h2>Walk the neighborhood with us</h2></div>
+          <a class="btn line" href={url('/videos')}>See all videos</a>
+        </div>
+        <div class="grid g3">{homeVideos.map((v) => <VideoCard v={v} />)}</div>
+        <p style="margin-top:20px"><a href={config.youtube} rel="noopener" style="font-weight:700">Watch more on YouTube</a></p>
+      </div>
+    </section>
+  )}
+
   {feed.length > 0 && (
     <section class="band" id="feed">
       <div class="wrap">
@@ -131,20 +198,7 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
     </section>
   )}
 
-  {homeVideos.length > 0 && (
-    <section class="band tint" id="home-videos">
-      <div class="wrap">
-        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
-          <div><p class="eyebrow">Local videos</p><h2>Walk the neighborhood with us</h2></div>
-          <a class="btn line" href={url('/videos')}>See all videos</a>
-        </div>
-        <div class="grid g3">{homeVideos.map((v) => <VideoCard v={v} />)}</div>
-        <p style="margin-top:20px"><a href={config.youtube} rel="noopener" style="font-weight:700">Watch more on YouTube</a></p>
-      </div>
-    </section>
-  )}
-
-  <section class="band" id="meet">
+  <section class="band tint" id="meet">
     <div class="wrap" style="display:flex;gap:48px;align-items:center;flex-wrap:wrap">
       <div style="flex:1 1 320px;max-width:460px"><div class="ph" style="height:340px;border-radius:12px">Photo of Sara and Dillon coming soon</div></div>
       <div style="flex:1 1 380px">
@@ -156,37 +210,6 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
       </div>
     </div>
   </section>
-
-  {places.length > 0 && (
-    <section class="band tint">
-      <div class="wrap">
-        <p class="eyebrow">Neighborhood guides</p>
-        <h2 style="margin-bottom:16px">Where do you call home?</h2>
-        <p style="font-size:17px;margin-bottom:20px">Pick an area to see what is good nearby.</p>
-        <div class="chips">{places.map((p) => <a class="chip" href={href(p)}>{p.name}</a>)}</div>
-        <form class="card pad" id="home-locally" action={config.newsletterAction} method="post" style="margin-top:28px;max-width:760px;display:grid;gap:14px">
-          <div><p class="eyebrow">Locally</p><h3 style="margin-bottom:6px">Your neighborhood, in your inbox.</h3><p class="meta" style="font-size:16px">For now, signing up joins In the Loop, and Locally for your area follows when it opens. Your area is saved on this device.</p></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label for="hl-area">Your area</label><select id="hl-area"><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}</select></div><div><label for="hl-email">Your email</label><input id="hl-email" name="email" type="email" required placeholder="name@email.com" /></div></div>
-          <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
-          <div><button class="btn" type="submit">Get Locally</button></div>
-        </form>
-      </div>
-    </section>
-  )}
-  <script is:inline>document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });</script>
-  {events.length > 0 && (
-    <section class="band">
-      <div class="wrap">
-        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
-          <div><p class="eyebrow">This weekend and beyond</p><h2>Good ways to spend it</h2></div>
-          <a class="btn line" href={url('/things-to-do')}>See all things to do</a>
-        </div>
-        <div class="grid g4">
-          {events.map((e) => <a class="card pad" href={href(e)} style="text-decoration:none"><span class="tag">{eventDates(e)}</span><h4 style="margin:12px 0 6px">{e.title}</h4><p class="meta">{e.venue || e.profile}</p></a>)}
-        </div>
-      </div>
-    </section>
-  )}
 
   <VideoScript />
   <script is:inline define:vars={{ WK: weekData }}>
@@ -206,6 +229,15 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
       var shortOnes = hits.filter(function (e) { return span(e) <= 14; }), longOnes = hits.filter(function (e) { return span(e) > 14; });
       document.getElementById('hw-grid').innerHTML = shortOnes.slice(0, 4).map(function (e) { return '<a class="card pad" href="' + esc(e.u) + '" style="text-decoration:none"><span class="tag">' + esc(label(e)) + '</span><h4 style="margin:12px 0 6px">' + esc(e.t) + '</h4><p class="meta">' + esc(e.v) + '</p></a>'; }).join('');
       document.getElementById('hw-empty').classList.toggle('hidden', shortOnes.length > 0);
+      var tabs = document.getElementById('ev-tabs'), soon = document.getElementById('ev-soon'), wk = document.getElementById('ev-week');
+      function show(p) {
+        wk.classList.toggle('hidden', p !== 'week'); if (soon) soon.classList.toggle('hidden', p !== 'soon');
+        [].forEach.call(tabs.children, function (c) { var on = c.dataset.p === p; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+      }
+      tabs.children[0].textContent = 'This week' + (shortOnes.length ? ' (' + shortOnes.length + ')' : '');
+      if (!soon) tabs.classList.add('hidden');
+      tabs.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.p); });
+      if (shortOnes.length === 0 && soon) show('soon');
       document.getElementById('hw-ongoing').innerHTML = longOnes.length ? 'Also on all week: ' + longOnes.slice(0, 4).map(function (e) { return '<a href="' + esc(e.u) + '" style="font-weight:700">' + esc(e.t) + '</a>'; }).join(', ') + '.' : '';
     })();
   </script>
@@ -244,4 +276,8 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
       $('home-locally').addEventListener('submit', function () { try { var v = $('hl-area').value; if (v) localStorage.setItem('tl_area', JSON.stringify(v)); } catch (e) {} });
     })();
   </script>
+  <style is:global>
+    .tile { transition: transform .18s, box-shadow .18s; }
+    .tile:hover, .tile:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
+  </style>
 </Base>
