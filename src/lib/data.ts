@@ -54,10 +54,7 @@ function faqs(s: string) {
 const on = (v: string) => (v || '').toLowerCase() === 'active';
 
 const rawProfiles = readTable('profiles.csv');
-// Stories from the old site live in their own file, so a sheet export never removes them. A row in the sheet wins on a shared address.
-const sheetContent = readTable('content.csv');
-const haveSlug = new Set(sheetContent.map((r) => r.slug));
-const rawContent = sheetContent.concat(readTable('stories.csv').filter((r) => !haveSlug.has(r.slug)));
+const rawContent = readTable('content.csv');
 
 export const profiles: Profile[] = rawProfiles.filter((r) => r.name).map((r) => ({
   slug: r.slug || slugify(r.name), name: r.name, type: r.type, area: r.area, summary: r.summary, description: r.description,
