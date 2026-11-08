@@ -4,7 +4,7 @@ import VideoCard from '../components/VideoCard.astro';
 import VideoScript from '../components/VideoScript.astro';
 import '../styles/pages.css';
 import { config } from '../config';
-import { videos } from '../lib/videos';
+import { videos, channelVideos } from '../lib/videos';
 const latest = videos[0];
 const rest = videos.slice(1);
 const tours = rest.filter((v) => v.tour).length;
@@ -49,6 +49,20 @@ const suggest = 'mailto:traditionlocal@gmail.com?subject=Video%20idea';
     </section>
   )}
 
+  {channelVideos.filter((c) => c.videos.length > 0).map((c, i) => (
+    <section class={i % 2 === 0 ? 'band' : 'band tint'} id={'ch-' + c.key}>
+      <div class="wrap">
+        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:12px;flex-wrap:wrap;gap:12px">
+          <div><p class="eyebrow">{c.eyebrow}</p><h2>{c.title}</h2></div>
+          <a class="btn line" href={c.url} rel="noopener">Watch on YouTube</a>
+        </div>
+        <p class="meta" style="margin-bottom:24px;font-size:17px;max-width:720px">{c.blurb}</p>
+        <div class="grid g3">{c.videos.map((v, j) => <div class={j >= 6 ? 'vmore-' + c.key + ' hidden' : ''}><VideoCard v={v} /></div>)}</div>
+        {c.videos.length > 6 && <p style="margin-top:24px"><button class="btn line vmore-btn" type="button" data-k={c.key}>Show more</button></p>}
+      </div>
+    </section>
+  ))}
+
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
       <div style="max-width:700px"><h3 style="margin-bottom:8px">Know a place we should film?</h3><p style="font-size:17px">Tell us about a spot you love, and it might be our next video.</p></div>
@@ -56,6 +70,14 @@ const suggest = 'mailto:traditionlocal@gmail.com?subject=Video%20idea';
     </div>
   </section>
   <VideoScript />
+  <script is:inline>
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest('.vmore-btn'); if (!b) return;
+      var hid = document.querySelectorAll('.vmore-' + b.dataset.k + '.hidden');
+      for (var i = 0; i < Math.min(6, hid.length); i++) hid[i].classList.remove('hidden');
+      if (!document.querySelectorAll('.vmore-' + b.dataset.k + '.hidden').length) b.classList.add('hidden');
+    });
+  </script>
   <script is:inline>
     (function () {
       var tabs = document.getElementById('v-tabs'); if (!tabs) return;

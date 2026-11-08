@@ -19,9 +19,9 @@ const findPlace = (title: string, named: string) => {
   const t = norm(title);
   return places.filter((p) => t.includes(norm(p.name))).sort((a, b) => norm(b.name).length - norm(a.name).length)[0];
 };
-const make = (id: string, title: string, duration: string, source: string, named: string): Video => {
-  const p = findPlace(title, named);
-  return { id, title, display: clean(title) || title, duration, source, tour: /walking tour|tour|spotlight/i.test(title), thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg', place: p ? href(p) : '', placeName: p ? p.name : '' };
+const make = (id: string, title: string, duration: string, source: string, named: string, match = true): Video => {
+  const p = match ? findPlace(title, named) : undefined;
+  return { id, title, display: clean(title) || title, duration, source, tour: match && /walking tour|tour|spotlight/i.test(title), thumb: 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg', place: p ? href(p) : '', placeName: p ? p.name : '' };
 };
 
 // Links pasted on a sheet row (Profiles or Content), shown first.
@@ -35,3 +35,12 @@ for (const r of [...readTable('profiles.csv').map((x) => ({ title: x.name, named
 }
 const fromChannel: Video[] = readTable('videos.csv').filter((r) => r.id && r.title && !seen.has(r.id)).map((r) => { seen.add(r.id); return make(r.id, r.title, r.duration, r.source, r.profile); });
 export const videos: Video[] = [...fromSheet, ...fromChannel];
+
+// Other channels we feature on the Videos page, in the order they appear. Rows live in data/channels.csv.
+export const CHANNELS = [
+  { key: 'dillon', source: 'Dillon Loren on YouTube', url: 'https://www.youtube.com/@dillonloren', eyebrow: 'Dillon Loren', title: 'Houston real estate, from Dillon.', blurb: 'Market updates and guidance for buyers, sellers, and people relocating, plus episodes of the Tradition Show.' },
+  { key: 'trg', source: 'Tradition Realty Group on YouTube', url: 'https://www.youtube.com/@traditionrealtygroup', eyebrow: 'Tradition Realty Group', title: 'Market news and home tours.', blurb: 'Houston real estate and mortgage updates, news roundups, and home tours from Tradition Realty Group.' },
+  { key: 'trending', source: 'Trending Houston on YouTube', url: 'https://www.youtube.com/@TrendingHouston', eyebrow: 'Trending Houston', title: 'Quick takes on what is new.', blurb: 'Short videos on what is being built, opened, and planned around Houston.' },
+];
+const more = readTable('channels.csv').filter((r) => r.id && r.title).map((r) => ({ source: r.source, v: make(r.id, r.title, r.duration, r.source, '', false) }));
+export const channelVideos = CHANNELS.map((c) => ({ ...c, videos: more.filter((m) => m.source === c.source && !seen.has(m.v.id)).map((m) => m.v) }));
