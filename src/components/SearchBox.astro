@@ -45,10 +45,10 @@ const gated = !!config.searchMembersOnly;
 <script is:inline define:vars={{ INDEX: url('/search-index.json'), GATED: gated }}>
   (function () {
     var idx = null, loading = null, active = -1, opener = null;
-    var LABEL = { food: 'Where to eat', closed: 'Closed', review: 'Review', thing: 'Things to do', area: 'Neighborhood', sub: 'Subdivision', event: 'Event', video: 'Video', opening: 'Openings', page: 'Page' };
-    var GROUPS = { page: 'Pages', food: 'Places to eat', review: 'Reviews', area: 'Neighborhoods', sub: 'Subdivisions', thing: 'Things to do', event: 'Events', video: 'Videos', opening: 'Openings and closings', closed: 'Closed places' };
-    var ORDER = ['page', 'food', 'review', 'area', 'sub', 'thing', 'event', 'video', 'opening', 'closed'];
-    var BOOST = { page: 6, food: 5, area: 4, thing: 3, event: 3, sub: 1, review: 1, video: 0, opening: 0, closed: -4 };
+    var LABEL = { food: 'Where to eat', biz: 'Local business', closed: 'Closed', review: 'Review', thing: 'Things to do', area: 'Neighborhood', sub: 'Subdivision', event: 'Event', video: 'Video', opening: 'Openings', page: 'Page' };
+    var GROUPS = { page: 'Pages', food: 'Places to eat', biz: 'Other places we reviewed', review: 'Reviews', area: 'Neighborhoods', sub: 'Subdivisions', thing: 'Things to do', event: 'Events', video: 'Videos', opening: 'Openings and closings', closed: 'Closed places' };
+    var ORDER = ['page', 'food', 'biz', 'review', 'area', 'sub', 'thing', 'event', 'video', 'opening', 'closed'];
+    var BOOST = { page: 6, food: 5, biz: 2, area: 4, thing: 3, event: 3, sub: 1, review: 1, video: 0, opening: 0, closed: -4 };
     var box = document.getElementById('srch'), input = document.getElementById('srch-q'), out = document.getElementById('srch-out');
     function norm(s) { return String(s || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/['\u2019]/g, '').replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim(); }
     function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
