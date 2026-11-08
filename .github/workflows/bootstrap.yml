@@ -1,0 +1,30 @@
+name: Apply the redesign files
+
+# One time step. It replaces the old site files with the redesign files stored in bootstrap/files.json,
+# commits them, and starts the preview build.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: node bootstrap/apply.mjs
+      - name: Commit the new files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Start the redesign: new layout, data layer, and first pages" || echo "Nothing to commit"
+          git push
+      - name: Start the preview build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml
