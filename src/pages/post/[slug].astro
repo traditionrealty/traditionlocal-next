@@ -1,0 +1,49 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/pages.css';
+import { href, media, url } from '../../lib/data';
+import { stories, storyDate, readMinutes, topicName, blocks } from '../../lib/stories';
+import { config } from '../../config';
+export function getStaticPaths() { return stories().map((s) => ({ params: { slug: s.slug }, props: { s } })); }
+const { s } = Astro.props;
+const m = media(s);
+const topic = s.tags[0] || '';
+const more = stories().filter((x) => x.slug !== s.slug && (!topic || x.tags.includes(topic))).slice(0, 3);
+const parts = blocks(s.body);
+---
+<Base title={s.title} description={s.summary || s.title} active="">
+  <section class="band hero">
+    <div class="wrap" style="max-width:920px">
+      <p class="meta" style="margin-bottom:12px"><a href={url('/stories')} style="font-weight:700">Stories</a>{topic && <> &rsaquo; <a href={url(`/stories?topic=${topic}`)} style="font-weight:700">{topicName(topic)}</a></>}</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">{s.tags.map((t) => <span class="tag">{topicName(t)}</span>)}</div>
+      <h1 style="margin-bottom:20px">{s.title}</h1>
+      {s.summary && <p class="lead" style="margin-bottom:20px">{s.summary}</p>}
+      <p class="meta">{[s.author && `By ${s.author}`, storyDate(s), `${readMinutes(s)} min read`].filter(Boolean).join(' | ')}</p>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap split">
+      <article class="main" style="max-width:740px">
+        {m && <figure style="margin:0 0 32px"><img class="photo" style="max-height:460px;border-radius:12px" src={m.src} alt={m.alt || s.title} />{m.credit && <figcaption class="credit">{m.credit}</figcaption>}</figure>}
+        {parts.map((b) => b.kind === 'h' ? <h2 style="font-size:30px;margin:36px 0 14px">{b.text}</h2> : b.kind === 'ul' ? <ul style="font-size:19px;line-height:1.7;margin:0 0 20px;padding-left:24px">{b.items!.map((i) => <li>{i}</li>)}</ul> : <p style="font-size:19px;line-height:1.7;margin-bottom:20px">{b.text}</p>)}
+      </article>
+      <aside class="side">
+        <div class="card pad pick">
+          <p class="eyebrow">In the Loop</p><h3 style="margin-bottom:8px">More like this, every Monday.</h3>
+          <p class="meta" style="margin-bottom:16px;font-size:16px">Food we trust, weekend plans, and what just opened.</p>
+          <form action={config.newsletterAction} method="post">
+            <label class="sr" for="st-email">Your email</label><input id="st-email" name="email" type="email" required placeholder="name@email.com" />
+            <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
+            <button class="btn" type="submit" style="width:100%;margin-top:12px">Join In the Loop</button>
+          </form>
+        </div>
+        <div class="card pad" style="margin-top:24px"><p class="eyebrow">A neighbor to ask</p><p style="margin-bottom:16px">Thinking about a move? Dillon is happy to talk it through.</p><a class="btn line" href={url('/ask-dillon')}>Ask Dillon</a></div>
+      </aside>
+    </div>
+  </section>
+  {more.length > 0 && (
+    <section class="band tint"><div class="wrap"><p class="eyebrow">Keep reading</p><h2 style="margin-bottom:28px">More stories</h2>
+      <div class="grid g3">{more.map((x) => <a class="card pad" href={href(x)} style="text-decoration:none"><span class="tag">{topicName(x.tags[0] || 'Story')}</span><h4 style="margin:12px 0 6px">{x.title}</h4><p class="meta">{storyDate(x)}</p></a>)}</div></div></section>
+  )}
+  <script is:inline define:vars={{ X: 1 }}>document.querySelectorAll('.nl-return').forEach(function (el) { el.value = location.origin + location.pathname; });</script>
+</Base>

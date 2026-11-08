@@ -120,7 +120,7 @@ for e in load('events.json'):
 for p in load('posts.json'):
     cats = p.get('categories') or []
     notes = [NOTE, 'Published: ' + s(p.get('date')), 'Updated: ' + s(p.get('updated')), 'Categories: ' + '|'.join(cats), 'Legacy path: ' + s(p.get('path'))]
-    img = s(p.get('image')); img = img if img.startswith(('/images', 'http')) else ''
+    img = s(p.get('image')); img = img if img.startswith(('/images', '/media', 'http')) else ''
     C(**{'Title': s(p['title']), 'Content type': 'Article', 'Summary': s(p.get('description')), 'Body': text_of(p.get('html')), 'Author': s(p.get('author')), 'Hero image': img,
          'Image alt text': s(p.get('imageAlt')), 'Media rights': 'Needs review' if img else '', 'Media section': 'hidden', 'FAQ section': 'hidden',
          'Editor notes': '\n'.join(notes), 'Record ID': 'legacy-post-' + p['slug'], 'Slug': p['slug']})
