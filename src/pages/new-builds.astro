@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import '../styles/pages.css';
+import FilterKit from '../components/FilterKit.astro';
 import { profiles, href, url } from '../lib/data';
 const WORDS = ['new construction', 'new build', 'new homes', 'newer homes', 'master planned', 'master-planned', 'new development', 'new neighborhoods', 'builder'];
 const isNew = (p: any) => { const t = [p.summary, p.description, p.localTake, p.typicalHomes, p.bestFor].join(' ').toLowerCase(); return WORDS.some((w) => t.includes(w)); };
@@ -25,11 +26,18 @@ const tips = [
   <section class="band">
     <div class="wrap">
       <p class="eyebrow">Communities</p><h2 style="margin-bottom:16px">Where new homes are being built</h2>
-      <div class="card pad search" style="margin-bottom:24px"><label for="nb-area">Area</label><select id="nb-area"><option value="">All areas</option>{areas.map((a) => <option>{a}</option>)}</select></div>
-      <p class="meta" id="nb-count" style="margin-bottom:16px">{list.length} communities</p>
+      <div class="fbar" id="nb-bar">
+        <div class="fbar-row">
+          <div class="fbar-search"><label for="nb-q">Search</label><input id="nb-q" type="search" placeholder="Try a community or a city" autocomplete="off" /></div>
+          <button class="chip fbar-toggle" type="button" aria-expanded="false" aria-controls="nb-panel">Filters <span class="fcount hidden" id="nb-badge"></span></button>
+          <div class="fbar-panel" id="nb-panel"><div class="fsel"><label for="nb-area">Area</label><select id="nb-area"><option value="">All areas</option>{areas.map((a) => <option>{a}</option>)}</select></div></div>
+        </div>
+        <div class="fbar-status"><div class="fpills" id="nb-pills"></div><button class="flink hidden" id="nb-clear" type="button">Clear all</button><span class="meta" id="nb-count">{list.length} communities</span></div>
+      </div>
+      <div style="height:24px"></div>
       <div class="grid g3">
-        {list.map((p) => (
-          <a class="card pad nb-item" href={href(p)} data-area={p.type === 'Subdivision' ? p.area : p.name} style="text-decoration:none">
+        {list.map((p, i) => (
+          <a class={i < 24 ? 'card pad nb-item' : 'card pad nb-item hidden'} data-name={[p.name, p.type === 'Subdivision' ? p.area : p.region].join(' ').toLowerCase()} href={href(p)} data-area={p.type === 'Subdivision' ? p.area : p.name} style="text-decoration:none">
             <span class="tag">{p.type === 'Subdivision' ? 'Community' : 'Area'}</span>
             <h4 style="margin:12px 0 6px">{p.name}</h4>
             <p class="meta" style="margin-bottom:8px">{p.type === 'Subdivision' ? p.area : p.region}</p>
@@ -37,6 +45,7 @@ const tips = [
           </a>
         ))}
       </div>
+      <p style="margin-top:24px"><button class="btn line hidden" id="nb-more" type="button">Show more communities</button></p>
       <div class="card pad hidden" id="nb-empty"><b>No communities match that area yet.</b></div>
     </div>
   </section>
@@ -52,11 +61,12 @@ const tips = [
       <a class="btn" href={url('/ask-dillon')}>Ask Dillon</a>
     </div>
   </section>
+  <FilterKit />
   <script is:inline>
     (function () {
-      var sel = document.getElementById('nb-area'), items = [].slice.call(document.querySelectorAll('.nb-item'));
-      sel.addEventListener('change', function () { var n = 0; items.forEach(function (i) { var ok = !sel.value || i.dataset.area === sel.value; i.classList.toggle('hidden', !ok); if (ok) n++; });
-        document.getElementById('nb-count').textContent = n + (n === 1 ? ' community' : ' communities'); document.getElementById('nb-empty').classList.toggle('hidden', n > 0); });
+      var $ = function (id) { return document.getElementById(id); }, area = $('nb-area');
+      var kit = TLF.init({ bar: $('nb-bar'), items: [].slice.call(document.querySelectorAll('.nb-item')), search: $('nb-q'), step: 24, noun: ['community', 'communities'], count: $('nb-count'), empty: $('nb-empty'), more: $('nb-more'), clear: $('nb-clear'), pills: $('nb-pills'), badge: $('nb-badge'), filters: [TLF.select(area, 'area')] });
+      area.addEventListener('change', kit.refresh);
     })();
   </script>
 </Base>

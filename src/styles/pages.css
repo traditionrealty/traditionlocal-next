@@ -12,6 +12,41 @@ button.chip { cursor: pointer; font-family: inherit; }
 .search { max-width: 520px; }
 .filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; align-items: end; max-width: 920px; }
 @media (max-width: 600px) { .filters { grid-template-columns: 1fr; } }
+/* Filter bar: one tidy set of controls, removable pills, and a count. */
+.fbar { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 20px; display: grid; gap: 14px; }
+.fbar-row { display: flex; gap: 12px 14px; flex-wrap: wrap; align-items: flex-end; }
+.fbar-search { flex: 2 1 260px; }
+.fbar-panel { display: contents; }
+.fsel, .fpop-wrap { flex: 1 1 170px; min-width: 150px; }
+.fbar-cats { flex: 1 1 100%; }
+.fbar-toggle { display: none; }
+.flabel { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.fpop { position: relative; }
+.fpop > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 48px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--slate); background: #fff; color: var(--navy); font-size: 16px; cursor: pointer; }
+.fpop > summary::-webkit-details-marker { display: none; }
+.fpop > summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--navy); border-bottom: 2px solid var(--navy); transform: rotate(45deg) translateY(-2px); flex: none; }
+.fpop[open] > summary { border-color: var(--navy); }
+.fpop-menu { position: absolute; z-index: 30; left: 0; top: calc(100% + 6px); min-width: 280px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 12px 32px rgba(29, 26, 109, .18); padding: 8px; display: grid; gap: 2px; }
+.fpop-menu label { display: flex; align-items: center; gap: 12px; margin: 0; padding: 10px 12px; min-height: 44px; border-radius: 10px; font-size: 16px; font-weight: 400; cursor: pointer; }
+.fpop-menu label:hover { background: var(--ivory); }
+.fpop-menu input { width: 20px; height: 20px; min-height: 20px; padding: 0; border-radius: 4px; accent-color: var(--navy); flex: none; }
+.fcount { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px; background: var(--navy); color: #fff; font-size: 12px; font-weight: 700; }
+.fbar-status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; min-height: 34px; }
+.fpills { display: flex; flex-wrap: wrap; gap: 8px; }
+.fpill { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px 0 14px; border-radius: 999px; border: 1.5px solid var(--navy); background: var(--ivory); color: var(--navy); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; }
+.fpill span:last-child { font-size: 18px; line-height: 1; }
+.flink { background: none; border: 0; padding: 8px 4px; font: inherit; font-size: 14px; font-weight: 700; color: var(--blue); cursor: pointer; text-decoration: underline; }
+.fbar-status .meta { margin-left: auto; }
+@media (max-width: 760px) {
+  .fbar { padding: 14px; }
+  .fbar-search { flex: 1 1 0; min-width: 0; }
+  .fbar-toggle { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: 8px; }
+  .fbar-panel { display: none; }
+  .fbar.open .fbar-panel { display: grid; gap: 12px; flex: 1 1 100%; }
+  .fbar-panel .fsel, .fbar-panel .fpop-wrap { flex: none; }
+  .fpop-menu { position: static; box-shadow: none; margin-top: 6px; }
+  .fbar-status .meta { margin-left: 0; flex: 1 1 100%; }
+}
 .kv { display: grid; gap: 12px; }
 .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 32px; }
 .toggle-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
