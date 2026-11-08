@@ -56,22 +56,8 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
     </div>
   </section>
 
-  {events.length > 0 && (
-    <section class="band tint">
-      <div class="wrap">
-        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
-          <div><p class="eyebrow">This weekend and beyond</p><h2>Good ways to spend it</h2></div>
-          <a class="btn line" href={url('/things-to-do')}>See all things to do</a>
-        </div>
-        <div class="grid g4">
-          {events.map((e) => <a class="card pad" href={href(e)} style="text-decoration:none"><span class="tag">{eventDates(e)}</span><h4 style="margin:12px 0 6px">{e.title}</h4><p class="meta">{e.venue || e.profile}</p></a>)}
-        </div>
-      </div>
-    </section>
-  )}
-
   {hasNew && (
-    <section class="band" id="new-this-month">
+    <section class="band tint" id="new-this-month">
       <div class="wrap">
         <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
           <div><p class="eyebrow">New this month</p><h2>Openings and closings</h2></div>
@@ -83,7 +69,7 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
   )}
 
   {picks.length > 0 && (
-    <section class="band tint">
+    <section class="band">
       <div class="wrap">
         <p class="eyebrow">Sara's Picks</p>
         <h2 style="margin-bottom:28px">Places we love, and why</h2>
@@ -171,6 +157,20 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
     </section>
   )}
   <script is:inline>document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });</script>
+  {events.length > 0 && (
+    <section class="band tint">
+      <div class="wrap">
+        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
+          <div><p class="eyebrow">This weekend and beyond</p><h2>Good ways to spend it</h2></div>
+          <a class="btn line" href={url('/things-to-do')}>See all things to do</a>
+        </div>
+        <div class="grid g4">
+          {events.map((e) => <a class="card pad" href={href(e)} style="text-decoration:none"><span class="tag">{eventDates(e)}</span><h4 style="margin:12px 0 6px">{e.title}</h4><p class="meta">{e.venue || e.profile}</p></a>)}
+        </div>
+      </div>
+    </section>
+  )}
+
   <script is:inline define:vars={{ WK: weekData }}>
     (function () {
       var now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
