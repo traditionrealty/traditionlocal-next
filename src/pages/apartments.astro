@@ -1,9 +1,111 @@
 ---
-import ServicePage from '../components/ServicePage.astro';
+import Base from '../layouts/Base.astro';
+import FilterKit from '../components/FilterKit.astro';
+import '../styles/pages.css';
+import { url, IS_PREVIEW } from '../lib/data';
+import { config } from '../config';
+import { apartments } from '../lib/apartments';
+const areas = [...new Set(apartments.map((a) => a.area).filter(Boolean))].sort();
+const mail = 'mailto:' + config.contactEmail + '?subject=Apartment%20locating';
+const help = [
+  ['Matched to your life', 'Your commute, budget, pets, and the feel of the neighborhood all shape the shortlist.'],
+  ['Neighborhood context', 'Our guides show what is nearby, from coffee and groceries to parks and things to do.'],
+  ['Tours made easier', 'A short list means fewer afternoons spent driving around.'],
+  ['A person to ask', 'Not sure where to start? Ask, and we will point you the right way.'],
+];
+const steps = ['Share your budget, move date, and what you must have.', 'We suggest areas and places worth a look.', 'You tour, compare, and decide with a local on your side.'];
 ---
-<ServicePage title="Apartment locating" eyebrow="Make it home" subject="Apartment locating"
-  description="Help finding the right apartment in Houston."
-  lead="Finding a rental in a big city takes time. Tell us what matters, and we will help you narrow the list."
-  who={['Renters new to Houston', 'Anyone moving on a short timeline', 'People who want to know the neighborhood before they sign']}
-  help={[['Matched to your life', 'Your commute, budget, pets, and the feel of the neighborhood all shape the shortlist.'], ['Neighborhood context', 'Our guides show what is nearby, from coffee and groceries to parks and things to do.'], ['Tours made easier', 'A short list means fewer afternoons spent driving around.'], ['A person to ask', 'Not sure where to start? Ask, and we will point you the right way.']]}
-  steps={['Share your budget, move date, and what you must have.', 'We suggest areas and places worth a look.', 'You tour, compare, and decide with a local on your side.']} />
+<Base title="Apartment locating" active="More" sub="makeithome" description="Help finding the right apartment in Houston.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">Apartment locating</p>
+      <h1 style="margin-bottom:16px;max-width:880px">Apartment communities to compare.</h1>
+      <p class="lead" style="margin-bottom:28px">Finding a rental in a big city takes time. Browse apartment communities below, then tell Dillon what matters and he will help you narrow the list.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon about apartments</a><a class="btn line" href={url('/find-your-fit')}>Find your fit</a></div>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Apartments</p><h2 style="margin-bottom:16px">Where to rent around Houston</h2>
+      {apartments.length > 0 ? (
+        <>
+          <div class="fbar" id="ap-bar">
+            <div class="fbar-row">
+              <div class="fbar-search"><label for="ap-q">Search</label><input id="ap-q" type="search" placeholder="Try a community or a neighborhood" autocomplete="off" /></div>
+              <button class="chip fbar-toggle" type="button" aria-expanded="false" aria-controls="ap-panel">Filters <span class="fcount hidden" id="ap-badge"></span></button>
+              <div class="fbar-panel" id="ap-panel">
+                <div class="fsel"><label for="ap-area">Area</label><select id="ap-area"><option value="">All areas</option>{areas.map((a) => <option>{a}</option>)}</select></div>
+                <div class="fsel"><label for="ap-beds">Bedrooms</label><select id="ap-beds"><option value="">Any size</option><option value="studio">Studio</option><option value="1">1 bedroom</option><option value="2">2 bedrooms</option><option value="3">3 or more</option></select></div>
+                <div class="fsel"><label for="ap-rent">Rent</label><select id="ap-rent"><option value="0">Any rent</option><option value="1200">Up to $1,200</option><option value="1500">Up to $1,500</option><option value="2000">Up to $2,000</option><option value="2500">Up to $2,500</option><option value="3000">Up to $3,000</option></select></div>
+                <div class="fsel"><label for="ap-pets">Pets</label><select id="ap-pets"><option value="">Any</option><option value="yes">Pet friendly</option></select></div>
+              </div>
+            </div>
+            <div class="fbar-status"><div class="fpills" id="ap-pills"></div><button class="flink hidden" id="ap-clear" type="button">Clear all</button><span class="meta" id="ap-count">{apartments.length} apartments</span></div>
+          </div>
+          <div style="height:24px"></div>
+          <div class="grid g3">
+            {apartments.map((a, i) => (
+              <a class={i < 24 ? 'card pad ap-item' : 'card pad ap-item hidden'} href={a.link || url('/ask-dillon')} rel="noopener" data-name={a.search} data-area={a.area} data-beds={a.beds.join(' ')} data-rent={a.from || ''} data-pets={a.pets ? 'yes' : ''} style="text-decoration:none;display:flex;flex-direction:column">
+                <div style="display:flex;gap:8px;flex-wrap:wrap">{a.fromText && <span class="tag">From {a.fromText}</span>}{a.pets && <span class="tag soft">Pet friendly</span>}{IS_PREVIEW && a.example && <span class="tag soft">Example</span>}</div>
+                <h4 style="margin:12px 0 6px">{a.name}</h4>
+                <p class="meta" style="margin-bottom:6px">{[a.area, a.city].filter(Boolean).join(', ')}</p>
+                {a.bedsLine && <p class="meta">{a.bedsLine}</p>}
+                {a.rentLine && <p class="meta">{a.rentLine}</p>}
+                {a.summary && <p class="meta" style="font-size:15px;margin-top:8px">{a.summary}</p>}
+                <span style="margin-top:auto;padding-top:14px;font-weight:700;color:var(--blue)">{a.link ? 'Visit community' : 'Ask about this community'}</span>
+              </a>
+            ))}
+          </div>
+          <p style="margin-top:24px"><button class="btn line hidden" id="ap-more" type="button">Show more apartments</button></p>
+          <div class="card pad hidden" id="ap-empty"><b>No apartments match that yet.</b><p class="meta" style="margin-top:4px">Try fewer filters, or tell Dillon what you need and he will help.</p></div>
+          <p class="meta" style="font-size:13px;max-width:820px;margin-top:22px">Rents and availability change often. Treat this list as a starting point, and confirm the details with the community before you tour. Apartment locating is offered by Dillon Loren, a Realtor with Tradition Realty Group at Keller Williams Memorial.</p>
+        </>
+      ) : (
+        <div class="card pad pick" style="max-width:820px">
+          <p class="eyebrow">Coming soon</p><h3 style="margin-bottom:8px">Our apartment list is on the way.</h3>
+          <p class="meta" style="font-size:17px;margin-bottom:18px">Until then, tell Dillon your budget, your move date, and what you must have, and he will help you narrow the rentals.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line" href={mail}>Email Dillon</a></div>
+        </div>
+      )}
+    </div>
+  </section>
+  <section class="band tint">
+    <div class="wrap">
+      <p class="eyebrow">How we can help</p><h2 style="margin-bottom:28px">What to expect</h2>
+      <div class="grid g2">{help.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">How it works</p><h2 style="margin-bottom:28px">Three simple steps</h2>
+      <div class="grid g3">{steps.map((s, i) => <div class="card pad"><span class="tag">{i + 1}</span><p style="margin-top:12px">{s}</p></div>)}</div>
+      <p class="meta" style="font-size:16px;margin-top:24px;max-width:760px">Great for renters new to Houston, anyone moving on a short timeline, and people who want to know the neighborhood before they sign.</p>
+    </div>
+  </section>
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious about a community?</h3><p style="font-size:17px">Tell Dillon your budget, your move date, and what you must have. He will reply personally, with no pressure.</p></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line" href={mail}>Email Dillon</a></div>
+    </div>
+  </section>
+  <FilterKit />
+  <script is:inline>
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      if (!$('ap-bar')) return;
+      var area = $('ap-area'), beds = $('ap-beds'), rent = $('ap-rent'), pets = $('ap-pets');
+      var bedsF = {
+        test: function (it) { return !beds.value || (' ' + it.dataset.beds + ' ').indexOf(' ' + beds.value + ' ') > -1; },
+        pills: function () { return beds.value ? [{ label: beds.options[beds.selectedIndex].text, remove: function () { beds.value = ''; } }] : []; },
+        clear: function () { beds.value = ''; }
+      };
+      var rentF = {
+        test: function (it) { return !+rent.value || (+it.dataset.rent > 0 && +it.dataset.rent <= +rent.value); },
+        pills: function () { return +rent.value ? [{ label: rent.options[rent.selectedIndex].text, remove: function () { rent.value = '0'; } }] : []; },
+        clear: function () { rent.value = '0'; }
+      };
+      var kit = TLF.init({ bar: $('ap-bar'), items: [].slice.call(document.querySelectorAll('.ap-item')), search: $('ap-q'), step: 24, noun: ['apartment', 'apartments'], count: $('ap-count'), empty: $('ap-empty'), more: $('ap-more'), clear: $('ap-clear'), pills: $('ap-pills'), badge: $('ap-badge'), filters: [TLF.select(area, 'area'), bedsF, rentF, TLF.select(pets, 'pets')] });
+      [area, beds, rent, pets].forEach(function (s) { s.addEventListener('change', kit.refresh); });
+    })();
+  </script>
+</Base>
