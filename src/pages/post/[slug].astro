@@ -10,14 +10,16 @@ const m = media(s);
 const topic = s.tags[0] || '';
 const more = stories().filter((x) => x.slug !== s.slug && (!topic || x.tags.includes(topic))).slice(0, 3);
 const parts = blocks(s.body);
+// Old excerpts can be long and cut off mid sentence. Only short summaries are shown as the intro.
+const lead = s.summary && s.summary.length <= 220 ? s.summary : '';
 ---
-<Base title={s.title} description={s.summary || s.title} active="">
+<Base title={s.title} description={(s.summary || s.title).slice(0, 160)} active="">
   <section class="band hero">
     <div class="wrap" style="max-width:920px">
       <p class="meta" style="margin-bottom:12px"><a href={url('/stories')} style="font-weight:700">Stories</a>{topic && <> &rsaquo; <a href={url(`/stories?topic=${topic}`)} style="font-weight:700">{topicName(topic)}</a></>}</p>
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">{s.tags.map((t) => <span class="tag">{topicName(t)}</span>)}</div>
       <h1 style="margin-bottom:20px">{s.title}</h1>
-      {s.summary && <p class="lead" style="margin-bottom:20px">{s.summary}</p>}
+      {lead && <p class="lead" style="margin-bottom:20px">{lead}</p>}
       <p class="meta">{[s.author && `By ${s.author}`, storyDate(s), `${readMinutes(s)} min read`].filter(Boolean).join(' | ')}</p>
     </div>
   </section>
