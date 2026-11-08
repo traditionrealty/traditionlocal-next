@@ -1,1 +1,0 @@
-{"__patches":[{"path":"src/lib/data.ts","find":"  if ('title' in e) return e.type === 'Event' ? `/events/${e.slug}` : `/reviews/${e.slug}`;","replace":"  if ('title' in e) return e.type === 'Event' ? `/events/${e.slug}` : e.type === 'Article' ? `/post/${e.slug}` : `/reviews/${e.slug}`;"}]}

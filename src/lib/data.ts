@@ -90,7 +90,7 @@ export const events = () => content.filter((c) => c.type === 'Event');
 const BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 export const url = (p: string) => BASE + p;
 export function pathFor(e: Profile | Content): string {
-  if ('title' in e) return e.type === 'Event' ? `/events/${e.slug}` : `/reviews/${e.slug}`;
+  if ('title' in e) return e.type === 'Event' ? `/events/${e.slug}` : e.type === 'Article' ? `/post/${e.slug}` : `/reviews/${e.slug}`;
   switch (e.type) {
     case 'Business': return `/food/${e.slug}`;
     case 'Place': return `/things-to-do/${e.slug}`;
