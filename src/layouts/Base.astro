@@ -38,8 +38,8 @@ const moreOn = sub !== '' || active === 'More';
           <div class="pop"><div class="pop-in">{more.map(([n, h, d]) => <a href={url(h)}>{n}<small>{d}</small></a>)}</div></div>
         </div>
         <span class="sep"></span>
-        <a class="chip" href={url('/account')}>Sign in</a>
         <a class="btn sm" href={url('/newsletters')}>Join In the Loop</a>
+        <a class="chip" href={url('/account')}>Sign in</a>
       </nav>
     </div>
   </header>
