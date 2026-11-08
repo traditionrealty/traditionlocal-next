@@ -29,7 +29,7 @@ const services = [
     <div class="wrap">
       <p class="eyebrow">Where to start</p><h2 style="margin-bottom:28px">Tools for getting to know a place</h2>
       <div class="grid g3">
-        {tools.map(([name, blurb, path, label, live]) => (
+        {[...tools].sort((a, b) => a[0].localeCompare(b[0])).map(([name, blurb, path, label, live]) => (
           <a class="card pad" href={url(path as string)} style="text-decoration:none"><span class={live ? 'tag' : 'tag soft'}>{label}</span><h4 style="margin:12px 0 8px">{name}</h4><p class="meta" style="font-size:16px">{blurb}</p></a>
         ))}
       </div>
