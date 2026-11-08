@@ -90,6 +90,33 @@ label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
 .foot a:hover { text-decoration: underline; }
 .foot .cols { display: grid; grid-template-columns: 1.25fr .75fr 1.5fr; gap: 64px; align-items: start; }
 @media (max-width: 900px) { .foot .cols { grid-template-columns: 1fr; gap: 40px; } }
+.mbar { display: none; }
+@media (max-width: 760px) {
+  .top .wrap { min-height: 64px; flex-wrap: wrap; row-gap: 0; padding-top: 8px; padding-bottom: 8px; }
+  .logo { font-size: 24px; }
+  .mbar { display: flex; gap: 8px; align-items: center; }
+  .nav { display: none; width: 100%; flex-direction: column; align-items: stretch; gap: 6px; padding: 10px 0 12px; }
+  .top.open .nav { display: flex; }
+  .nav > .chip { justify-content: flex-start; min-height: 48px; font-size: 16px; }
+  .nav .more { display: block; }
+  .nav .more > .chip { display: none; }
+  .more .pop { display: block; position: static; padding-top: 0; }
+  .more .pop-in { box-shadow: none; border: 0; padding: 0; min-width: 0; }
+  .pop a { padding: 12px 14px; font-size: 16px; }
+  .pop a small { font-size: 13px; }
+  .nav .sep, .nav .srch-open { display: none; }
+  .nav > .btn.sm { min-height: 48px; justify-content: center; font-size: 16px; }
+  [style*="grid-template-columns:repeat(12"] { grid-template-columns: 1fr !important; row-gap: 24px; }
+  [style*="grid-template-columns:repeat(12"] > * { grid-column: 1 / -1 !important; }
+  [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+  .hero .ph, .hero img.photo { height: 240px !important; }
+  img.photo[style*="height:420px"] { height: 260px !important; }
+  .subnav .wrap { flex-wrap: nowrap; overflow-x: auto; gap: 22px; white-space: nowrap; }
+  .foot a { display: inline-block; padding: 8px 0; }
+  .foot a.logo { padding: 0; }
+  .ribbon { font-size: 12px; padding: 6px 0; }
+  .tag { font-size: 13px; }
+}
 .foot .h { font-size: 12px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; color: var(--gold); margin: 0 0 12px; }
 .foot .li { margin: 0 0 8px; }
 .foot .join { display: flex; gap: 10px; }

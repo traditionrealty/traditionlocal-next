@@ -32,7 +32,11 @@ const moreOn = sub !== '' || active === 'More';
   <header class="top">
     <div class="wrap">
       <a class="logo" href={url('/')}>Tradition Local</a>
-      <nav class="nav" aria-label="Main">
+      <div class="mbar">
+        <button class="chip srch-open" type="button" aria-label="Search" aria-haspopup="dialog"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
+        <button class="chip nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+      </div>
+      <nav class="nav" id="site-nav" aria-label="Main">
         {main.map(([n, h]) => <a class={`chip${active === n ? ' on' : ''}`} href={url(h)}>{n}</a>)}
         <div class="more">
           <button class={`chip${moreOn ? ' on' : ''}`} aria-haspopup="true">More <span style="font-size:10px;margin-left:6px">&#9660;</span></button>
@@ -92,6 +96,15 @@ const moreOn = sub !== '' || active === 'More';
     var m = document.getElementById('nl-msg'), r = document.getElementById('nl-return');
     if (r) r.value = location.origin + location.pathname;
     if (q && m) { m.hidden = false; m.textContent = q === 'ok' ? 'Thanks, you are subscribed. Welcome to Tradition Local.' : q === 'invalid' ? 'That email address does not look right. Please try again.' : 'Something went wrong. Please try again, or email us.'; }
+  </script>
+  <script is:inline>
+    (function () {
+      var h = document.querySelector('header.top'), b = h && h.querySelector('.nav-toggle'); if (!b) return;
+      function set(o) { h.classList.toggle('open', o); b.setAttribute('aria-expanded', o ? 'true' : 'false'); b.textContent = o ? 'Close' : 'Menu'; }
+      b.addEventListener('click', function () { set(!h.classList.contains('open')); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+      h.querySelector('.nav').addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
+    })();
   </script>
   <SearchBox />
 </body>
