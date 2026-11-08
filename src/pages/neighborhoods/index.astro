@@ -5,7 +5,7 @@ import '../../styles/pages.css';
 import { href, url } from '../../lib/data';
 import { areaPages, bizIn, subsIn, REGIONS } from '../../lib/helpers';
 const list = areaPages().map((p) => ({ p, biz: bizIn(p.name).length, subs: subsIn(p.name).length })).sort((a, b) => a.p.name.localeCompare(b.p.name));
-const regions = REGIONS.filter((r) => list.some((x) => x.p.region === r));
+const regions = [...REGIONS, ...new Set(list.map((x) => x.p.region).filter((r) => r && !REGIONS.includes(r)))].filter((r) => list.some((x) => x.p.region === r));
 ---
 <Base title="Neighborhoods" active="Neighborhoods" description="Area guides and subdivision profiles from people who live here.">
   <section class="band hero">

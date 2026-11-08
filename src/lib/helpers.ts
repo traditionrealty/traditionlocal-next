@@ -12,14 +12,18 @@ export const bizIn = (name: string) => profiles.filter((p) => p.type === 'Busine
 export const subsIn = (name: string) => profiles.filter((p) => p.type === 'Subdivision' && p.area === name);
 export const placesIn = (name: string) => profiles.filter((p) => p.type === 'Place' && p.area === name);
 export const topRating = (name: string) => reviewsFor(name).reduce((m, r) => Math.max(m, stars(r.rating)), 0);
-export const category = (p: Profile) => p.tags[0] || p.subCategory || '';
+// Tags come from the sheet as slugs like coffee-and-tea. Show them as plain words.
+export const category = (p: Profile) => {
+  const raw = (p.tags[0] || p.subCategory || '').replace(/-/g, ' ').replace(/\band\b/g, '&').trim();
+  return raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : '';
+};
 
 // The Business type also holds salons, shops, and services. Food pages only use food and drink.
 const FOOD_WORDS = ['restaurant', 'food', 'cafe', 'coffee', 'bakery', 'bakeries', 'dessert', 'donut', 'doughnut', 'ice cream', 'frozen yogurt', 'creper', 'candy', 'chocolate', 'cake', 'cookie', 'brew', 'juice', 'smoothie',
   'deli', 'grocery', 'supermarket', 'farmers market', 'butcher', 'catering', 'brunch', 'breakfast', 'sandwich', 'pizza', 'burger', 'bbq', 'barbecue', 'sushi', 'steak', 'seafood', 'noodle', 'buffet', 'grill', 'eatery',
   'diner', 'bistro', 'tavern', 'wine', 'cocktail', 'vegan', 'vegetarian', 'boba', 'bubble tea', 'tapas', 'taco', 'wings', 'chicken', 'gelato', 'tea room', 'bagel', 'pancake', 'waffle', 'dumpling', 'soup', 'salad', 'lounge',
   'thai', 'vietnam', 'chinese', 'japan', 'korea', 'indian', 'ramen', 'dim sum', 'asian', 'taiwan', 'malay', 'filipin', 'pakistan', 'hot pot', 'middle eastern', 'mediterranean', 'persian', 'iranian', 'halal', 'turkish', 'greek',
-  'lebanese', 'moroccan', 'afghan', 'falafel', 'kebab', 'mexican', 'tex-mex', 'latin', 'cuban', 'peru', 'argentin', 'caribbean', 'salvador', 'venezuel', 'colombia', 'brazil', 'empanada', 'french', 'italian', 'german', 'spanish',
+  'lebanese', 'moroccan', 'afghan', 'falafel', 'kebab', 'mexican', 'tex-mex', 'tex mex', 'latin', 'cuban', 'peru', 'argentin', 'caribbean', 'salvador', 'venezuel', 'colombia', 'brazil', 'empanada', 'french', 'italian', 'german', 'spanish',
   'british', 'polish', 'czech', 'european', 'american', 'southern', 'cajun', 'creole', 'ethiopian', 'nigerian', 'african'];
 const FOOD_TOKENS = new Set(['bar', 'bars', 'pub', 'pubs', 'tea', 'pho', 'deli']);
 export function isFood(p: Profile): boolean {
@@ -44,7 +48,7 @@ export const WORLD: [string, string][] = [['all', 'All'], ['asia', 'Asian'], ['m
 const REGION_WORDS: Record<string, string[]> = {
   asia: ['thai', 'vietnam', 'chinese', 'japan', 'korea', 'indian', 'sushi', 'ramen', 'noodle', 'dim sum', 'asian', 'taiwan', 'malay', 'filipin', 'pho', 'pakistan', 'hot pot', 'dumpling'],
   mideast: ['middle eastern', 'mediterranean', 'persian', 'iranian', 'halal', 'turkish', 'greek', 'lebanese', 'moroccan', 'afghan', 'falafel', 'kebab'],
-  latin: ['mexican', 'tex-mex', 'taco', 'latin', 'cuban', 'peru', 'argentin', 'caribbean', 'salvador', 'venezuel', 'colombia', 'brazil', 'empanada'],
+  latin: ['mexican', 'tex-mex', 'tex mex', 'taco', 'latin', 'cuban', 'peru', 'argentin', 'caribbean', 'salvador', 'venezuel', 'colombia', 'brazil', 'empanada'],
   europe: ['french', 'italian', 'german', 'spanish', 'creper', 'pizza', 'british', 'polish', 'czech', 'european', 'tapas'],
   america: ['american', 'southern', 'bbq', 'barbecue', 'burger', 'diner', 'cajun', 'creole', 'steak', 'brunch', 'breakfast', 'sandwich', 'chicken', 'seafood'],
   africa: ['ethiopian', 'nigerian', 'african', 'senegal', 'ghana'],
