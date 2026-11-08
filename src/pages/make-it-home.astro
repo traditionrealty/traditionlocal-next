@@ -4,6 +4,7 @@ import '../styles/pages.css';
 import { url } from '../lib/data';
 import MoreWays from '../components/MoreWays.astro';
 const tools = [
+  ['Apartment locating', 'Tell us what matters, and we will help you narrow the list of rentals.', '/apartments', 'Open', true],
   ['Ask Dillon', 'Tell us where you are curious about, and Dillon replies personally. No pressure.', '/ask-dillon', 'Open', true],
   ['Neighborhoods', 'Area guides and subdivision profiles, with what it is like to live there.', '/neighborhoods', 'Open', true],
   ['Find your fit', 'Answer a few questions to see which neighborhoods match what you love.', '/find-your-fit', 'Open', true],
@@ -12,7 +13,6 @@ const tools = [
 ];
 const services = [
   ['Relocation', 'Moving to Houston? Start with the neighborhood, then sort out the details.', '/relocation'],
-  ['Apartment locating', 'Tell us what matters, and we will help you narrow the list of rentals.', '/apartments'],
   ['Commercial real estate', 'Buying, selling, or leasing space for a business.', '/commercial'],
   ['International clients', 'Moving to or buying in Houston from another country.', '/international'],
 ];
@@ -36,5 +36,5 @@ const services = [
       </div>
     </div>
   </section>
-  <MoreWays cards={services} cols="g4" tint />
+  <MoreWays cards={services} cols="g3" tint />
 </Base>
