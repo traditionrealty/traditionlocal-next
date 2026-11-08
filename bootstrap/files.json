@@ -1,0 +1,1 @@
+{"__patches":[{"path":"src/pages/index.astro","find":"<h2 style=\"margin-bottom:8px\">Fresh from Sara and Dillon</h2>","replace":"<h2 style=\"margin-bottom:8px\">Fresh from Sara, Dillon, and our Contributors</h2>"}]}
