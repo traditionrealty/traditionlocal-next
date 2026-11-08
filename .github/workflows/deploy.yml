@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy preview to GitHub Pages
 
 on:
   push:
@@ -19,15 +19,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
-      - name: Rebuild data from the spreadsheets and export
-        run: |
-          pip install pandas openpyxl pyyaml markdown
-          python scripts/prepare_data.py
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
-      - run: npm ci
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
       - id: pages
         uses: actions/configure-pages@v5
       - name: Build site
@@ -35,6 +29,7 @@ jobs:
         env:
           SITE_URL: ${{ steps.pages.outputs.origin }}
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          SITE_MODE: preview
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }
 
