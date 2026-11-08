@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/pages.css';
+import { url } from '../lib/data';
+import { config } from '../config';
+const mail = (subject: string) => 'mailto:' + config.contactEmail + '?subject=' + encodeURIComponent(subject);
+const ways = [
+  ['Ask Dillon', 'Questions about a neighborhood, a move, or renting or buying in Houston.', 'Ask Dillon', url('/ask-dillon')],
+  ['Suggest a place', 'Know a spot we should visit and review? Tell us about it.', 'Suggest a place', mail('Suggest a place')],
+  ['List an event', 'Hosting something local? We would love to share it with neighbors.', 'List your event', mail('List my event')],
+  ['Partnerships and press', 'Working on something together, or writing about Houston? Say hello.', 'Email us', mail('Partnerships and press')],
+];
+---
+<Base title="Contact" active="" description="Questions, ideas, or a place we should know about? Get in touch.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">Contact</p>
+      <h1 style="margin-bottom:16px;max-width:900px">Say hello.</h1>
+      <p class="lead" style="max-width:720px">Questions, ideas, or a place we should know about? We read every message.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px"><a class="btn" href={mail('Hello from the website')}>Email {config.contactEmail}</a></div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">How can we help?</p><h2 style="margin-bottom:28px">Pick what fits.</h2>
+      <div class="grid g2">
+        {ways.map(([t, d, label, link]) => (
+          <div class="card pad"><h3 style="margin-bottom:8px">{t}</h3><p class="meta" style="font-size:16px;margin-bottom:18px">{d}</p><a class="btn line" href={link}>{label}</a></div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band tint">
+    <div class="wrap split">
+      <div class="main">
+        <p class="eyebrow">Real estate</p><h2 style="margin-bottom:16px">Talk to Dillon.</h2>
+        <p style="font-size:18px;margin-bottom:14px">For questions about buying, selling, renting, or relocating, Dillon is a Realtor with Tradition Realty Group at Keller Williams Memorial. Call, or send a note and he will reply personally.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px"><a class="btn" href="tel:+12817266969">Call (281) 726 6969</a><a class="btn line" href={url('/tradition-realty-group')}>About Tradition Realty Group</a></div>
+      </div>
+      <div class="side">
+        <div class="card pad"><p class="eyebrow">Find us on YouTube</p>
+          <a class="menu" href={config.youtube} rel="noopener">Tradition Local</a>
+          <a class="menu" href="https://www.youtube.com/@dillonloren" rel="noopener">Dillon Loren</a>
+          <a class="menu" href="https://www.youtube.com/@traditionrealtygroup" rel="noopener">Tradition Realty Group</a>
+          <a class="menu" href="https://www.youtube.com/@TrendingHouston" rel="noopener" style="border-bottom:0">Trending Houston</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap" style="max-width:860px">
+      <p class="meta" style="font-size:15px">For legal notices, see <a href={url('/disclosures')}>Texas real estate disclosures</a>. To learn how we handle your information, see <a href={url('/privacy')}>Privacy</a>.</p>
+    </div>
+  </section>
+</Base>

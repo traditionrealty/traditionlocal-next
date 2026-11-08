@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/pages.css';
+import { url } from '../lib/data';
+import { config } from '../config';
+const sections = [
+  ['What we collect', [
+    'Your email, when you join In the Loop or Locally.',
+    'What you send us. If you use Ask Dillon or write to us, we receive your name, your email, the areas and topics you pick, and your message. If you share an address, we use it only to answer your question.',
+    'What stays on your device. Saved places, followed areas, your neighborhood visit list, and your Locally choices are kept in your own browser. We do not receive them.',
+    'Basic technical details. Like most websites, the services that deliver this site can see things like your IP address and browser when a page loads. We do not use advertising trackers on this site.',
+  ]],
+  ['How we use it', [
+    'To send the newsletters you asked for.',
+    'To reply to your questions and messages.',
+    'To keep the site working and secure.',
+    'We never sell your email or personal information, and we do not share it for advertising.',
+  ]],
+  ['Who helps us run the site', [
+    'GitHub hosts the website.',
+    'Cloudflare delivers the site and runs our forms.',
+    'Resend sends our emails and keeps our newsletter list.',
+    'Supabase stores the messages you send us.',
+    'Google Fonts provides the fonts you see.',
+    'YouTube provides video thumbnails. The video player loads only when you press play, and we use the privacy enhanced version of the YouTube player.',
+  ]],
+  ['Your choices', [
+    'Every email we send has a link to unsubscribe in one click.',
+    'You can ask us to show you, correct, or delete what we have about you by emailing us.',
+    'You can clear what is saved on your device any time from your Account page.',
+  ]],
+];
+---
+<Base title="Privacy" active="" description="How Tradition Local handles your information.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">Privacy</p>
+      <h1 style="margin-bottom:16px;max-width:900px">How we handle your information.</h1>
+      <p class="lead" style="max-width:720px">We keep this simple. We collect only what we need, we never sell your email, and we tell you who helps us run the site.</p>
+      <p class="meta" style="margin-top:14px">Last updated November 8, 2026</p>
+    </div>
+  </section>
+
+  {sections.map(([title, items], i) => (
+    <section class={i % 2 === 0 ? 'band' : 'band tint'}>
+      <div class="wrap" style="max-width:860px">
+        <h2 style="margin-bottom:20px">{title}</h2>
+        <ul style="padding-left:22px;margin:0;display:grid;gap:12px;font-size:18px">{(items as string[]).map((t) => <li>{t}</li>)}</ul>
+      </div>
+    </section>
+  ))}
+
+  <section class="band">
+    <div class="wrap" style="max-width:860px">
+      <h2 style="margin-bottom:20px">If you contact Dillon about real estate</h2>
+      <p style="font-size:18px;margin-bottom:14px">If you reach out about buying, selling, or renting, Dillon may also keep your information as part of his real estate work with Keller Williams Memorial. That work is covered by the brokerage privacy policy, which you can read on the <a href="https://kwmemorial.com/privacy-policy/" rel="noopener" style="font-weight:700">Keller Williams Memorial website</a>.</p>
+      <h2 style="margin:36px 0 20px">Children</h2>
+      <p style="font-size:18px;margin-bottom:14px">This site is not meant for children under 13, and we do not knowingly collect their information.</p>
+      <h2 style="margin:36px 0 20px">Changes</h2>
+      <p style="font-size:18px">If we change this page, we will update the date at the top.</p>
+    </div>
+  </section>
+
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Questions about your information?</h3><p style="font-size:17px">Write to us at {config.contactEmail}, and a person will reply.</p></div>
+      <a class="btn" href={'mailto:' + config.contactEmail + '?subject=Privacy%20question'}>Email us</a>
+    </div>
+  </section>
+</Base>
