@@ -3,6 +3,8 @@ import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
 import { profiles, byName, href, media, eventDates, url } from '../../lib/data';
 import { eventsAtPlace, placesIn } from '../../lib/helpers';
+import { config } from '../../config';
+import Prefs from '../../components/Prefs.astro';
 export function getStaticPaths() { return profiles.filter((p) => p.type === 'Place').map((p) => ({ params: { slug: p.slug }, props: { p } })); }
 const { p } = Astro.props;
 const m = media(p), area = byName(p.area), events = eventsAtPlace(p), near = placesIn(p.area).filter((x) => x.slug !== p.slug).slice(0, 3);
@@ -17,7 +19,7 @@ const status = p.status === 'Open' ? 'Open' : p.status === 'Closed' ? 'Closed' :
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">{p.subCategory || 'Place'}</span><span class="tag soft">{status}</span></div>
         <h1 style="margin-bottom:16px">{p.name}</h1>
         <p class="lead" style="margin-bottom:28px">{p.summary || 'We are still building this profile.'}</p>
-        {p.website && <a class="btn" href={p.website} rel="noopener">Visit {web}</a>}
+        <div style="display:flex;gap:12px;flex-wrap:wrap">{p.website && <a class="btn" href={p.website} rel="noopener">Visit {web}</a>}<button class="btn line save-btn" data-slug={'p:' + p.slug} data-name={p.name} type="button" aria-pressed="false">Save</button></div>
       </div>
       <div style="grid-column:span 5">{m ? <figure style="margin:0"><img class="photo" style="height:380px;border-radius:16px" src={m.src} alt={m.alt} />{m.credit && <figcaption class="credit">{m.credit}</figcaption>}</figure> : <div class="ph" style="height:380px;border-radius:16px">Photo coming soon</div>}</div>
     </div>
@@ -27,6 +29,19 @@ const status = p.status === 'Open' ? 'Open' : p.status === 'Closed' ? 'Closed' :
       <div class="main">
         {events.length > 0 && <><p class="eyebrow">What is happening here</p><h2 style="margin-bottom:12px">Events at {p.name}</h2>{events.map((e) => <div class="row"><span class="tag">{eventDates(e)}</span><div style="flex:1;min-width:220px"><b style="font-size:18px">{e.title}</b></div><a class="btn line sm" href={href(e)}>See the event</a></div>)}</>}
         {p.description && <><p class="eyebrow" style="margin-top:40px">About</p><h2 style="margin-bottom:20px">What to know</h2><p style="font-size:18px">{p.description}</p></>}
+        {p.area && (
+          <div class="card pad pick" style="margin-top:40px;padding:32px">
+            <p class="eyebrow">Locally for {p.area}</p>
+            <h3 style="margin-bottom:8px">More like this, from your neighborhood.</h3>
+            <p class="meta" style="margin-bottom:20px;font-size:16px">A closer look at where you live. For now, signing up joins In the Loop, and Locally for {p.area} follows when it opens.</p>
+            <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:220px"><label class="sr" for="loc-email">Your email</label><input id="loc-email" name="email" type="email" required placeholder="name@email.com" /></div>
+              <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+              <input type="hidden" name="return" class="nl-return" />
+              <button class="btn" type="submit">Get Locally</button>
+            </form>
+          </div>
+        )}
       </div>
       <div class="side"><div class="card pad"><h3 style="margin-bottom:20px">Good to know</h3>
         {p.area && <p class="fact"><span>Area</span><b>{area ? <a href={href(area)}>{p.area}</a> : p.area}</b></p>}
@@ -38,4 +53,6 @@ const status = p.status === 'Open' ? 'Open' : p.status === 'Closed' ? 'Closed' :
     </div>
   </section>
   {near.length > 0 && <section class="band tint"><div class="wrap"><p class="eyebrow">Nearby</p><h2 style="margin-bottom:28px">Around {p.name}</h2><div class="grid g3">{near.map((x) => <a class="card pad" href={href(x)} style="text-decoration:none"><h4 style="margin-bottom:4px">{x.name}</h4><p class="meta">{x.subCategory}</p></a>)}</div></div></section>}
+  <Prefs />
+  <script is:inline>document.querySelectorAll('.nl-return').forEach(function (el) { el.value = location.origin + location.pathname; });</script>
 </Base>

@@ -3,9 +3,13 @@ import Base from '../../layouts/Base.astro';
 import Prefs from '../../components/Prefs.astro';
 import '../../styles/pages.css';
 import { href, url } from '../../lib/data';
-import { areaPages, bizIn, subsIn, REGIONS } from '../../lib/helpers';
-const list = areaPages().map((p) => ({ p, biz: bizIn(p.name).length, subs: subsIn(p.name).length })).sort((a, b) => a.p.name.localeCompare(b.p.name));
-const regions = [...REGIONS, ...new Set(list.map((x) => x.p.region).filter((r) => r && !REGIONS.includes(r)))].filter((r) => list.some((x) => x.p.region === r));
+import { areaPages, foodIn, subsIn, cleanList, REGIONS } from '../../lib/helpers';
+const list = areaPages().map((p) => ({ p, biz: foodIn(p.name).length, subs: subsIn(p.name).length })).sort((a, b) => a.p.name.localeCompare(b.p.name));
+const found = [...new Set(list.map((x) => x.p.region).filter(Boolean))];
+const regions = [...REGIONS.filter((r) => found.includes(r)), ...found.filter((r) => !REGIONS.includes(r))];
+const text = (p: any) => [p.summary, p.bestFor, p.typicalHomes, p.localTake, cleanList(p.schools)].join(' ').toLowerCase();
+const compare = Object.fromEntries(list.map(({ p, biz, subs }) => [p.name, { u: href(p), r: p.region || '', b: p.bestFor || p.summary, h: p.typicalHomes || '', s: cleanList(p.schools), biz, subs }]));
+const loves = [['food', 'Food and coffee nearby'], ['parks', 'Parks and space'], ['schools', 'Good schools'], ['commute', 'A shorter commute'], ['quiet', 'Quiet streets'], ['walk', 'Walkable and lively'], ['newer', 'Newer homes'], ['value', 'Value for the money']];
 ---
 <Base title="Neighborhoods" active="Neighborhoods" description="Area guides and subdivision profiles from people who live here.">
   <section class="band hero">
@@ -13,7 +17,10 @@ const regions = [...REGIONS, ...new Set(list.map((x) => x.p.region).filter((r) =
       <p class="eyebrow">Around town</p>
       <h1 style="margin-bottom:12px;max-width:900px">Find the neighborhood that fits your life.</h1>
       <p class="lead" style="margin-bottom:28px">A local perspective on where to eat, what to do, and what it is like to live there.</p>
-      <div class="card pad search"><label for="n-q">Search an area</label><input id="n-q" type="search" placeholder="Try Sugar Land, Montrose, or Cinco Ranch" /></div>
+      <p style="font-size:13px;font-weight:700;margin-bottom:10px">Start with what you love</p>
+      <div class="tabs" id="n-loves" style="margin-bottom:24px"><button class="chip on" data-l="" aria-pressed="true">Anything</button>{loves.map(([k, l]) => <button class="chip" data-l={k} aria-pressed="false">{l}</button>)}</div>
+      <p style="font-size:13px;font-weight:700;margin-bottom:10px">Or search an area</p>
+      <div class="card pad search"><label class="sr" for="n-q">Search an area</label><input id="n-q" type="search" placeholder="Try Sugar Land, Montrose, or Cinco Ranch" /></div>
       <div class="tabs" id="n-regions" style="margin-top:20px"><button class="chip on" data-r="" aria-pressed="true">All</button>{regions.map((r) => <button class="chip" data-r={r} aria-pressed="false">{r}</button>)}</div>
     </div>
   </section>
@@ -22,15 +29,25 @@ const regions = [...REGIONS, ...new Set(list.map((x) => x.p.region).filter((r) =
       <p class="meta" id="n-count" style="margin-bottom:16px">{list.length} areas</p>
       <div class="grid g3">
         {list.map(({ p, biz, subs }) => (
-          <a class="card pad n-item" href={href(p)} data-region={p.region} data-name={p.name.toLowerCase()} style="text-decoration:none">
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><span class="tag">{p.type}</span>{p.region && <span class="tag soft">{p.region}</span>}</div>
-            <h4 style="margin-bottom:8px">{p.name}</h4>
-            <p class="meta" style="margin-bottom:12px">{p.summary}</p>
-            <p class="meta"><b>{biz}</b> places reviewed, <b>{subs}</b> subdivisions</p>
-          </a>
+          <div class="card tcard n-item" data-region={p.region} data-name={p.name.toLowerCase()} data-text={text(p)}>
+            <a href={href(p)}>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><span class="tag">{p.type}</span>{p.region && <span class="tag soft">{p.region}</span>}</div>
+              <h4 style="margin-bottom:8px">{p.name}</h4>
+              <p class="meta" style="margin-bottom:12px">{p.summary}</p>
+              <p class="meta"><b>{biz}</b> places reviewed, <b>{subs}</b> subdivisions</p>
+            </a>
+            <div style="padding:0 24px 20px"><button class="chip cmp" type="button" data-n={p.name} aria-pressed="false">Compare</button></div>
+          </div>
         ))}
       </div>
-      <div class="card pad hidden" id="n-empty"><b>No areas match yet.</b><p class="meta" style="margin-top:4px">Try another name or region.</p></div>
+      <div class="card pad hidden" id="n-empty"><b>No areas match yet.</b><p class="meta" style="margin-top:4px">Try another name, region, or interest.</p></div>
+    </div>
+  </section>
+  <section class="band tint" id="compare">
+    <div class="wrap">
+      <p class="eyebrow">Compare</p><h2 style="margin-bottom:8px">Side by side, in plain language</h2>
+      <p class="meta" id="cmp-hint" style="margin-bottom:20px">Tap Compare on two or three areas above.</p>
+      <div id="cmp-out" class="card hidden" style="overflow:auto"></div>
     </div>
   </section>
   <section class="band butter">
@@ -40,13 +57,31 @@ const regions = [...REGIONS, ...new Set(list.map((x) => x.p.region).filter((r) =
     </div>
   </section>
   <Prefs />
-  <script is:inline>
+  <script is:inline define:vars={{ COMPARE: compare }}>
     (function () {
-    var q = document.getElementById('n-q'), items = [].slice.call(document.querySelectorAll('.n-item')), region = '';
-    function run() { var t = q.value.trim().toLowerCase(), n = 0; items.forEach(function (i) { var ok = (!region || i.dataset.region === region) && (!t || i.dataset.name.indexOf(t) > -1); i.classList.toggle('hidden', !ok); if (ok) n++; });
-      document.getElementById('n-count').textContent = n + (n === 1 ? ' area' : ' areas'); document.getElementById('n-empty').classList.toggle('hidden', n > 0); }
-    q.addEventListener('input', run);
-    document.getElementById('n-regions').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; region = b.dataset.r; [].forEach.call(this.children, function (c) { c.classList.toggle('on', c === b); c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); }); run(); });
+      var PRIOR = { food: ['restaurant', 'food', 'coffee', 'dining', 'cafe', 'eat'], parks: ['park', 'trail', 'green', 'yard', 'space', 'lake', 'outdoor', 'nature'], schools: ['school', 'isd', 'families', 'family'], commute: ['commute', 'downtown', 'freeway', 'minutes', 'central', 'close to', 'galleria', 'medical center', 'energy corridor'], quiet: ['quiet', 'peaceful', 'tucked', 'established', 'tree', 'private', 'calm', 'small town', 'laid back'], walk: ['walkable', 'walk', 'lively', 'nightlife', 'urban', 'inner loop', 'inside the loop', 'bike', 'townhome'], newer: ['new construction', 'new build', 'newer', 'master planned', 'new homes', 'developing', 'growing'], value: ['affordable', 'value', 'budget', 'starter', 'price'] };
+      var $ = function (id) { return document.getElementById(id); };
+      var q = $('n-q'), items = [].slice.call(document.querySelectorAll('.n-item')), region = '', love = '', picks = [];
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+      function matches(i) { if (!love) return true; var t = i.dataset.text; return PRIOR[love].some(function (w) { return t.indexOf(w) > -1; }); }
+      function run() {
+        var t = q.value.trim().toLowerCase(), n = 0;
+        items.forEach(function (i) { var ok = (!region || i.dataset.region === region) && (!t || i.dataset.name.indexOf(t) > -1) && matches(i); i.classList.toggle('hidden', !ok); if (ok) n++; });
+        $('n-count').textContent = n + (n === 1 ? ' area' : ' areas'); $('n-empty').classList.toggle('hidden', n > 0);
+      }
+      function wire(id, attr, set) { $(id).addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; set(b.dataset[attr]); [].forEach.call(this.children, function (c) { c.classList.toggle('on', c === b); c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); }); run(); }); }
+      q.addEventListener('input', run);
+      wire('n-regions', 'r', function (v) { region = v; }); wire('n-loves', 'l', function (v) { love = v; });
+      var ROWS = [['Region', 'r'], ['Best for', 'b'], ['Typical homes', 'h'], ['Schools', 's'], ['Places we reviewed', 'biz'], ['Subdivision guides', 'subs']];
+      function drawCompare() {
+        document.querySelectorAll('.cmp').forEach(function (b) { var on = picks.indexOf(b.dataset.n) > -1; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'Comparing' : 'Compare'; });
+        var out = $('cmp-out'); $('cmp-hint').textContent = picks.length < 2 ? 'Tap Compare on two or three areas above.' : 'Comparing ' + picks.length + ' areas. Tap Comparing again to remove one.';
+        if (picks.length < 2) { out.classList.add('hidden'); return; }
+        var h = '<table style="width:100%;border-collapse:collapse;min-width:560px"><thead><tr><th style="text-align:left;padding:14px 18px;border-bottom:1px solid var(--line)"></th>' + picks.map(function (n) { return '<th style="text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);font-family:var(--serif);font-size:20px"><a href="' + esc(COMPARE[n].u) + '">' + esc(n) + '</a></th>'; }).join('') + '</tr></thead><tbody>';
+        ROWS.forEach(function (r) { h += '<tr><td style="padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--slate);vertical-align:top">' + r[0] + '</td>' + picks.map(function (n) { var v = COMPARE[n][r[1]]; return '<td style="padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:top">' + esc(v === '' || v === undefined ? 'Not listed yet' : v) + '</td>'; }).join('') + '</tr>'; });
+        out.innerHTML = h + '</tbody></table>'; out.classList.remove('hidden');
+      }
+      document.addEventListener('click', function (e) { var b = e.target.closest('.cmp'); if (!b) return; var n = b.dataset.n, i = picks.indexOf(n); if (i > -1) picks.splice(i, 1); else { picks.push(n); if (picks.length > 3) picks.shift(); } drawCompare(); if (picks.length >= 2 && i < 0) $('compare').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); });
     })();
   </script>
 </Base>

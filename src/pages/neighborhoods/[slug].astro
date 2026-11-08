@@ -48,7 +48,7 @@ const label = p.type === 'City' ? 'City guide' : p.type === 'Area' ? 'Area guide
       <div class="card pad pick" style="padding:32px;max-width:760px">
         <p class="eyebrow">Locally for {p.name}</p>
         <h3 style="margin-bottom:8px">A closer look at where you live.</h3>
-        <p class="meta" style="margin-bottom:20px;font-size:16px">Your neighborhood, in your inbox. Free with your account.</p>
+        <p class="meta" style="margin-bottom:20px;font-size:16px">Your neighborhood, in your inbox. For now, signing up joins In the Loop, and Locally for {p.name} follows when it opens.</p>
         <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
           <div style="flex:1;min-width:220px"><label class="sr" for="loc-email">Your email</label><input id="loc-email" name="email" type="email" required placeholder="name@email.com" /></div>
           <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
@@ -88,6 +88,10 @@ const label = p.type === 'City' ? 'City guide' : p.type === 'Area' ? 'Area guide
         {subs.length > 40 && <p class="meta" style="margin-top:16px">And {subs.length - 40} more.</p>}
       </div>
     </section>
+  )}
+
+  {biz.length === 0 && subs.length === 0 && places.length === 0 && (
+    <section class="band tint"><div class="wrap"><p class="eyebrow">Coming next</p><h2 style="margin-bottom:12px">More on {p.name} is on the way</h2><p style="font-size:17px;max-width:700px">We are adding reviews, events, and subdivision guides for this area. Follow it above to hear when they arrive.</p></div></section>
   )}
 
   <section class="band butter">

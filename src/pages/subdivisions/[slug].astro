@@ -3,6 +3,8 @@ import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
 import { profiles, byName, href, url } from '../../lib/data';
 import { subsIn, foodIn, topRating, category } from '../../lib/helpers';
+import { config } from '../../config';
+import Prefs from '../../components/Prefs.astro';
 export function getStaticPaths() { return profiles.filter((p) => p.type === 'Subdivision').map((p) => ({ params: { slug: p.slug }, props: { p } })); }
 const { p } = Astro.props;
 const area = byName(p.area);
@@ -16,7 +18,7 @@ const eats = foodIn(p.area).map((b) => ({ b, r: topRating(b.name) })).sort((x, y
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">Subdivision</span>{p.area && <span class="tag soft">{p.area}</span>}{p.zips && <span class="tag soft">{p.zips}</span>}</div>
       <h1 style="margin-bottom:16px">{p.name}</h1>
       {p.summary && <p class="lead" style="margin-bottom:28px">{p.summary}</p>}
-      <a class="btn line" href={url('/ask-dillon')}>Ask Dillon about {p.name}</a>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn line" href={url('/ask-dillon')}>Ask Dillon about {p.name}</a>{p.area && <button class="btn line" id="follow" type="button">Follow {p.area}</button>}</div>
     </div>
   </section>
   <section class="band">
@@ -25,6 +27,19 @@ const eats = foodIn(p.area).map((b) => ({ b, r: topRating(b.name) })).sort((x, y
         <p class="eyebrow">About</p><h2 style="margin-bottom:20px">What to know about {p.name}</h2>
         <p style="font-size:18px;margin-bottom:24px">{p.summary || 'We are still building this profile.'}</p>
         <p class="meta">Prices and school details are being reviewed, so we leave them out for now. Ask Dillon for the latest.</p>
+        {p.area && (
+          <div class="card pad pick" style="margin-top:32px;padding:32px">
+            <p class="eyebrow">Locally for {p.area}</p>
+            <h3 style="margin-bottom:8px">More like this, from your neighborhood.</h3>
+            <p class="meta" style="margin-bottom:20px;font-size:16px">A closer look at where you live. For now, signing up joins In the Loop, and Locally for {p.area} follows when it opens.</p>
+            <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:220px"><label class="sr" for="loc-email">Your email</label><input id="loc-email" name="email" type="email" required placeholder="name@email.com" /></div>
+              <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+              <input type="hidden" name="return" class="nl-return" />
+              <button class="btn" type="submit">Get Locally</button>
+            </form>
+          </div>
+        )}
       </div>
       <div class="side"><div class="card pad"><h3 style="margin-bottom:20px">Good to know</h3>
         {p.area && <p class="fact"><span>Area</span><b>{p.area}</b></p>}
@@ -35,4 +50,15 @@ const eats = foodIn(p.area).map((b) => ({ b, r: topRating(b.name) })).sort((x, y
   </section>
   {sibs.length > 0 && <section class="band tint"><div class="wrap"><p class="eyebrow">Around {p.area}</p><h2 style="margin-bottom:28px">More subdivisions nearby</h2><div class="chips">{sibs.map((s) => <a class="chip" href={href(s)}>{s.name}</a>)}</div></div></section>}
   {eats.length > 0 && <section class="band"><div class="wrap"><p class="eyebrow">Eat nearby</p><h2 style="margin-bottom:28px">Places we love around {p.area}</h2><div class="grid g3">{eats.map(({ b, r }) => <a class="card pad" href={href(b)} style="text-decoration:none">{r > 0 && <span class="tag">{r} out of 5</span>}<h4 style="margin:12px 0 4px">{b.name}</h4><p class="meta">{category(b)}</p></a>)}</div></div></section>}
+  <Prefs />
+  <script is:inline define:vars={{ NAME: p.area || '' }}>
+    (function () {
+      var TLD = window.TL, f = document.getElementById('follow');
+      document.querySelectorAll('.nl-return').forEach(function (el) { el.value = location.origin + location.pathname; });
+      if (!f || !NAME) return;
+      function show() { var fol = TLD.follows().indexOf(NAME) > -1; f.textContent = fol ? 'Following ' + NAME : 'Follow ' + NAME; f.classList.toggle('gold', fol); }
+      f.addEventListener('click', function () { var l = TLD.follows(), i = l.indexOf(NAME); if (i > -1) l.splice(i, 1); else l.push(NAME); TLD.setFollows(l); show(); });
+      show();
+    })();
+  </script>
 </Base>

@@ -10,7 +10,7 @@
 button.chip { cursor: pointer; font-family: inherit; }
 .hidden { display: none !important; }
 .search { max-width: 520px; }
-.filters { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; align-items: end; max-width: 720px; }
+.filters { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; align-items: end; max-width: 920px; }
 @media (max-width: 600px) { .filters { grid-template-columns: 1fr; } }
 .kv { display: grid; gap: 12px; }
 .panel { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 32px; }

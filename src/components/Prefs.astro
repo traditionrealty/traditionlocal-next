@@ -12,6 +12,10 @@
     };
     function paint() {
       var saved = TL.saved();
+      document.querySelectorAll('.save-btn').forEach(function (b) {
+        var on = saved.indexOf(b.dataset.slug) > -1;
+        b.textContent = on ? 'Saved' : 'Save'; b.classList.toggle('gold', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
       document.querySelectorAll('.save').forEach(function (b) {
         var on = saved.indexOf(b.dataset.slug) > -1;
         b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -19,7 +23,7 @@
       });
     }
     document.addEventListener('click', function (e) {
-      var b = e.target.closest && e.target.closest('.save'); if (!b) return;
+      var b = e.target.closest && e.target.closest('.save, .save-btn'); if (!b) return;
       e.preventDefault(); TL.toggleSaved(b.dataset.slug); paint(); document.dispatchEvent(new Event('tl:saved'));
     });
     document.addEventListener('tl:repaint', paint); paint();

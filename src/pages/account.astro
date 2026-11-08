@@ -2,11 +2,12 @@
 import Base from '../layouts/Base.astro';
 import Prefs from '../components/Prefs.astro';
 import '../styles/pages.css';
-import { businesses, href, url } from '../lib/data';
+import { businesses, profiles, href, url } from '../lib/data';
 import { areaPages, bizIn, topRating, category, isFood } from '../lib/helpers';
 import { config } from '../config';
 const areas = areaPages().map((p) => p.name).sort();
-const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b) }));
+const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b) }))
+  .concat(profiles.filter((p) => p.type === 'Place').map((p) => ({ s: 'p:' + p.slug, n: p.name, a: p.area, c: p.subCategory || 'Place', r: 0, u: href(p) })));
 const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openings', 'New openings'], ['homes', 'Neighborhoods and homes']];
 ---
 <Base title="Your account" description="Your area, the places you follow, and what you receive.">
@@ -34,7 +35,8 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
           <div class="chips" id="l-topics">{topics.map(([k, l]) => <button class="chip" data-k={k} aria-pressed="false">{l}</button>)}</div>
           <p style="font-size:13px;font-weight:700;margin:24px 0 10px">How often</p>
           <div class="chips" id="l-freq"><button class="chip" data-f="twice" aria-pressed="false">Twice a month</button><button class="chip" data-f="monthly" aria-pressed="false">Monthly</button></div>
-          <p class="meta" style="margin-top:20px">We save these now. Locally emails start once sign in is connected.</p>
+          <p class="meta" style="margin:20px 0 16px">We save these now. Locally emails start once sign in is connected.</p>
+          <a class="btn line sm" href={url('/locally')}>Open your Locally page</a>
         </div>
 
         <div class="panel" id="loop"><p class="eyebrow">In the Loop</p><h2 style="font-size:32px;margin-bottom:8px">Every Monday, the same for everyone</h2>
@@ -48,10 +50,11 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
 
         <div class="panel" id="saved"><p class="eyebrow">Saved places</p><h2 style="font-size:32px;margin-bottom:8px">Your list</h2>
           <p class="meta" style="font-size:16px;margin-bottom:12px">Places you saved on Food, ready whenever you are.</p>
-          <div id="s-list"></div><p style="margin-top:16px"><a href={url('/food')} style="font-weight:700">Find more places</a></p></div>
+          <div id="s-list"></div><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:16px"><button class="btn line sm" id="s-mail" type="button">Email my list</button><a href={url('/food')} style="font-weight:700">Find more places</a></div></div>
 
         <div class="panel" id="privacy"><p class="eyebrow">Privacy and data</p><h2 style="font-size:32px;margin-bottom:8px">You are in control</h2>
           <p class="meta" style="font-size:16px;margin-bottom:12px">We never sell your email, and you can leave at any time.</p>
+          <div class="row"><div style="flex:1;min-width:240px"><b>Download what is saved on this device</b><br /><span class="meta">Your area, followed areas, Locally choices, and saved places, as a file.</span></div><button class="btn line sm" id="p-download" type="button">Download</button></div>
           <div class="row"><div style="flex:1;min-width:240px"><b>Clear what is saved on this device</b><br /><span class="meta">Your area, followed areas, Locally choices, and saved places.</span></div><button class="btn line sm" id="p-clear" type="button">Clear</button></div></div>
       </div>
     </div>
@@ -66,7 +69,7 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
     function initHome() { var v = TLD.area(), opts = [].map.call(home.options, function (o) { return o.value; });
       if (!v) home.value = ''; else if (opts.indexOf(v) > -1) home.value = v; else { home.value = '__other'; other.value = v; } $('a-other-wrap').hidden = home.value !== '__other'; }
     function picks() { var a = TLD.area(), box = $('a-picks'); if (!a || a === '__other') { box.hidden = true; return; }
-      var list = INDEX.filter(function (x) { return x.a === a; }).sort(function (x, y) { return y.r - x.r; }).slice(0, 3); box.hidden = !list.length; if (!list.length) return;
+      var list = INDEX.filter(function (x) { return x.a === a && x.s.indexOf('p:') !== 0; }).sort(function (x, y) { return y.r - x.r; }).slice(0, 3); box.hidden = !list.length; if (!list.length) return;
       $('a-picks-h').textContent = 'Local picks for ' + a;
       $('a-picks-list').innerHTML = list.map(function (x) { return '<div class="row" style="border-top:1px solid var(--line)"><b style="flex:1"><a href="' + esc(x.u) + '">' + esc(x.n) + '</a></b><span class="meta">' + esc(x.c) + (x.r ? ', ' + x.r + ' out of 5' : '') + '</span></div>'; }).join(''); }
     function follows() { var f = TLD.follows(); $('a-follow').innerHTML = f.length ? f.map(function (a) { return '<button class="chip on" data-a="' + esc(a) + '" title="Unfollow">' + esc(a) + ' &times;</button>'; }).join('') : '<span class="meta">You are not following any areas yet.</span>'; }
@@ -86,6 +89,17 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
       box.innerHTML = rows.length ? rows.map(function (x) { return '<div class="row"><div style="flex:1;min-width:220px"><a href="' + esc(x.u) + '" style="font-size:18px;font-weight:700">' + esc(x.n) + '</a><br><span class="meta">' + esc([x.c, x.a].filter(Boolean).join(', ')) + '</span></div><button class="btn line sm" data-slug="' + esc(x.s) + '" type="button">Remove</button></div>'; }).join('') : '<div class="row"><span class="meta">Nothing saved yet. Tap the heart on any place to add it here.</span></div>'; }
     $('s-list').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; TLD.toggleSaved(b.dataset.slug); saved(); });
     $('p-clear').addEventListener('click', function () { if (!confirm('Clear your saved choices on this device?')) return; ['tl_area', 'tl_follows', 'tl_saved', 'tl_locally'].forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} }); location.reload(); });
+    $('s-mail').addEventListener('click', function () {
+      var s = TLD.saved(), rows = s.map(function (slug) { return INDEX.filter(function (x) { return x.s === slug; })[0]; }).filter(Boolean);
+      if (!rows.length) { alert('Nothing saved yet.'); return; }
+      var body = rows.map(function (x) { return x.n + (x.a ? ' (' + x.a + ')' : '') + ': ' + location.origin + x.u; }).join('\n');
+      location.href = 'mailto:?subject=' + encodeURIComponent('My saved places from Tradition Local') + '&body=' + encodeURIComponent(body);
+    });
+    $('p-download').addEventListener('click', function () {
+      var data = {}; ['tl_area', 'tl_follows', 'tl_saved', 'tl_locally'].forEach(function (k) { try { var v = localStorage.getItem(k); if (v) data[k.replace('tl_', '')] = JSON.parse(v); } catch (e) {} });
+      var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), link = document.createElement('a');
+      link.href = URL.createObjectURL(blob); link.download = 'tradition-local-my-data.json'; link.click();
+    });
     initHome(); picks(); follows(); drawLocally(); saved();
   </script>
 </Base>

@@ -1,0 +1,76 @@
+---
+import Base from '../layouts/Base.astro';
+import Prefs from '../components/Prefs.astro';
+import '../styles/pages.css';
+import { businesses, events, href, url } from '../lib/data';
+import { areaPages, subsIn, topRating, category, cleanList, isFood, venuePlace } from '../lib/helpers';
+const areas = areaPages().map((p) => ({ n: p.name, u: href(p), take: p.localTake, best: p.bestFor, homes: p.typicalHomes, schools: cleanList(p.schools), subs: subsIn(p.name).slice(0, 8).map((s) => ({ n: s.name, u: href(s) })) }));
+const food = businesses().filter(isFood).filter((b) => b.status !== 'Closed').map((b) => ({ s: b.slug, n: b.name, u: href(b), a: b.area, c: category(b), r: topRating(b.name) }));
+const toDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
+const pad = (n: number) => String(n).padStart(2, '0');
+const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const evs = events().map((e) => { const a = toDate(e.starts), b = toDate(e.ends || e.starts), pl = venuePlace(e); return a && b && pl && pl.area ? { t: e.title, s: iso(a), f: iso(b), u: href(e), a: pl.area, v: pl.name } : null; }).filter(Boolean);
+const names = areas.map((a) => a.n).sort();
+---
+<Base title="Your Locally" active="" description="Local picks for your area and the areas you follow.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">Your Locally</p>
+      <h1 style="margin-bottom:12px" id="lc-title" data-account={url('/account')} data-food={url('/food')} data-things={url('/things-to-do')} data-ask={url('/ask-dillon')}>Locally</h1>
+      <p class="lead">Local picks for your area and the places you follow, shaped by what you chose in your account. Saved on this device until sign in is connected.</p>
+      <div class="tabs" id="lc-tabs" style="margin-top:24px"></div>
+    </div>
+  </section>
+  <section class="band" id="lc-choose">
+    <div class="wrap"><div class="card pad" style="max-width:520px"><h3 style="margin-bottom:8px">Choose your area</h3><p class="meta" style="margin-bottom:16px">Pick where you call home, and your picks appear here.</p>
+      <label class="sr" for="lc-pick">Your area</label><select id="lc-pick"><option value="">Choose an area</option>{names.map((n) => <option>{n}</option>)}</select></div></div>
+  </section>
+  <div id="lc-body" class="hidden"></div>
+  <section class="band tint">
+    <div class="wrap">
+      <p class="eyebrow">Following</p><h2 style="margin-bottom:8px">The places you follow</h2>
+      <p class="meta" style="margin-bottom:20px">Locally covers your home area and the areas you follow. <a href={url('/account#locally')} style="font-weight:700">Change what you get in your account</a>.</p>
+      <div id="lc-follow"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;max-width:520px"><div style="flex:1;min-width:220px"><label class="sr" for="lc-add">Follow another area</label><select id="lc-add"><option value="">Follow another area</option>{names.map((n) => <option>{n}</option>)}</select></div><button class="btn line sm" id="lc-add-btn" type="button">Follow</button></div>
+      <p class="meta" style="margin-top:24px">Locally is separate from In the Loop. In the Loop arrives every Monday and is the same for everyone. <a href={url('/newsletters')} style="font-weight:700">See both newsletters</a>.</p>
+    </div>
+  </section>
+  <Prefs />
+  <script is:inline define:vars={{ AREAS: areas, FOOD: food, EVENTS: evs }}>
+    (function () {
+      var $ = function (id) { return document.getElementById(id); }, TLD = window.TL, current = '';
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+      function pref() { return TLD.get('tl_locally', { on: true, topics: { food: true, things: true, openings: false, homes: true }, freq: 'twice' }); }
+      function iso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+      function tabsList() { var l = [TLD.area()].concat(TLD.follows()).filter(Boolean), out = []; l.forEach(function (a) { if (out.indexOf(a) < 0) out.push(a); }); return out; }
+      function sec(eyebrow, title, inner, tint) { return '<section class="band' + (tint ? ' tint' : '') + '"><div class="wrap"><p class="eyebrow">' + eyebrow + '</p><h2 style="margin-bottom:24px">' + title + '</h2>' + inner + '</div></section>'; }
+      function cardFood(x) { return '<a class="card pad" href="' + esc(x.u) + '" style="text-decoration:none">' + (x.r ? '<span class="tag">' + x.r + ' out of 5</span>' : '') + '<h4 style="margin:12px 0 4px">' + esc(x.n) + '</h4><p class="meta">' + esc(x.c) + '</p></a>'; }
+      function body() {
+        var p = pref(), a = AREAS.filter(function (x) { return x.n === current; })[0], html = '';
+        if (!p.on) html += '<section class="band"><div class="wrap"><div class="card pad pick"><b>Locally is paused.</b><p class="meta" style="margin-top:4px">You will not get Locally emails. Your picks below stay on the site. <a href="' + esc($('lc-title').dataset.account) + '" style="font-weight:700">Turn it back on in your account</a>.</p></div></div></section>'; 
+        var anyTopic = p.topics.food || p.topics.things || p.topics.openings || p.topics.homes;
+        if (!anyTopic) html += sec('Nothing selected', 'Choose what you would like to see.', '<p class="meta">Pick one or more topics in your account, and your picks for ' + esc(current) + ' will appear here.</p>');
+        if (p.topics.food) { var f = FOOD.filter(function (x) { return x.a === current; }).sort(function (x, y) { return y.r - x.r; }).slice(0, 6), sv = TLD.saved().length;
+          html += sec('Food and drink', 'Places to try in ' + esc(current), f.length ? '<div class="grid g3">' + f.map(cardFood).join('') + '</div><p style="margin-top:20px"><a href="' + esc($('lc-title').dataset.food) + '?area=' + encodeURIComponent(current) + '" style="font-weight:700">See all food in ' + esc(current) + '</a>' + (sv ? ' &nbsp;|&nbsp; <a href="' + esc($('lc-title').dataset.account) + '#saved" style="font-weight:700">Saved places (' + sv + ')</a>' : '') + '</p>' : '<p class="meta">No reviews here yet. We are adding more every week.</p>', true); }
+        if (p.topics.things) { var t = iso(new Date()), ev = EVENTS.filter(function (e) { return e.a === current && e.f >= t; }).sort(function (x, y) { return x.s < y.s ? -1 : 1; }).slice(0, 5);
+          html += sec('Things to do', 'Coming up near ' + esc(current), ev.length ? ev.map(function (e) { return '<div class="row"><div style="flex:1;min-width:220px"><a href="' + esc(e.u) + '" style="font-size:18px;font-weight:700;text-decoration:none">' + esc(e.t) + '</a><br><span class="meta">' + esc(e.v) + '</span></div><a class="btn line sm" href="' + esc(e.u) + '">See details</a></div>'; }).join('') + '<p style="margin-top:20px"><a href="' + esc($('lc-title').dataset.things) + '" style="font-weight:700">See the full calendar</a></p>' : '<p class="meta">Nothing listed near ' + esc(current) + ' right now. <a href="' + esc($('lc-title').dataset.things) + '" style="font-weight:700">See the full calendar</a>.</p>'); }
+        if (p.topics.openings) html += sec('New openings', 'What is new in ' + esc(current), '<p class="meta">Nothing new this week. We will tell you when something opens in ' + esc(current) + '.</p>', true);
+        if (p.topics.homes && a) html += sec('Neighborhoods and homes', 'Living in ' + esc(current), (a.take ? '<div style="background:var(--butter);border-radius:12px;padding:28px;margin-bottom:20px"><p class="eyebrow" style="color:var(--navy)">Our local take</p><p style="font-family:var(--serif);font-weight:600;font-size:22px;line-height:1.3">' + esc(a.take) + '</p></div>' : '') + '<div class="card pad">' + (a.best ? '<p class="fact"><span>Best for</span><b>' + esc(a.best) + '</b></p>' : '') + (a.homes ? '<p class="fact"><span>Typical homes</span><b>' + esc(a.homes) + '</b></p>' : '') + (a.schools ? '<p class="fact"><span>Schools</span><b>' + esc(a.schools) + '</b></p>' : '') + '</div>' + (a.subs.length ? '<p style="font-size:13px;font-weight:700;margin:20px 0 10px">Subdivisions to know</p><div class="chips">' + a.subs.map(function (s) { return '<a class="chip" href="' + esc(s.u) + '">' + esc(s.n) + '</a>'; }).join('') + '</div>' : '') + '<div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px"><a class="btn line" href="' + esc(a.u) + '">Read the guide</a><a class="btn" href="' + esc($('lc-title').dataset.ask) + '">Ask Dillon about ' + esc(current) + '</a></div>');
+        $('lc-body').innerHTML = html;
+      }
+      function draw() {
+        var tabs = tabsList(); if (tabs.indexOf(current) < 0) current = tabs[0] || '';
+        $('lc-title').textContent = current ? 'Locally for ' + current : 'Locally';
+        $('lc-tabs').innerHTML = tabs.map(function (a) { return '<button class="chip' + (a === current ? ' on' : '') + '" data-a="' + esc(a) + '" aria-pressed="' + (a === current) + '">' + esc(a) + (a === TLD.area() ? ' (home)' : '') + '</button>'; }).join('');
+        $('lc-choose').classList.toggle('hidden', !!current); $('lc-body').classList.toggle('hidden', !current);
+        if (current) body();
+        var f = TLD.follows(); $('lc-follow').innerHTML = (TLD.area() ? '<div class="row" style="border-top:0"><b style="flex:1">' + esc(TLD.area()) + '</b><span class="tag">Your home area</span></div>' : '') + (f.length ? f.map(function (a) { return '<div class="row"><b style="flex:1">' + esc(a) + '</b><button class="btn line sm unf" data-a="' + esc(a) + '" type="button">Unfollow</button></div>'; }).join('') : '<div class="row"><span class="meta">You are not following any areas yet.</span></div>');
+      }
+      $('lc-tabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; current = b.dataset.a; draw(); });
+      $('lc-pick').addEventListener('change', function () { if (this.value) { TLD.setArea(this.value); current = this.value; draw(); } });
+      $('lc-add-btn').addEventListener('click', function () { var v = $('lc-add').value; if (!v) return; var f = TLD.follows(); if (f.indexOf(v) < 0) f.push(v); TLD.setFollows(f); $('lc-add').value = ''; draw(); });
+      $('lc-follow').addEventListener('click', function (e) { var b = e.target.closest('.unf'); if (!b) return; TLD.setFollows(TLD.follows().filter(function (x) { return x !== b.dataset.a; })); draw(); });
+      draw();
+    })();
+  </script>
+</Base>

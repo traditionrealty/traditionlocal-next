@@ -19,8 +19,8 @@ const areas = areaPages().map((p) => p.name).sort();
     <div class="wrap split">
       <div class="main">
         <div class="grid g2" style="margin-bottom:40px">
-          <div class="card pad"><span class="tag">Every Monday</span><h3 style="margin:14px 0 8px">In the Loop</h3><p style="margin-bottom:12px">The same note for everyone. Food we trust, the weekend list, and what just opened around Houston.</p><p class="meta">Written by Sara and Dillon.</p></div>
-          <div class="card pad"><span class="tag">For your area</span><h3 style="margin:14px 0 8px">Locally</h3><p style="margin-bottom:12px">A closer look at where you live, written for your neighborhood and the areas you follow.</p><p class="meta">Separate from In the Loop.</p></div>
+          <div class="card pad"><span class="tag">Every Monday</span><h3 style="margin:14px 0 8px">In the Loop</h3><p style="margin-bottom:12px">The same note for everyone, from Dillon and Sara in their own voice.</p><ul style="padding-left:20px;margin:0 0 12px;display:grid;gap:6px"><li>Three local finds, short enough to read with your coffee</li><li>The weekend list</li><li>One Worth the Drive pick</li><li>What just opened</li></ul><p class="meta">Written by Sara and Dillon.</p></div>
+          <div class="card pad"><span class="tag">For your area</span><h3 style="margin:14px 0 8px">Locally</h3><p style="margin-bottom:12px">A closer look at where you live, written for your neighborhood and the areas you follow.</p><ul style="padding-left:20px;margin:0 0 12px;display:grid;gap:6px"><li>Food and drink to try nearby</li><li>Things to do coming up near you</li><li>New openings in your area</li><li>Neighborhoods and homes</li></ul><p class="meta">Separate from In the Loop.</p></div>
         </div>
         <form class="panel" id="nl-form" action={config.newsletterAction} method="post">
           <h2 style="font-size:32px;margin-bottom:20px">Sign up</h2>

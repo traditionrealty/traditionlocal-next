@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
 import { profiles, events, href, eventDates, url } from '../../lib/data';
 import { venuePlace } from '../../lib/helpers';
+import { config } from '../../config';
 const today = new Date(); const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 const toDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -11,6 +12,8 @@ const dated = events().map((e) => ({ e, a: toDate(e.starts), b: toDate(e.ends ||
 const list = dated.filter((x) => x.b >= t0).sort((x, y) => +x.a - +y.a).map((x) => ({ ...x, s: +x.a, f: +x.b }));
 // every dated event, for the week view and the calendar (the browser decides what today is)
 const cal = dated.map((x) => ({ t: x.e.title, s: iso(x.a), f: iso(x.b), v: x.place ? x.place.name : (x.e.venue || x.e.profile || ''), k: x.e.eventType || '', u: href(x.e) }));
+// Events tagged Featured or Our pick in the sheet show up in Our picks. The section stays hidden when none are tagged.
+const picks = list.filter((x) => x.e.tags.some((t: string) => /^(featured|our picks?|picks?)$/i.test(t))).slice(0, 3);
 const kinds = [...new Set(list.map((x) => x.e.eventType).filter(Boolean))].sort();
 const places = profiles.filter((p) => p.type === 'Place').sort((a, b) => a.name.localeCompare(b.name));
 const placeAreas = [...new Set(places.map((p) => p.area).filter(Boolean))].sort();
@@ -26,6 +29,11 @@ const DAY = 86400000;
       {kinds.length > 0 && <div class="tabs" id="t-kind" style="margin-top:12px"><button class="chip on" data-k="" aria-pressed="true">Any kind</button>{kinds.map((k) => <button class="chip" data-k={k} aria-pressed="false">{k}</button>)}</div>}
     </div>
   </section>
+
+  {picks.length > 0 && (
+    <section class="band tint" id="our-picks"><div class="wrap"><p class="eyebrow">Our picks</p><h2 style="margin-bottom:28px">Worth planning around</h2>
+      <div class="grid g3">{picks.map((x) => <a class="card pad pick" href={href(x.e)} style="text-decoration:none"><span class="tag">{eventDates(x.e)}</span><h4 style="margin:12px 0 6px">{x.e.title}</h4><p class="meta">{x.place ? x.place.name : (x.e.venue || x.e.profile || 'Houston')}</p></a>)}</div></div></section>
+  )}
 
   <section class="band" id="this-week">
     <div class="wrap">
@@ -53,6 +61,18 @@ const DAY = 86400000;
       </div>
       <div class="card pad" id="cal-day" style="margin-top:20px" aria-live="polite"></div>
       <div id="cal-ongoing" style="margin-top:20px"></div>
+    </div>
+  </section>
+
+  <section class="band navy" id="loop-signup">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
+      <div style="max-width:560px"><p class="eyebrow">In the Loop</p><h2 style="color:#fff;margin-bottom:10px">Start your week in the loop.</h2><p style="font-size:18px;color:#fff">Every Monday: a short, useful list of what is worth doing and the best new places to eat.</p></div>
+      <form class="card pad" action={config.newsletterAction} method="post" style="flex:1;min-width:300px;max-width:460px">
+        <label for="tl-email">Your email</label><input id="tl-email" name="email" type="email" required placeholder="name@email.com" />
+        <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
+        <button class="btn" type="submit" style="width:100%;margin-top:14px">Join In the Loop</button>
+        <p class="meta" style="margin-top:10px">Free, and one click to leave.</p>
+      </form>
     </div>
   </section>
 
@@ -107,6 +127,7 @@ const DAY = 86400000;
     @media (max-width: 640px) { .cal-day { min-height: 56px; padding: 4px; } .cal-day .ev, .cal-day .more { display: none; } .cal-day .dot.has { display: block; } }
   </style>
 
+  <script is:inline>document.querySelectorAll('.nl-return').forEach(function (el) { el.value = location.origin + location.pathname; });</script>
   <script is:inline define:vars={{ DAY, EVENTS: cal }}>
     (function () {
       var $ = function (id) { return document.getElementById(id); };

@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import '../styles/pages.css';
 import { href, url } from '../lib/data';
 import { areaPages, cleanList, REGIONS } from '../lib/helpers';
+import { config } from '../config';
 const areas = areaPages().map((p) => ({ n: p.name, u: href(p), r: p.region, b: p.bestFor, s: p.summary, t: [p.summary, p.bestFor, p.typicalHomes, p.localTake, cleanList(p.schools)].join(' ').toLowerCase() }));
 const found = [...new Set(areas.map((a) => a.r).filter(Boolean))];
 const regions = [...REGIONS.filter((r) => found.includes(r)), ...found.filter((r) => !REGIONS.includes(r))];
@@ -34,9 +35,20 @@ const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], 
           <p class="meta" id="fit-note" style="margin-bottom:24px"></p>
           <div class="grid g2" id="fit-grid"></div>
           <div class="card pad hidden" id="fit-none"><b>We did not find a close match for that mix.</b><p class="meta" style="margin-top:4px">Try fewer choices, or ask Dillon and he will suggest a few areas.</p></div>
+          <div class="card pad pick hidden" id="fit-locally" style="margin-top:24px;padding:32px">
+            <p class="eyebrow">Keep exploring <span id="fit-locally-name"></span></p>
+            <h3 style="margin-bottom:8px">Locally, for where you might land.</h3>
+            <p class="meta" style="margin-bottom:20px;font-size:16px">For now, signing up joins In the Loop, and Locally for your top match follows when it opens.</p>
+            <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:220px"><label class="sr" for="fit-email">Your email</label><input id="fit-email" name="email" type="email" required placeholder="name@email.com" /></div>
+              <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
+              <button class="btn" type="submit">Get Locally</button>
+            </form>
+          </div>
         </div>
       </div>
       <div class="side">
+        <div class="card pad" style="margin-bottom:24px"><p class="eyebrow">Your neighborhood visit list</p><div id="visit-list"></div><p class="meta" style="margin-top:8px">Saved on this device.</p></div>
         <div class="card pad"><p class="eyebrow">How this works</p><p class="meta" style="font-size:16px">Matches come from what we wrote in each neighborhood guide, so they are a starting point, not a verdict. Always visit before you decide.</p></div>
         <div class="card pad pick" style="margin-top:24px"><p class="eyebrow">Want a person?</p><h3 style="margin-bottom:8px">Ask Dillon.</h3><p class="meta" style="margin-bottom:16px;font-size:16px">Tell us what you are looking for, and he will reply personally.</p><a class="btn" href={url('/ask-dillon')} style="width:100%">Ask Dillon</a></div>
       </div>
@@ -66,10 +78,24 @@ const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], 
         var top = scored.filter(function (x) { return any ? x.score >= 2 : true; }).sort(function (x, y) { return y.score - x.score || x.a.n.localeCompare(y.a.n); }).slice(0, 6);
         $('fit-results').classList.remove('hidden');
         $('fit-note').textContent = any ? 'Ranked by how closely each guide matches your choices.' : 'You did not pick any priorities, so here is a mix to start with.';
-        $('fit-grid').innerHTML = top.map(function (x) { return '<a class="card pad" href="' + esc(x.a.u) + '" style="text-decoration:none"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">' + (x.a.r ? '<span class="tag soft">' + esc(x.a.r) + '</span>' : '') + x.why.map(function (w) { return '<span class="tag">' + esc(w) + '</span>'; }).join('') + '</div><h4 style="margin-bottom:6px">' + esc(x.a.n) + '</h4><p class="meta" style="font-size:15px">' + esc(x.a.b || x.a.s) + '</p></a>'; }).join('');
+$('fit-grid').innerHTML = top.map(function (x) { return '<div class="card pad"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">' + (x.a.r ? '<span class="tag soft">' + esc(x.a.r) + '</span>' : '') + x.why.map(function (w) { return '<span class="tag">' + esc(w) + '</span>'; }).join('') + '</div><h4 style="margin-bottom:6px"><a href="' + esc(x.a.u) + '" style="text-decoration:none">' + esc(x.a.n) + '</a></h4><p class="meta" style="font-size:15px;margin-bottom:14px">' + esc(x.a.b || x.a.s) + '</p><button type="button" class="btn line sm add-visit" data-n="' + esc(x.a.n) + '" data-u="' + esc(x.a.u) + '">Add to my visit list</button></div>'; }).join('');
+        $('fit-locally').classList.toggle('hidden', top.length === 0); if (top.length) $('fit-locally-name').textContent = top[0].a.n;
         $('fit-none').classList.toggle('hidden', top.length > 0);
         $('fit-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
+      function visits() { try { return JSON.parse(localStorage.getItem('tl_visit') || '[]'); } catch (e) { return []; } }
+      function saveVisits(v) { try { localStorage.setItem('tl_visit', JSON.stringify(v)); } catch (e) {} }
+      function drawVisits() {
+        var v = visits();
+        $('visit-list').innerHTML = v.length ? v.map(function (x, i) { return '<div class="row" style="padding:10px 0"><a href="' + esc(x.u) + '" style="flex:1;font-weight:700">' + esc(x.n) + '</a><span class="meta">Day ' + (i + 1) + '</span><button type="button" class="btn line sm rm-visit" data-i="' + i + '">Remove</button></div>'; }).join('') : '<p class="meta">Add a neighborhood to start your list. Try a day in each.</p>';
+      }
+      document.addEventListener('click', function (e) {
+        var a = e.target.closest('.add-visit');
+        if (a) { var v = visits(); if (!v.some(function (x) { return x.u === a.dataset.u; })) v.push({ n: a.dataset.n, u: a.dataset.u }); saveVisits(v); drawVisits(); a.textContent = 'On your list'; return; }
+        var r = e.target.closest('.rm-visit'); if (r) { var v2 = visits(); v2.splice(+r.dataset.i, 1); saveVisits(v2); drawVisits(); }
+      });
+      document.querySelectorAll('.nl-return').forEach(function (el) { el.value = location.origin + location.pathname; });
+      drawVisits();
       $('fit-reset').addEventListener('click', function () { setTimeout(function () { paint(); $('fit-results').classList.add('hidden'); }, 0); });
     })();
   </script>

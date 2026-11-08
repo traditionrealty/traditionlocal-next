@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
-import { events, href, media, eventDates, dateText, url } from '../../lib/data';
+import { events, upcomingEvents, href, media, eventDates, dateText, url } from '../../lib/data';
 import { venuePlace } from '../../lib/helpers';
 import { config } from '../../config';
 export function getStaticPaths() { return events().map((e) => ({ params: { slug: e.slug }, props: { e } })); }
@@ -10,6 +10,7 @@ const place = venuePlace(e), m = media(e) || (place ? media(place) : null);
 const web = e.eventLink.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '');
 const dates = e.starts && e.ends && e.ends !== e.starts ? `${dateText(e.starts)} to ${dateText(e.ends)}` : dateText(e.starts);
 const where = place ? place.name : e.venue || e.profile;
+const more = upcomingEvents(8).filter((x) => x.slug !== e.slug).slice(0, 3);
 ---
 <Base title={e.title} description={e.summary} active="Things to do">
   <section class="band hero">
@@ -45,6 +46,10 @@ const where = place ? place.name : e.venue || e.profile;
       </div>
     </div>
   </section>
+  {more.length > 0 && (
+    <section class="band tint"><div class="wrap"><p class="eyebrow">Keep going</p><h2 style="margin-bottom:28px">More to do</h2>
+      <div class="grid g3">{more.map((x) => <a class="card pad" href={href(x)} style="text-decoration:none"><span class="tag">{eventDates(x)}</span><h4 style="margin:12px 0 6px">{x.title}</h4><p class="meta">{x.venue || x.profile || 'Houston'}</p></a>)}</div></div></section>
+  )}
   <script is:inline define:vars={{ T: e.title, S: e.starts, E: e.ends || e.starts, W: where, L: e.eventLink }}>
     document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });
     function ymd(s) { var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? m[3] + ('0' + m[1]).slice(-2) + ('0' + m[2]).slice(-2) : ''; }
