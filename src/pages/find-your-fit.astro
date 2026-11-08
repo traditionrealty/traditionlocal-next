@@ -1,0 +1,76 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/pages.css';
+import { href, url } from '../lib/data';
+import { areaPages, cleanList, REGIONS } from '../lib/helpers';
+const areas = areaPages().map((p) => ({ n: p.name, u: href(p), r: p.region, b: p.bestFor, s: p.summary, t: [p.summary, p.bestFor, p.typicalHomes, p.localTake, cleanList(p.schools)].join(' ').toLowerCase() }));
+const found = [...new Set(areas.map((a) => a.r).filter(Boolean))];
+const regions = [...REGIONS.filter((r) => found.includes(r)), ...found.filter((r) => !REGIONS.includes(r))];
+const priorities = [['food', 'Food and coffee nearby'], ['parks', 'Parks and space'], ['schools', 'Good schools'], ['commute', 'A shorter commute'], ['quiet', 'Quiet streets'], ['walk', 'Walkable and lively'], ['newer', 'Newer homes'], ['value', 'Value for the money']];
+const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], ['newbuild', 'New construction'], ['acreage', 'Acreage or country living']];
+---
+<Base title="Find your fit" active="More" sub="makeithome" description="Answer a few questions to see which Houston neighborhoods match what you love.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">Find your fit</p>
+      <h1 style="margin-bottom:16px;max-width:880px">Which neighborhood fits your life?</h1>
+      <p class="lead">Answer three quick questions. We will suggest areas from our neighborhood guides, and you can take it from there.</p>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap split">
+      <div class="main">
+        <form class="panel" id="fit-form" novalidate>
+          <fieldset style="border:0;padding:0;margin:0 0 28px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">1. What matters most? Pick as many as you like.</legend>
+            <div class="chips">{priorities.map(([k, l]) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="prior" value={k} data-label={l} style="position:absolute;opacity:0;width:1px;height:1px" />{l}</label>)}</div></fieldset>
+          <fieldset style="border:0;padding:0;margin:0 0 28px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">2. What kind of home?</legend>
+            <div class="chips">{homes.map(([k, l]) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="home" value={k} data-label={l} style="position:absolute;opacity:0;width:1px;height:1px" />{l}</label>)}</div></fieldset>
+          <fieldset style="border:0;padding:0;margin:0 0 28px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">3. Where in the Houston area? Leave blank for anywhere.</legend>
+            <div class="chips">{regions.map((r) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="region" value={r} data-label={r} style="position:absolute;opacity:0;width:1px;height:1px" />{r}</label>)}</div></fieldset>
+          <div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn" type="submit" style="min-height:52px">Show my matches</button><button class="btn line" type="reset" id="fit-reset" style="min-height:52px">Start over</button></div>
+        </form>
+        <div id="fit-results" class="hidden" style="margin-top:40px" aria-live="polite">
+          <p class="eyebrow">Your matches</p><h2 style="margin-bottom:8px">Neighborhoods to explore</h2>
+          <p class="meta" id="fit-note" style="margin-bottom:24px"></p>
+          <div class="grid g2" id="fit-grid"></div>
+          <div class="card pad hidden" id="fit-none"><b>We did not find a close match for that mix.</b><p class="meta" style="margin-top:4px">Try fewer choices, or ask Dillon and he will suggest a few areas.</p></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="card pad"><p class="eyebrow">How this works</p><p class="meta" style="font-size:16px">Matches come from what we wrote in each neighborhood guide, so they are a starting point, not a verdict. Always visit before you decide.</p></div>
+        <div class="card pad pick" style="margin-top:24px"><p class="eyebrow">Want a person?</p><h3 style="margin-bottom:8px">Ask Dillon.</h3><p class="meta" style="margin-bottom:16px;font-size:16px">Tell us what you are looking for, and he will reply personally.</p><a class="btn" href={url('/ask-dillon')} style="width:100%">Ask Dillon</a></div>
+      </div>
+    </div>
+  </section>
+  <script is:inline define:vars={{ AREAS: areas }}>
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      var PRIOR = { food: ['restaurant', 'food', 'coffee', 'dining', 'cafe', 'eat'], parks: ['park', 'trail', 'green', 'yard', 'space', 'lake', 'outdoor', 'nature'], schools: ['school', 'isd', 'families', 'family'], commute: ['commute', 'downtown', 'freeway', 'minutes', 'central', 'close to', 'galleria', 'medical center', 'energy corridor'], quiet: ['quiet', 'peaceful', 'tucked', 'established', 'tree', 'private', 'calm', 'small town', 'laid back'], walk: ['walkable', 'walk', 'lively', 'nightlife', 'urban', 'inner loop', 'inside the loop', 'bike', 'townhome'], newer: ['new construction', 'new build', 'newer', 'master planned', 'new homes', 'developing', 'growing'], value: ['affordable', 'value', 'budget', 'starter', 'price'] };
+      var HOME = { single: ['single family', 'ranch', 'bungalow', 'yard', 'detached'], town: ['townhome', 'townhouse', 'condo', 'high rise', 'patio home', 'loft'], newbuild: ['new construction', 'new build', 'newer', 'new homes', 'master planned'], acreage: ['acreage', 'rural', 'acre', 'country', 'horse'] };
+      var form = $('fit-form');
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+      function paint() { form.querySelectorAll('label.chip').forEach(function (l) { l.classList.toggle('on', l.querySelector('input').checked); }); }
+      form.addEventListener('change', paint);
+      function picked(name) { return [].map.call(form.querySelectorAll('input[name=' + name + ']:checked'), function (i) { return { k: i.value, l: i.dataset.label }; }); }
+      function hits(text, words) { var n = 0; words.forEach(function (w) { if (text.indexOf(w) > -1) n++; }); return n; }
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var pr = picked('prior'), hm = picked('home'), rg = picked('region').map(function (x) { return x.k; });
+        var scored = AREAS.filter(function (a) { return !rg.length || rg.indexOf(a.r) > -1; }).map(function (a) {
+          var score = 0, why = [];
+          pr.forEach(function (p) { var h = hits(a.t, PRIOR[p.k]); if (h) { score += Math.min(h, 2) * 2; why.push(p.l); } });
+          hm.forEach(function (p) { var h = hits(a.t, HOME[p.k]); if (h) { score += Math.min(h, 2) * 2; why.push(p.l); } });
+          return { a: a, score: score, why: why };
+        });
+        var any = pr.length || hm.length;
+        var top = scored.filter(function (x) { return any ? x.score >= 2 : true; }).sort(function (x, y) { return y.score - x.score || x.a.n.localeCompare(y.a.n); }).slice(0, 6);
+        $('fit-results').classList.remove('hidden');
+        $('fit-note').textContent = any ? 'Ranked by how closely each guide matches your choices.' : 'You did not pick any priorities, so here is a mix to start with.';
+        $('fit-grid').innerHTML = top.map(function (x) { return '<a class="card pad" href="' + esc(x.a.u) + '" style="text-decoration:none"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">' + (x.a.r ? '<span class="tag soft">' + esc(x.a.r) + '</span>' : '') + x.why.map(function (w) { return '<span class="tag">' + esc(w) + '</span>'; }).join('') + '</div><h4 style="margin-bottom:6px">' + esc(x.a.n) + '</h4><p class="meta" style="font-size:15px">' + esc(x.a.b || x.a.s) + '</p></a>'; }).join('');
+        $('fit-none').classList.toggle('hidden', top.length > 0);
+        $('fit-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      $('fit-reset').addEventListener('click', function () { setTimeout(function () { paint(); $('fit-results').classList.add('hidden'); }, 0); });
+    })();
+  </script>
+</Base>

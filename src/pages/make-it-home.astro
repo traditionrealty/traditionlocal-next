@@ -5,9 +5,15 @@ import { url } from '../lib/data';
 const tools = [
   ['Ask Dillon', 'Tell us where you are curious about, and Dillon replies personally. No pressure.', '/ask-dillon', 'Open', true],
   ['Neighborhoods', 'Area guides and subdivision profiles, with what it is like to live there.', '/neighborhoods', 'Open', true],
-  ['Find your fit', 'Answer a few questions to see which neighborhoods match what you love.', '/find-your-fit', 'Coming soon', false],
-  ['New builds', 'New communities to compare side by side.', '/new-builds', 'Coming soon', false],
+  ['Find your fit', 'Answer a few questions to see which neighborhoods match what you love.', '/find-your-fit', 'Open', true],
+  ['New builds', 'Newer and master planned communities to compare side by side.', '/new-builds', 'Open', true],
   ['Local Directory', 'Providers we know and trust, for members.', '/local-directory', 'Members', true],
+];
+const services = [
+  ['Relocation', 'Moving to Houston? Start with the neighborhood, then sort out the details.', '/relocation'],
+  ['Apartment locating', 'Tell us what matters, and we will help you narrow the list of rentals.', '/apartments'],
+  ['Commercial real estate', 'Buying, selling, or leasing space for a business.', '/commercial'],
+  ['International clients', 'Moving to or buying in Houston from another country.', '/international'],
 ];
 ---
 <Base title="Make it home" active="More" sub="makeithome" description="A place that fits. A life that feels like you.">
@@ -25,6 +31,16 @@ const tools = [
       <div class="grid g3">
         {tools.map(([name, blurb, path, label, live]) => (
           <a class="card pad" href={url(path as string)} style="text-decoration:none"><span class={live ? 'tag' : 'tag soft'}>{label}</span><h4 style="margin:12px 0 8px">{name}</h4><p class="meta" style="font-size:16px">{blurb}</p></a>
+        ))}
+      </div>
+    </div>
+  </section>
+  <section class="band tint">
+    <div class="wrap">
+      <p class="eyebrow">More ways we can help</p><h2 style="margin-bottom:28px">Whatever your move looks like</h2>
+      <div class="grid g4">
+        {services.map(([name, blurb, path]) => (
+          <a class="card pad" href={url(path)} style="text-decoration:none"><h4 style="margin-bottom:8px">{name}</h4><p class="meta" style="font-size:16px">{blurb}</p></a>
         ))}
       </div>
     </div>
