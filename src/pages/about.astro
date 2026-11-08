@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/pages.css';
+import { url } from '../lib/data';
+const points = [
+  ['Neighbors first', 'Our reviews come from real visits, written honestly and kindly, so you know what to expect before you go.'],
+  ['Know the place', 'Neighborhood guides that cover where to eat, what to do, and what it is like to live there.'],
+  ['Ask a person', 'Questions about an area are always welcome. A real person reads every one and replies.'],
+];
+---
+<Base title="Meet Sara and Dillon" active="" description="The people behind Tradition Local.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">About</p>
+      <h1 style="margin-bottom:16px;max-width:860px">Meet Sara and Dillon</h1>
+      <p class="lead">We started Tradition Local to help people feel connected to their neighborhood, community, and city.</p>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <div class="grid g2" style="gap:32px">
+        <div class="card">
+          <div class="ph" style="height:300px">Photo of Sara coming soon</div>
+          <div class="pad"><p class="eyebrow">Writer and reviewer</p><h3 style="margin-bottom:12px">Sara</h3>
+            <p style="margin-bottom:12px">Sara visits the places she writes about, then shares what she found, honestly and kindly. Her ratings are a big part of how Tradition Local helps neighbors decide where to eat, shop, and spend a Saturday.</p>
+            <a href={url('/how-we-review')} style="font-weight:700">How we review places</a></div>
+        </div>
+        <div class="card">
+          <div class="ph" style="height:300px">Photo of Dillon coming soon</div>
+          <div class="pad"><p class="eyebrow">Realtor and neighbor</p><h3 style="margin-bottom:12px">Dillon Loren</h3>
+            <p style="margin-bottom:12px">Dillon is a Realtor with Tradition Realty Group at Keller Williams Memorial. He founded Tradition Realty Group in 2016 and has about ten years of experience helping families and young couples find a place that fits.</p>
+            <p>He grew up in a family business in the hospitality industry, and he has lived in Houston since he was young.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="band tint">
+    <div class="wrap">
+      <p class="eyebrow">What we believe</p><h2 style="margin-bottom:28px">Why Tradition Local</h2>
+      <div class="grid g3">{points.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
+    </div>
+  </section>
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
+      <div style="max-width:680px"><h3 style="margin-bottom:8px">Say hello.</h3><p style="font-size:17px">Curious about a neighborhood, or just want to talk about where to eat this weekend? We would love to hear from you.</p></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line" href={url('/newsletters')}>Join In the Loop</a></div>
+    </div>
+  </section>
+</Base>
