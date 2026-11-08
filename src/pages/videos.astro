@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+import VideoCard from '../components/VideoCard.astro';
+import VideoScript from '../components/VideoScript.astro';
+import '../styles/pages.css';
+import { config } from '../config';
+import { videos } from '../lib/videos';
+const latest = videos[0];
+const rest = videos.slice(1);
+const tours = rest.filter((v) => v.tour).length;
+const food = rest.length - tours;
+const suggest = 'mailto:traditionlocal@gmail.com?subject=Video%20idea';
+---
+<Base title="Videos" active="More" description="Neighborhood walks, coffee runs, and honest reviews from Tradition Local.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">Local videos</p>
+      <h1 style="margin-bottom:16px;max-width:900px">Houston, one neighborhood at a time.</h1>
+      <p class="lead" style="margin-bottom:28px;max-width:720px">Walking tours, coffee runs, and honest reviews from Sara and Dillon, filmed around Greater Houston.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={config.youtube} rel="noopener">Watch on YouTube</a><a class="btn line" href={suggest}>Suggest a place to film</a></div>
+    </div>
+  </section>
+
+  {videos.length === 0 && (
+    <section class="band"><div class="wrap"><div class="card pad"><b>Videos are coming soon.</b><p class="meta" style="margin-top:4px">In the meantime, you can find us on YouTube.</p></div></div></section>
+  )}
+
+  {latest && (
+    <section class="band" id="latest">
+      <div class="wrap">
+        <p class="eyebrow">Latest</p><h2 style="margin-bottom:24px">Newest from the channel.</h2>
+        <div style="max-width:860px"><VideoCard v={latest} /></div>
+      </div>
+    </section>
+  )}
+
+  {rest.length > 0 && (
+    <section class="band tint" id="all-videos">
+      <div class="wrap">
+        <p class="eyebrow">All videos</p><h2 style="margin-bottom:20px">Keep watching.</h2>
+        <div class="tabs" id="v-tabs" style="margin-bottom:12px">
+          <button class="chip on" data-k="" aria-pressed="true">All</button>
+          {food > 0 && <button class="chip" data-k="food" aria-pressed="false">Food and coffee ({food})</button>}
+          {tours > 0 && <button class="chip" data-k="tour" aria-pressed="false">Walking tours ({tours})</button>}
+        </div>
+        <p class="meta" id="v-count" style="margin-bottom:20px">{rest.length} videos</p>
+        <div class="grid g3" id="v-grid">{rest.map((v) => <VideoCard v={v} />)}</div>
+      </div>
+    </section>
+  )}
+
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Know a place we should film?</h3><p style="font-size:17px">Tell us about a spot you love, and it might be our next video.</p></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={suggest}>Suggest a place</a><a class="btn line" href={config.youtube} rel="noopener">Watch on YouTube</a></div>
+    </div>
+  </section>
+  <VideoScript />
+  <script is:inline>
+    (function () {
+      var tabs = document.getElementById('v-tabs'); if (!tabs) return;
+      var cards = [].slice.call(document.querySelectorAll('#v-grid .vcard'));
+      tabs.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        [].forEach.call(tabs.children, function (c) { c.classList.toggle('on', c === b); c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); });
+        var k = b.dataset.k, n = 0;
+        cards.forEach(function (c) { var ok = !k || c.dataset.kind === k; c.classList.toggle('hidden', !ok); if (ok) n++; });
+        document.getElementById('v-count').textContent = n + (n === 1 ? ' video' : ' videos');
+      });
+    })();
+  </script>
+</Base>

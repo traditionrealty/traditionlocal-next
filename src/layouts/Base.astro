@@ -7,6 +7,7 @@ const { title, description = 'Honest reviews, weekend plans, and neighborhood gu
 const main = [['Food', '/food'], ['Neighborhoods', '/neighborhoods'], ['Things to do', '/things-to-do']];
 const more = [
   ['Newsletters', '/newsletters', 'In the Loop and Locally'],
+  ['Videos', '/videos', 'Walks, coffee runs, and reviews'],
   ['Make it home', '/make-it-home', 'Moving, renting, or buying'],
   ['Local Directory', '/local-directory', 'Providers we know, for members'],
   ['Ask Dillon', '/ask-dillon', 'Questions about an area'],
@@ -75,7 +76,7 @@ const moreOn = sub !== '' || active === 'More';
       </div>
       <div class="legal">
         <span>© {new Date().getFullYear()} Tradition Local | <a href={url('/privacy')}>Privacy</a> | <a href={url('/disclosures')}>Texas real estate disclosures</a> | Real estate services by <a href={config.brokerage.url}>{config.brokerage.name}</a></span>
-        <span><a href="https://instagram.com">Instagram</a> | <a href="https://youtube.com">YouTube</a> | <a href="https://facebook.com">Facebook</a> | <a href="#top">Back to top</a></span>
+        <span><a href="https://instagram.com">Instagram</a> | <a href="https://www.youtube.com/@TraditionLocal">YouTube</a> | <a href="https://facebook.com">Facebook</a> | <a href="#top">Back to top</a></span>
       </div>
     </div>
   </footer>

@@ -1,0 +1,10 @@
+<script is:inline>
+  // Click to play: the YouTube player only loads when someone presses play.
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('.vthumb'); if (!b) return;
+    var f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + b.dataset.id + '?autoplay=1&rel=0';
+    f.title = b.dataset.title; f.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen'; f.allowFullscreen = true;
+    b.replaceWith(f);
+  });
+</script>
