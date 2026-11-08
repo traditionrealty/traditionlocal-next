@@ -27,7 +27,7 @@ const eats = foodIn(p.area).map((b) => ({ b, r: topRating(b.name) })).sort((x, y
         <p class="eyebrow">About</p><h2 style="margin-bottom:20px">What to know about {p.name}</h2>
         <p style="font-size:18px;margin-bottom:24px">{p.summary || 'We are still building this profile.'}</p>
         <p class="meta">Prices and school details are being reviewed, so we leave them out for now. Ask Dillon for the latest.</p>
-        {p.area && (
+        {p.area && p.show.newsletter && (
           <div class="card pad pick" style="margin-top:32px;padding:32px">
             <p class="eyebrow">Locally for {p.area}</p>
             <h3 style="margin-bottom:8px">More like this, from your neighborhood.</h3>

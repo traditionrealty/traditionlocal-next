@@ -29,7 +29,7 @@ const status = p.status === 'Open' ? 'Open' : p.status === 'Closed' ? 'Closed' :
       <div class="main">
         {events.length > 0 && <><p class="eyebrow">What is happening here</p><h2 style="margin-bottom:12px">Events at {p.name}</h2>{events.map((e) => <div class="row"><span class="tag">{eventDates(e)}</span><div style="flex:1;min-width:220px"><b style="font-size:18px">{e.title}</b></div><a class="btn line sm" href={href(e)}>See the event</a></div>)}</>}
         {p.description && <><p class="eyebrow" style="margin-top:40px">About</p><h2 style="margin-bottom:20px">What to know</h2><p style="font-size:18px">{p.description}</p></>}
-        {p.area && (
+        {p.area && p.show.newsletter && (
           <div class="card pad pick" style="margin-top:40px;padding:32px">
             <p class="eyebrow">Locally for {p.area}</p>
             <h3 style="margin-bottom:8px">More like this, from your neighborhood.</h3>
