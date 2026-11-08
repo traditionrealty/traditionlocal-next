@@ -1,1 +1,0 @@
-{"__patches":[{"path":"src/pages/things-to-do/index.astro","find":"style=\"margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap\"","replace":"style=\"margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap;max-width:760px\""}]}
