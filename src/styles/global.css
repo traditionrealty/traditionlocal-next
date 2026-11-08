@@ -99,9 +99,11 @@ label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; }
   .top.open .nav { display: flex; }
   .nav > .chip { justify-content: flex-start; min-height: 48px; font-size: 16px; }
   .nav .more { display: block; }
-  .nav .more > .chip { display: none; }
-  .more .pop { display: block; position: static; padding-top: 0; }
-  .more .pop-in { box-shadow: none; border: 0; padding: 0; min-width: 0; }
+  .nav .more > .chip { display: flex; justify-content: space-between; width: 100%; min-height: 48px; font-size: 16px; }
+  .more .pop, .nav .more:hover .pop, .nav .more:focus-within .pop { display: none; position: static; padding-top: 0; }
+  .nav .more.open .pop { display: block; }
+  .more.open > .chip span { transform: rotate(180deg); }
+  .more .pop-in { box-shadow: none; border: 0; border-left: 2px solid var(--line); border-radius: 0; padding: 4px 0 4px 8px; margin: 8px 0 4px 14px; min-width: 0; }
   .pop a { padding: 12px 14px; font-size: 16px; }
   .pop a small { font-size: 13px; }
   .nav .sep, .nav .srch-open { display: none; }
