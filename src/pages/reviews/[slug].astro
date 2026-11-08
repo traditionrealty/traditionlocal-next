@@ -1,0 +1,44 @@
+---
+import Base from '../../layouts/Base.astro';
+import { reviews, byName, reviewsFor, href, media, stars, dateText, url } from '../../lib/data';
+export function getStaticPaths() { return reviews().map((r) => ({ params: { slug: r.slug }, props: { r } })); }
+const { r } = Astro.props;
+const biz = byName(r.profile);
+const m = media(r) || (biz ? media(biz) : null);
+const paras = r.body.split(/\n\s*\n/).filter(Boolean);
+const more = biz ? reviewsFor(biz.name).filter((x) => x.slug !== r.slug) : [];
+---
+<Base title={r.title} description={r.summary} active="Food">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="meta" style="margin-bottom:12px"><a href={url('/food')} style="font-weight:700">Food</a>{biz && <> &rsaquo; <a href={href(biz)} style="font-weight:700">{biz.name}</a></>} &rsaquo; Review</p>
+      <p class="eyebrow">Review</p>
+      <h1 style="margin-bottom:20px;max-width:900px">{r.title}</h1>
+      <div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:var(--serif);font-weight:600;font-size:48px;line-height:1">{stars(r.rating)}</span><span class="meta">out of 5{r.reviewDate && `, reviewed ${dateText(r.reviewDate)}`}</span></div>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap split">
+      <div class="main" style="max-width:720px">
+        {m ? <figure style="margin:0 0 32px"><img class="photo" style="height:420px;border-radius:12px" src={m.src} alt={m.alt} />{m.credit && <figcaption class="credit">{m.credit}</figcaption>}</figure> : <div class="ph" style="height:320px;border-radius:12px;margin-bottom:32px">Photo from the visit</div>}
+        {paras.map((p) => <p style="font-size:19px;line-height:1.7;margin-bottom:20px">{p}</p>)}
+      </div>
+      {biz && (
+        <div class="side">
+          <div class="card pad">
+            <p class="eyebrow">About the place</p>
+            <h3 style="margin-bottom:16px">{biz.name}</h3>
+            <p class="fact"><span>Area</span><b>{biz.area}</b></p>
+            {biz.address && <p class="fact"><span>Address</span><b>{biz.address}</b></p>}
+            {biz.phone && <p class="fact"><span>Phone</span><b>{biz.phone}</b></p>}
+            <a class="btn" href={href(biz)} style="margin-top:8px">Open the profile</a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+  {more.length > 0 && (
+    <section class="band tint"><div class="wrap"><p class="eyebrow">Keep going</p><h2 style="margin-bottom:28px">More from {biz?.name}</h2>
+      <div class="grid g3">{more.map((x) => <a class="card pad" href={href(x)} style="text-decoration:none"><span class="tag">{stars(x.rating)} out of 5</span><h4 style="margin-top:12px">{x.title}</h4></a>)}</div></div></section>
+  )}
+</Base>

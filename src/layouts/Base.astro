@@ -1,484 +1,92 @@
 ---
-import site from '../data/site.json';
-import events from '../data/events.json';
-import { url, img, fmtDate } from '../lib/util';
+import '../styles/global.css';
+import { IS_PREVIEW, url } from '../lib/data';
 import { config } from '../config';
-import AccountMenu from '../components/AccountMenu.astro';
-
-interface Props { title?: string; description?: string | null; image?: string | null; type?: string; }
-const { title, description, image, type = 'website' } = Astro.props;
-const fullTitle = title ? `${title} | Tradition Local` : site.title;
-const desc = description || site.description;
-// Search engines should credit the real domain, not the github.io preview copy.
-const PRODUCTION = 'https://www.traditionlocal.com';
-const isPreview = !String(Astro.site).includes('traditionlocal.com');
-const canonical = new URL((Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/').replace(/(.)\/$/, '$1'), PRODUCTION).href;
-const membersOn = Boolean(config.supabaseUrl && config.supabaseAnonKey);
-const today = new Date().toISOString().slice(0, 10);
-const next = events.find((e) => e.date && e.date >= today);
-const path = Astro.url.pathname.replace(import.meta.env.BASE_URL.replace(/\/$/, ''), '') || '/';
-const nav = [
-  {
-    // Trending pulled from the submenu and hidden for now.
-    id: 'food', label: 'Food', href: '/food', match: ['/food', '/eat'],
-    sub: [],
-  },
-  {
-    // Make It Home, Find Your Fit, and Design & Style are pulled back behind coming-soon for
-    // now, so their submenu entries are removed here too, rather than linking to pages that
-    // would just redirect to coming-soon.
-    id: 'hoods', label: 'Neighborhoods', href: '/cities', match: ['/cities', '/copy-of-neighborhoods-1', '/traditionneighborhoods', '/subdivisions', '/make-it-home', '/find-your-fit', '/home-and-design'],
-    sub: [],
-  },
-  {
-    id: 'todo', label: 'Things To Do', href: '/living', match: ['/living', '/event-details', '/events', '/weekend-ideas', '/local-events', '/things-to-do'],
-    sub: [
-      { label: 'Weekend Ideas', href: '/weekend-ideas' },
-      { label: 'Places to Visit', href: '/things-to-do' },
-      { label: 'Upcoming Events', href: '/living#featured' },
-      { label: 'Calendar', href: '/local-events' },
-    ],
-  },
+interface Props { title: string; description?: string; active?: string; sub?: string; }
+const { title, description = 'Honest reviews, weekend plans, and neighborhood guides from people who live here.', active = '', sub = '' } = Astro.props;
+const main = [['Food', '/food'], ['Neighborhoods', '/neighborhoods'], ['Things to do', '/things-to-do']];
+const more = [
+  ['Make it home', '/make-it-home', 'Moving, renting, or buying'],
+  ['Find your fit', '/find-your-fit', 'Match neighborhoods to what you love'],
+  ['New builds', '/new-builds', 'Communities to compare'],
+  ['Local Directory', '/local-directory', 'Providers we know, for members'],
+  ['Ask Dillon', '/ask-dillon', 'Questions about an area'],
+  ['Newsletters', '/newsletters', 'In the Loop and Locally'],
 ];
-const moreNav = [
-  
-  { label: 'Reviews', href: '/about-our-reviews', match: ['/about-our-reviews'] },
-  { label: 'Newsletters', href: '/newsletters', match: ['/newsletters'] },
-  ...(membersOn ? [{ label: 'Local Directory', href: '/local-directory', match: ['/local-directory'] }] : []),
-  { label: 'About Us', href: '/about', match: ['/about'] },
-];
-const moreActive = moreNav.some((n) => n.match.some((m) => path.startsWith(m)));
-// Which top-level section the bar below the header shows by default (no JS needed): whichever
-// one's page you're actually on. "More" has no page of its own, so it isn't part of this; it's
-// a hover/tap menu (see the script below) that previews on top of whichever section is active.
-const activeNav = nav.find((n) => n.match.some((m) => path.startsWith(m)));
-// Site search (Pagefind). Account, sign in and utility pages stay out of the index; every other page is
-// tagged with a type so results can be filtered.
-const searchable = !/^\/(404|sign-in|join|reset-password|members|search)(\/|$)/.test(path);
-const searchType = /^\/(food|eat)(\/|$)/.test(path) ? 'Food'
-  : /^\/(cities|copy-of-neighborhoods-1|traditionneighborhoods|subdivisions|make-it-home|new-builds)(\/|$)/.test(path) ? 'Neighborhoods'
-  : /^\/(living|event-details|events|weekend-ideas|things-to-do)(\/|$)/.test(path) ? 'Things To Do'
-  : /^\/(post|all-articles)(\/|$)/.test(path) ? 'Blog'
-  : 'Pages';
-const popularSearches = ['coffee', 'brunch', 'Sugar Land', 'new builds', 'events'];
+const subs = [['Overview', '/make-it-home'], ['Find your fit', '/find-your-fit'], ['New builds', '/new-builds'], ['Local Directory', '/local-directory'], ['Ask Dillon', '/ask-dillon']];
+const moreOn = sub !== '' || active === 'More';
 ---
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{fullTitle}</title>
-  <meta name="description" content={desc} />
-  <link rel="canonical" href={canonical} />
-  {isPreview && <meta name="robots" content="noindex, follow" />}
-  <meta property="og:title" content={fullTitle} />
-  <meta property="og:description" content={desc} />
-  <meta property="og:type" content={type} />
-  <meta property="og:url" content={canonical} />
-  {image && <meta property="og:image" content={img(image)} />}
-  <meta name="twitter:card" content="summary_large_image" />
-  <link rel="icon" type="image/png" href={img(site.logo)} />
+  <title>{title} | Tradition Local</title>
+  <meta name="description" content={description} />
+  {IS_PREVIEW && <meta name="robots" content="noindex, nofollow" />}
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&display=swap" rel="stylesheet" />
-  <slot name="head" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&family=Fraunces:wght@600&display=swap" rel="stylesheet" />
 </head>
 <body>
-  <a class="skip" href="#main">Skip to content</a>
-  {next && (
-    <div class="eventbar">
-      <div class="wrap">
-        <strong>Upcoming events</strong>
-        <span class="eventbar-title">{next.title.replace(/\s*\[.*?\]\s*/g, ' ').trim()}<span class="eventbar-date">{fmtDate(next.date, { weekday: 'short', month: 'short', day: 'numeric' })}</span></span>
-        <a class="rsvp" href={url(next.path)}>RSVP</a>
-        <a class="all" href={url('/living#featured')}>See all events</a>
-      </div>
-    </div>
-  )}
-  <header class="site-header">
-    <div class="wrap header-inner">
-      <a class="brand" href={url('/')}>
-        <img src={img(site.logo)} alt="" width="56" height="56" />
-        <span>Tradition Local</span>
-      </a>
-      <nav class="top-nav" aria-label="Main">
-        {nav.map((n) => (
-          <a href={url(n.href)} class="top-link" aria-current={activeNav?.id === n.id ? 'page' : undefined}>{n.label}</a>
-        ))}
-        <button type="button" class="top-link top-more-btn" data-nav-more-btn aria-haspopup="true" aria-expanded="false" aria-current={moreActive ? 'page' : undefined}>
-          More
-          <svg class="chev" aria-hidden="true" viewBox="0 0 12 8" width="10" height="7"><path d="M1 1l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" /></svg>
-        </button>
-      </nav>
-      <div class="site-search" data-site-search data-base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
-        <button type="button" class="search-btn" aria-label="Search" aria-expanded="false" aria-controls="search-panel">
-          <svg aria-hidden="true" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5" /><path d="M15.5 15.5L21 21" /></svg>
-        </button>
-        <div class="search-panel" id="search-panel" hidden>
-          <div class="search-panel-inner">
-            <form action={url('/search')} method="get" role="search">
-              <label class="sr-only" for="hs-q">Search Tradition Local</label>
-              <input id="hs-q" name="q" type="search" autocomplete="off" placeholder="Search places, neighborhoods, events, stories" />
-            </form>
-            <ul class="search-sugg" id="hs-sugg" hidden></ul>
-            <p class="search-pop"><span>Popular searches</span>{popularSearches.map((t) => <a href={url('/search') + '?q=' + encodeURIComponent(t)}>{t}</a>)}</p>
-          </div>
+  {IS_PREVIEW && <div class="ribbon"><div class="wrap"><b>Draft preview.</b> This is the redesign in progress, built from the Simple Master sheet. It is not the live site.</div></div>}
+  <header class="top">
+    <div class="wrap">
+      <a class="logo" href={url('/')}>Tradition Local</a>
+      <nav class="nav" aria-label="Main">
+        {main.map(([n, h]) => <a class={`chip${active === n ? ' on' : ''}`} href={url(h)}>{n}</a>)}
+        <div class="more">
+          <button class={`chip${moreOn ? ' on' : ''}`} aria-haspopup="true">More <span style="font-size:10px;margin-left:6px">&#9660;</span></button>
+          <div class="pop"><div class="pop-in">{more.map(([n, h, d]) => <a href={url(h)}>{n}<small>{d}</small></a>)}</div></div>
         </div>
-      </div>
-      {membersOn && <AccountMenu />}
-    </div>
-    <div class={`subheader${activeNav || moreActive ? ' open' : ''}`} id="subheader" data-default={activeNav ? activeNav.id : ''}>
-      <div class="wrap">
-        {nav.map((n) => (
-          <ul class="sub-list" id={`sub-${n.id}`} hidden={activeNav?.id !== n.id}>
-            {n.sub.map((s) => <li><a href={url(s.href)}>{s.label}</a></li>)}
-          </ul>
-        ))}
-        <ul class="sub-list" id="sub-more" hidden={!moreActive}>
-          {moreNav.map((m) => (
-            <li><a href={url(m.href)} aria-current={m.match.some((mm) => path.startsWith(mm)) ? 'page' : undefined}>{m.label}</a></li>
-          ))}
-        </ul>
-      </div>
+        <span class="sep"></span>
+        <a class="chip" href={url('/account')}>Sign in</a>
+        <a class="btn sm" href={url('/newsletters')}>Join In the Loop</a>
+      </nav>
     </div>
   </header>
-  <script>
-    // Food / Neighborhoods / Things To Do are plain links now; the bar below the header shows
-    // the right one automatically because the server already knows which page you're on (see
-    // activeNav above), no JS needed for those three. "More" has no page of its own, so it stays
-    // a menu: hover opens it on desktop, tap toggles it on mobile, and closing it falls back to
-    // whichever section's bar was showing before, instead of closing to nothing.
-    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    const topNav = document.querySelector<HTMLElement>('.top-nav')!;
-    const subheader = document.getElementById('subheader')!;
-    const moreBtn = document.querySelector<HTMLButtonElement>('[data-nav-more-btn]')!;
-    const lists = [...document.querySelectorAll<HTMLElement>('.sub-list')];
-    const defaultId = subheader.dataset.default ? `sub-${subheader.dataset.default}` : '';
-    let moreOpen = false;
-
-    function render() {
-      const showId = moreOpen ? 'sub-more' : defaultId;
-      lists.forEach((l) => { l.hidden = l.id !== showId; });
-      moreBtn.setAttribute('aria-expanded', String(moreOpen));
-      subheader.classList.toggle('open', Boolean(showId));
-    }
-
-    if (canHover) {
-      moreBtn.addEventListener('mouseenter', () => { moreOpen = true; render(); });
-      moreBtn.addEventListener('focus', () => { moreOpen = true; render(); });
-      let closeTimer: number;
-      [topNav, subheader].forEach((el) => {
-        el.addEventListener('mouseenter', () => clearTimeout(closeTimer));
-        el.addEventListener('mouseleave', () => {
-          closeTimer = window.setTimeout(() => { moreOpen = false; render(); }, 120);
-        });
-      });
-    } else {
-      moreBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        moreOpen = !moreOpen;
-        render();
-      });
-      document.addEventListener('click', (e) => {
-        if (moreOpen && !subheader.contains(e.target as Node) && !topNav.contains(e.target as Node)) {
-          moreOpen = false; render();
-        }
-      });
-    }
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && moreOpen) { moreOpen = false; render(); moreBtn.focus(); }
-    });
-  </script>
-  <script is:inline>
-    // Header search: opens a panel, suggests matches from the Pagefind index as you type.
-    window.tlPagefind = window.tlPagefind || (function () {
-      var p;
-      return function () {
-        if (p) return p;
-        var root = document.querySelector('[data-site-search]');
-        var base = (root && root.getAttribute('data-base')) || '';
-        p = import(base + '/pagefind/pagefind.js').then(function (pf) {
-          return pf.options({ baseUrl: base + '/' }).then(function () { return pf; });
-        }).catch(function () { return null; });
-        return p;
-      };
-    })();
-    (function () {
-      var root = document.querySelector('[data-site-search]');
-      if (!root) return;
-      var btn = root.querySelector('.search-btn');
-      var panel = root.querySelector('.search-panel');
-      var input = root.querySelector('input[name="q"]');
-      var list = root.querySelector('#hs-sugg');
-      var timer;
-      function setOpen(open) {
-        panel.hidden = !open;
-        btn.setAttribute('aria-expanded', String(open));
-        if (open) { input.focus(); window.tlPagefind(); }
-      }
-      btn.addEventListener('click', function (e) { e.stopPropagation(); setOpen(panel.hidden); });
-      document.addEventListener('click', function (e) { if (!root.contains(e.target)) setOpen(false); });
-      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !panel.hidden) { setOpen(false); btn.focus(); } });
-      function render(items) {
-        list.textContent = '';
-        items.forEach(function (d) {
-          var li = document.createElement('li');
-          var a = document.createElement('a');
-          a.href = d.url;
-          var t = document.createElement('span');
-          t.className = 'sugg-type';
-          t.textContent = (d.filters && d.filters.type && d.filters.type[0]) || 'Pages';
-          var n = document.createElement('span');
-          n.className = 'sugg-title';
-          n.textContent = (d.meta && d.meta.title) || d.url;
-          a.appendChild(t); a.appendChild(n); li.appendChild(a); list.appendChild(li);
-        });
-        var all = document.createElement('li');
-        var link = document.createElement('a');
-        link.className = 'sugg-all';
-        link.href = root.querySelector('form').action + '?q=' + encodeURIComponent(input.value.trim());
-        link.textContent = 'See all results for \u201c' + input.value.trim() + '\u201d \u2192';
-        all.appendChild(link); list.appendChild(all);
-        list.hidden = false;
-      }
-      input.addEventListener('input', function () {
-        clearTimeout(timer);
-        var q = input.value.trim();
-        if (!q) { list.hidden = true; list.textContent = ''; return; }
-        timer = setTimeout(function () {
-          window.tlPagefind().then(function (pf) {
-            if (!pf) return;
-            return pf.search(q).then(function (res) {
-              return Promise.all(res.results.slice(0, 5).map(function (r) { return r.data(); }));
-            }).then(function (items) {
-              if (input.value.trim() !== q) return;
-              if (!items.length) { list.textContent = ''; list.hidden = true; return; }
-              render(items);
-            });
-          });
-        }, 150);
-      });
-    })();
-  </script>
-  <main id="main" data-pagefind-body={searchable ? '' : undefined} data-pagefind-filter={searchable ? 'type[data-type]' : undefined} data-type={searchType}><slot /></main>
-  <footer class="site-footer">
-    <div class="wrap footer-grid">
-      <div>
-        <p class="footer-brand">Tradition Local</p>
-        <p>Become a local insider. Join for monthly stories, events, and what's trending near you.</p>
-        {config.newsletterAction ? (
-          <form class="signup" action={config.newsletterAction} method="post">
-            <label for="nl-email">Email</label>
-            <div><input id="nl-email" name="email" type="email" required placeholder="you@example.com" /><button type="submit">Subscribe</button></div><input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" id="nl-return" /><p id="nl-msg" role="status" hidden></p><script is:inline>var q=new URLSearchParams(location.search).get('newsletter');var m=document.getElementById('nl-msg');var r=document.getElementById('nl-return');if(r){r.value=location.origin+location.pathname;}if(q&&m){m.hidden=false;m.textContent=q==='ok'?'Thanks, you are subscribed. Welcome to Tradition Local.':q==='invalid'?'That email address does not look right. Please try again.':'Something went wrong. Please try again, or email us.';}</script>
+  {sub === 'makeithome' && (
+    <div class="subnav"><div class="wrap"><b>Make it home</b>{subs.map(([n, h]) => <a class={Astro.url.pathname.replace(/\/$/, '').endsWith(h) ? 'on' : ''} href={url(h)}>{n}</a>)}</div></div>
+  )}
+  <main><slot /></main>
+  <footer class="foot">
+    <div class="wrap">
+      <div class="cols">
+        <div>
+          <a class="logo" href={url('/')} style="color:#fff;font-size:34px">Tradition Local</a>
+          <p style="margin-top:10px;font-size:17px;max-width:360px">We help people feel connected to their neighborhood, community, and city.</p>
+          <p class="h" style="margin-top:28px">Explore</p>
+          <div style="display:flex;gap:28px;flex-wrap:wrap"><a href={url('/food')}>Where to eat</a><a href={url('/neighborhoods')}>Neighborhoods</a><a href={url('/things-to-do')}>Things to do</a></div>
+        </div>
+        <div>
+          <p class="h">About</p>
+          <p class="li"><a href={url('/about')}>Meet Sara and Dillon</a></p>
+          <p class="li"><a href={url('/how-we-review')}>How we review places</a></p>
+          <p class="li"><a href={url('/contact')}>Contact</a></p>
+        </div>
+        <div>
+          <form action={config.newsletterAction} method="post">
+            <label for="foot-email" style="color:#E7BC52">Join In the Loop, every Monday</label>
+            <div class="join"><input id="foot-email" name="email" type="email" required placeholder="name@email.com" autocomplete="email" /><button type="submit">Join</button></div>
+            <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+            <input type="hidden" name="return" id="nl-return" />
+            <p id="nl-msg" role="status" hidden style="margin-top:8px;font-size:14px;color:#fff;font-weight:700"></p>
           </form>
-        ) : (
-          <a class="btn gold" href={`mailto:${config.contactEmail}?subject=Subscribe%20me%20to%20Tradition%20Local`}>Join the newsletter</a>
-        )}
+          <p style="margin-top:10px;font-size:14px;color:#D4D2EE">Free, and one click to leave. We never sell your email.</p>
+          <p style="margin-top:14px"><a href={url('/account')} style="color:#FFE29A;font-weight:700">Get local picks for your area</a></p>
+        </div>
       </div>
-      <div>
-        <p class="footer-head">Explore</p>
-        <ul>
-          <li><a href={url('/food')}>Where to eat</a></li>
-          <li><a href={url('/cities')}>Neighborhood guides</a></li>
-          <li><a href={url('/living#featured')}>Events</a></li>
-          
-          <li><a href={url('/about-me')}>About us</a></li>
-          {membersOn && <li><a href={url('/members/account')}>Members</a></li>}
-        </ul>
+      <div class="legal">
+        <span>© {new Date().getFullYear()} Tradition Local | <a href={url('/privacy')}>Privacy</a> | <a href={url('/disclosures')}>Texas real estate disclosures</a> | Real estate services by <a href={config.brokerage.url}>{config.brokerage.name}</a></span>
+        <span><a href="https://instagram.com">Instagram</a> | <a href="https://youtube.com">YouTube</a> | <a href="https://facebook.com">Facebook</a> | <a href="#top">Back to top</a></span>
       </div>
-      <div>
-        <p class="footer-head">Follow</p>
-        <ul>
-          <li><a href={site.social.instagram}>Instagram</a></li>
-          <li><a href={site.social.youtube}>YouTube</a></li>
-          <li><a href={site.social.facebook}>Facebook group</a></li>
-          <li><a href={`mailto:${config.contactEmail}`}>{config.contactEmail}</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="wrap legal">
-      <span>© {new Date().getFullYear()} Tradition Local. All rights reserved. <a href={url('/privacy-policy')}>Privacy policy</a></span>
-      <span>Real estate services by <a href={config.brokerage.url}>{config.brokerage.name}</a></span>
     </div>
   </footer>
+  <script is:inline>
+    // Fill in the return address, and show the result when the signup service sends the reader back.
+    var q = new URLSearchParams(location.search).get('newsletter');
+    var m = document.getElementById('nl-msg'), r = document.getElementById('nl-return');
+    if (r) r.value = location.origin + location.pathname;
+    if (q && m) { m.hidden = false; m.textContent = q === 'ok' ? 'Thanks, you are subscribed. Welcome to Tradition Local.' : q === 'invalid' ? 'That email address does not look right. Please try again.' : 'Something went wrong. Please try again, or email us.'; }
+  </script>
 </body>
 </html>
-
-<style is:global>
-  :root {
-    --blue: #004aad; --blue-deep: #1f4ba8; --navy: #1D1A6D; --slate: #35465c;
-    --gold: #E7BC52; --gold-soft: #f3e9c4; --brown: #9d693f; --cream: #f9f5f4;
-    --green: #1E7A43;
-    --ink: #1c1c1c; --muted: #5b6573; --line: #e4e0da; --paper: #ffffff;
-    --serif: 'Fraunces', Georgia, serif;
-    --sans: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    --wrap: 1180px;
-  }
-  *, *::before, *::after { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
-  body { margin: 0; font-family: var(--sans); color: var(--ink); background: var(--paper); line-height: 1.55; font-size: 17px; }
-  img { max-width: 100%; height: auto; display: block; }
-  a { color: var(--blue); }
-  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
-  h1, h2, h3, h4 { font-family: var(--serif); font-weight: 400; color: var(--blue); line-height: 1.15; margin: 0 0 .5em; }
-  h1 { font-size: clamp(2.2rem, 5vw, 3.6rem); letter-spacing: -0.01em; }
-  h2 { font-size: clamp(1.6rem, 3vw, 2.2rem); }
-  h3 { font-size: 1.3rem; }
-  :where(.wrap) { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
-  .skip { position: absolute; left: -999px; top: 0; background: var(--gold); padding: 8px 12px; z-index: 10; }
-  .skip:focus { left: 8px; }
-
-
-  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .site-header { position: relative; }
-  .site-search { order: 2; display: flex; align-items: center; }
-  .search-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; border: 0; background: transparent; color: var(--blue); cursor: pointer; }
-  .search-btn:hover, .search-btn[aria-expanded="true"] { background: var(--line); }
-  .search-panel { position: absolute; left: 0; right: 0; top: 100%; z-index: 30; background: #fff; border-bottom: 1px solid var(--line); box-shadow: 0 12px 32px rgba(32, 69, 94, .16); }
-  .search-panel[hidden] { display: none; }
-  .search-panel-inner { max-width: 760px; margin: 0 auto; padding: 24px 24px 28px; }
-  .search-panel input[type="search"] { width: 100%; height: 52px; padding: 0 22px; border-radius: 999px; border: 1.5px solid var(--muted); font-size: 17px; font-family: var(--sans); color: var(--ink); background: #fff; }
-  .search-sugg { list-style: none; margin: 12px 0 0; padding: 0; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
-  .search-sugg[hidden] { display: none; }
-  .search-sugg li + li { border-top: 1px solid var(--line); }
-  .search-sugg a { display: flex; align-items: center; gap: 14px; padding: 12px 16px; text-decoration: none; color: var(--ink); }
-  .search-sugg a:hover { background: var(--cream); }
-  .sugg-type { flex: none; min-width: 104px; text-align: center; font-size: 13px; padding: 2px 10px; border-radius: 4px; background: var(--gold-soft); color: var(--brown); font-weight: 600; }
-  .sugg-title { font-family: var(--serif); font-size: 1.1rem; color: var(--blue); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-  .search-sugg a.sugg-all { display: block; font-weight: 600; color: var(--blue); background: var(--cream); }
-  .search-pop { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 16px 0 0; font-size: 14px; color: var(--muted); }
-  .search-pop a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1.5px solid var(--blue); border-radius: 999px; text-decoration: none; font-size: 14px; background: #fff; }
-  .search-pop a:hover { background: var(--blue); color: #fff; }
-
-  .eventbar { background: var(--gold); color: var(--navy); font-size: 15px; }
-  .eventbar .wrap { display: flex; gap: 18px; align-items: center; justify-content: center; padding-top: 8px; padding-bottom: 8px; flex-wrap: wrap; }
-  .eventbar strong { color: #1d2d7a; letter-spacing: .04em; }
-  .eventbar-date::before { content: ", "; }
-  .eventbar a { color: var(--navy); }
-  .eventbar .rsvp { font-weight: 700; letter-spacing: .15em; }
-  .eventbar .all { border-left: 1px solid var(--navy); padding-left: 18px; text-decoration: none; }
-  @media (max-width: 760px) {
-    .eventbar .wrap { flex-direction: column; gap: 4px; padding-top: 10px; padding-bottom: 10px; text-align: center; }
-    .eventbar strong { display: none; }
-    .eventbar-title { font-size: 14px; }
-    .eventbar-date { display: block; margin-top: 2px; }
-    .eventbar-date::before { content: ""; }
-    .eventbar .all { border-left: 0; padding-left: 0; }
-  }
-
-  .site-header { background: var(--cream); border-bottom: 1px solid var(--line); }
-  .header-inner { display: flex; align-items: center; justify-content: space-between; min-height: 104px; gap: 16px; flex-wrap: wrap; }
-  .brand { display: flex; align-items: center; gap: 22px; text-decoration: none; }
-  .brand span { font-family: var(--serif); font-size: clamp(1.4rem, 2.6vw, 2rem); color: var(--blue); letter-spacing: .06em; text-transform: uppercase; }
-  /* Top-level nav: each item (including More) is one single element, so there's no
-     separate tiny chevron button to tap on mobile -- the whole item is the tap target. */
-  .top-nav { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
-  .top-link {
-    display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
-    background: none; border: none; cursor: pointer;
-    color: var(--blue); font-family: var(--sans); font-weight: 600; font-size: 16px;
-    padding: 10px 12px; min-height: 44px; border-radius: 8px;
-  }
-  .top-link:hover { background: var(--cream); }
-  .top-link[aria-current], .top-link[aria-expanded="true"] { background: var(--cream); }
-  .top-link .chev { color: var(--muted); transition: transform .2s ease; }
-  .top-link[aria-expanded="true"] .chev { transform: rotate(180deg); }
-
-  /* The bar that drops down below the header. Food/Neighborhoods/Things To Do show their own
-     sub-list automatically when you're on that page (see activeNav in the frontmatter); More
-     is a hover (desktop) / tap (mobile) menu that previews on top of it -- see the script above. */
-  /* White + a visible top border + a soft shadow, so this reads as its own dropped-down panel,
-     distinct from the solid --cream header bar sitting above it. */
-  .subheader {
-    max-height: 0; overflow: hidden; background: #fff;
-    border-top: 1px solid transparent; border-bottom: 1px solid transparent;
-    box-shadow: 0 0 0 rgba(32, 69, 94, 0);
-    transition: max-height .25s ease, border-color .2s ease, box-shadow .2s ease;
-  }
-  .subheader.open {
-    max-height: 220px; border-color: var(--line);
-    box-shadow: 0 10px 24px rgba(32, 69, 94, .1);
-  }
-  .subheader .wrap { padding-top: 0; padding-bottom: 0; }
-  /* Natural-width links, centered as a group. These sit at a different count than the
-     4 items in the main nav above, so stretching them into their own equal-width columns
-     only made the two rows look like they were trying (and failing) to line up with each
-     other. Sizing to content and centering the whole row reads as its own, clearly
-     secondary level instead. */
-  .sub-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 14px 0; margin: 0; list-style: none; }
-  .sub-list[hidden] { display: none; }
-  .sub-list li { display: flex; }
-  .sub-list a {
-    display: flex; align-items: center; justify-content: center; min-height: 44px; white-space: nowrap;
-    padding: 0 16px; border-radius: 8px; background: transparent;
-    font-weight: 600; font-size: 15px; color: var(--blue); text-decoration: none;
-  }
-  /* The bar itself is white now, so the hover highlight uses --cream to show up against it. */
-  .sub-list a:hover { background: var(--cream); }
-  .sub-list a:active { background: var(--gold-soft); }
-  .sub-list a[aria-current] { color: var(--navy); font-weight: 700; }
-
-  :where(.band) { background: var(--blue-deep); color: #fff; padding: 72px 0 64px; }
-  :where(.band) h1, :where(.band) h2 { color: #fff; }
-  :where(.band) .kicker { color: var(--gold); font-size: 15px; margin: 0 0 12px; }
-  :where(.band) p.lede { font-size: 1.25rem; max-width: 40ch; margin: 0 0 28px; }
-  :where(.section) { padding: 56px 0; }
-  .section.tint { background: var(--cream); }
-  .section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 24px; border-bottom: 2px solid var(--blue); padding-bottom: 8px; }
-  .section-head h2 { margin: 0; }
-  .section-head a { font-weight: 600; text-decoration: none; }
-
-  :where(.btn) { display: inline-block; padding: 12px 26px; border-radius: 999px; font-family: var(--serif); font-weight: 600; text-decoration: none; border: 0; cursor: pointer; font-size: 16px; }
-  .btn.gold { background: var(--gold); color: var(--blue); }
-  .btn.blue { background: var(--blue); color: #fff; }
-  .btn.small { padding: 8px 18px; font-size: 15px; }
-  .btn.ghost { border: 2px solid var(--blue); color: var(--blue); background: transparent; }
-
-  :where(.grid) { display: grid; gap: 28px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
-  .chip { display: inline-block; border: 1.5px solid var(--blue); border-radius: 999px; padding: 4px 14px; font-size: 14px; color: var(--blue); text-decoration: none; background: #fff; cursor: pointer; font-family: var(--sans); }
-  .chip[aria-pressed="true"] { background: var(--blue); color: #fff; }
-  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
-  .muted { color: var(--muted); }
-  .badge { display: inline-block; font-size: 13px; padding: 2px 10px; border-radius: 4px; background: var(--gold-soft); color: var(--brown); font-weight: 600; }
-
-  .prose { max-width: 70ch; font-size: 18px; line-height: 1.7; }
-  .prose h2 { margin-top: 1.6em; font-size: 1.7rem; }
-  .prose h3, .prose h4, .prose h5 { margin-top: 1.4em; font-family: var(--serif); color: var(--navy); }
-  .prose figure { margin: 1.6em 0; }
-  .prose figure img { border-radius: 6px; width: 100%; }
-  .prose p > img:only-child { display: block; width: 100%; border-radius: 6px; margin: 1.6em 0; }
-  .prose blockquote { border-left: 4px solid var(--gold); margin: 1.4em 0; padding: .2em 0 .2em 1.2em; font-family: var(--serif); font-size: 1.2rem; color: var(--navy); }
-  .prose .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-top: 2em; }
-  .prose .gallery figure { margin: 0; }
-
-  .site-footer { background: var(--navy); color: #e8edf2; margin-top: 64px; padding: 56px 0 24px; }
-  .site-footer a { color: #fff; }
-  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; }
-  .footer-brand { font-family: var(--serif); font-size: 1.8rem; color: #fff; margin: 0 0 8px; }
-  .footer-head { font-weight: 700; color: var(--gold); margin: 0 0 10px; }
-  .site-footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
-  .signup label { display: block; font-size: 14px; margin-bottom: 6px; }
-  .signup div { display: flex; gap: 8px; }
-  .signup input { flex: 1; padding: 12px; border-radius: 999px; border: 0; font-size: 16px; }
-  .signup button { background: var(--gold); color: var(--blue); border: 0; border-radius: 999px; padding: 0 22px; font-weight: 700; cursor: pointer; }
-  .legal { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; border-top: 1px solid rgba(255,255,255,.2); margin-top: 40px; padding-top: 18px; font-size: 14px; }
-  @media (max-width: 760px) {
-    .footer-grid { grid-template-columns: 1fr; }
-    .header-inner { padding-top: 14px; padding-bottom: 14px; }
-    /* Main menu: bigger text, spread evenly across the full width as equal-width columns,
-       centered, instead of small and clustered on the left. ".site-header nav" below is
-       more specific than ".top-nav" alone, so the gap has to be set here instead. */
-    .site-header nav.top-nav { gap: 0; width: 100%; }
-    .top-link {
-      flex: 1; justify-content: center; text-align: center;
-      font-size: 13.5px; padding: 10px 2px; gap: 2px; min-height: 44px;
-    }
-    .top-link .chev { width: 8px; height: 6px; }
-    /* Submenu: smaller than the main menu above it, not bigger. */
-    .sub-list a { font-size: 13px; padding: 0 10px; }
-    .site-search { order: 1; margin-left: auto; }
-    .site-search + .account { margin-left: 0; }
-    :where(.band) { padding: 48px 0; }
-  }
-  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
-</style>

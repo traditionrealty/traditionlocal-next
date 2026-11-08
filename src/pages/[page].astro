@@ -1,0 +1,10 @@
+---
+import Base from '../layouts/Base.astro';
+import { pages } from '../lib/pages';
+
+export function getStaticPaths() { return Object.keys(pages).map((page) => ({ params: { page } })); }
+const [title, blurb, active] = pages[Astro.params.page];
+---
+<Base title={title} active={active} sub={['make-it-home', 'find-your-fit', 'new-builds', 'local-directory', 'ask-dillon'].includes(Astro.params.page) ? 'makeithome' : ''}>
+  <section class="band hero"><div class="wrap"><p class="eyebrow">Coming in the next build</p><h1 style="margin-bottom:16px">{title}</h1><p class="lead">{blurb}</p></div></section>
+</Base>

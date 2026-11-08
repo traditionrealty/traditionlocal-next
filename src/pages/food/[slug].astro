@@ -1,0 +1,85 @@
+---
+import Base from '../../layouts/Base.astro';
+import { businesses, byName, reviewsFor, inArea, href, media, stars, dateText, url } from '../../lib/data';
+import { config } from '../../config';
+export function getStaticPaths() { return businesses().map((b) => ({ params: { slug: b.slug }, props: { b } })); }
+const { b } = Astro.props;
+const m = media(b);
+const reviews = reviewsFor(b.name);
+const top = reviews[0];
+const area = byName(b.area);
+const nearby = inArea(b.area, 'Business').filter((x) => x.slug !== b.slug).slice(0, 3);
+const hasFacts = b.address || b.phone || b.website;
+const status = b.status === 'Open' ? 'Open' : b.status === 'Closed' ? 'Closed' : 'Status not confirmed';
+const web = b.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+---
+<Base title={b.name} description={b.summary} active="Food">
+  <section class="band hero">
+    <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
+      <div style="grid-column:span 7">
+        <p class="meta" style="margin-bottom:12px">{area ? <a href={href(area)} style="font-weight:700">{b.area}</a> : b.area} &rsaquo; <a href={url('/food')}>Food</a></p>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">{b.tags[0] && <span class="tag">{b.tags[0]}</span>}<span class="tag soft">{status}</span></div>
+        <h1 style="margin-bottom:16px">{b.name}</h1>
+        {b.summary && <p class="lead" style="margin-bottom:28px">{b.summary}</p>}
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          {b.phone && <a class="btn" href={`tel:${b.phone}`}>Call {b.phone}</a>}
+          {b.website && <a class="btn line" href={b.website} rel="noopener">Visit {web}</a>}
+        </div>
+      </div>
+      <div style="grid-column:span 5">
+        {m ? <figure style="margin:0"><img class="photo" style="height:420px;border-radius:16px" src={m.src} alt={m.alt} />{m.credit && <figcaption class="credit">{m.credit}</figcaption>}</figure> : <div class="ph" style="height:420px;border-radius:16px">Photo coming soon</div>}
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap split">
+      <div class="main">
+        {b.description && <><p class="eyebrow">About</p><h2 style="margin-bottom:20px">What to know</h2><p style="font-size:18px">{b.description}</p></>}
+        {top && b.show.reviews && (
+          <div class="card pad pick" style="margin-top:40px;padding:32px">
+            <p class="eyebrow">Sara's review</p>
+            <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:12px"><span style="font-family:var(--serif);font-weight:600;font-size:48px;line-height:1">{stars(top.rating)}</span><span class="meta">out of 5{top.reviewDate && `, ${dateText(top.reviewDate)}`}</span></div>
+            <p style="font-size:18px;margin-bottom:20px">{top.summary}</p>
+            <a class="btn line" href={href(top)}>Read the full review</a>
+          </div>
+        )}
+        {b.show.newsletter && (
+          <div class="card pad pick" style="margin-top:40px;padding:32px">
+            <p class="eyebrow">Locally for {b.area}</p>
+            <h3 style="margin-bottom:8px">More like this, from your neighborhood.</h3>
+            <p class="meta" style="margin-bottom:20px;font-size:16px">A closer look at where you live, written for {b.area}. Free with your account.</p>
+            <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
+              <div style="flex:1;min-width:220px"><label class="sr" for="loc-email">Your email</label><input id="loc-email" name="email" type="email" required placeholder="name@email.com" /></div>
+              <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+              <input type="hidden" name="return" class="nl-return" />
+              <button class="btn" type="submit">Get Locally</button>
+            </form>
+          </div>
+        )}
+      </div>
+      <div class="side">
+        <div class="card pad">
+          <h3 style="margin-bottom:20px">Good to know</h3>
+          {b.address && <p class="fact"><span>Address</span><b>{b.address}{b.postalCity && `, ${b.postalCity}`}</b></p>}
+          {b.phone && <p class="fact"><span>Phone</span><b>{b.phone}</b></p>}
+          {b.website && <p class="fact"><span>Website</span><b>{web}</b></p>}
+          <p class="fact"><span>Status</span><b>{status}</b></p>
+          {!hasFacts && <p class="meta">Address, phone, and website are on the way. Check before you go.</p>}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {b.show.nearby && nearby.length > 0 && (
+    <section class="band tint">
+      <div class="wrap">
+        <p class="eyebrow">Nearby</p>
+        <h2 style="margin-bottom:28px">More in {b.area}</h2>
+        <div class="grid g3">{nearby.map((n) => <a class="card pad" href={href(n)} style="text-decoration:none"><h4 style="margin-bottom:4px">{n.name}</h4><p class="meta">{[n.tags[0], n.area].filter(Boolean).join(', ')}</p></a>)}</div>
+        {area && <p style="margin-top:28px"><a href={href(area)} style="font-weight:700">Explore {b.area}</a></p>}
+      </div>
+    </section>
+  )}
+  <script is:inline>document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });</script>
+</Base>
