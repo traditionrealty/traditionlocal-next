@@ -1,1 +1,0 @@
-{"__patches":[{"path":"src/pages/apartments.astro","find":"{[a.area, a.city].filter(Boolean).join(', ')}","replace":"{a.area && a.city.toLowerCase().indexOf(a.area.toLowerCase()) === 0 ? a.city : [a.area, a.city].filter(Boolean).join(', ')}"}],"__expect":{"src/pages/apartments.astro":"60abf4d3759f"}}

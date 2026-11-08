@@ -48,7 +48,7 @@ const steps = ['Share your budget, move date, and what you must have.', 'We sugg
               <a class={i < 24 ? 'card pad ap-item' : 'card pad ap-item hidden'} href={a.link || url('/ask-dillon')} rel="noopener" data-name={a.search} data-area={a.area} data-beds={a.beds.join(' ')} data-rent={a.from || ''} data-pets={a.pets ? 'yes' : ''} style="text-decoration:none;display:flex;flex-direction:column">
                 <div style="display:flex;gap:8px;flex-wrap:wrap">{a.fromText && <span class="tag">From {a.fromText}</span>}{a.pets && <span class="tag soft">Pet friendly</span>}{IS_PREVIEW && a.example && <span class="tag soft">Example</span>}</div>
                 <h4 style="margin:12px 0 6px">{a.name}</h4>
-                <p class="meta" style="margin-bottom:6px">{[a.area, a.city].filter(Boolean).join(', ')}</p>
+                <p class="meta" style="margin-bottom:6px">{a.area && a.city.toLowerCase().indexOf(a.area.toLowerCase()) === 0 ? a.city : [a.area, a.city].filter(Boolean).join(', ')}</p>
                 {a.bedsLine && <p class="meta">{a.bedsLine}</p>}
                 {a.rentLine && <p class="meta">{a.rentLine}</p>}
                 {a.summary && <p class="meta" style="font-size:15px;margin-top:8px">{a.summary}</p>}
