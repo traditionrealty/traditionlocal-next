@@ -1,0 +1,4 @@
+address,city,price,status,beds,baths,sqft,summary,photo,link,example
+1234 Example Street,"Houston, TX",425000,Active,3,2,1850,A short description of the home goes here. Replace this example with your listing.,,,yes
+5678 Sample Lane,"Sugar Land, TX",389000,Coming soon,4,2.5,2300,Another example. Add your own homes to this file and the examples disappear.,,,yes
+910 Placeholder Court,"Katy, TX",515000,Under contract,4,3,2750,A third example listing to show how a home under contract appears.,,,yes
