@@ -1,0 +1,1 @@
+{"__patches":[{"path":"src/layouts/Base.astro","find":"        <a class=\"chip\" href={url('/account')}>Sign in</a>\n        <a class=\"btn sm\" href={url('/newsletters')}>Join In the Loop</a>\n","replace":"        <a class=\"btn sm\" href={url('/newsletters')}>Join In the Loop</a>\n        <a class=\"chip\" href={url('/account')}>Sign in</a>\n"}]}
