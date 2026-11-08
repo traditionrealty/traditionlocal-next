@@ -100,7 +100,7 @@ for r in load('reviews.json'):
     b = biz.get(r['businessSlug']); 
     if not b: continue
     date = s(r.get('date')); body = s(r.get('text'))
-    notes = [NOTE, 'Legacy tier: ' + s(r.get('tier')), 'Scope: ' + s(r.get('scope')), 'Status: ' + s(r.get('status')), 'Legacy review id: ' + r['id']]
+    notes = [NOTE, 'Legacy tier: ' + s(r.get('tier')), 'Scope: ' + s(r.get('scope')), 'Status: ' + s(r.get('status')), 'Legacy review id: ' + r['id'], 'Legacy business slug: ' + r['businessSlug']]
     C(**{'Title': f"Review: {b['name']} \u2014 {date}" if date else f"Review: {b['name']}", 'Content type': 'Review', 'Profile': b['name'], 'Summary': first_sentences(body),
          'Body': body, 'Author': s(r.get('reviewer')), 'Original review date': mdy(date), 'Rating': s(b.get('stars')) if str(b.get('stars') or '').replace('.', '').isdigit() else '',
          'Media section': 'hidden', 'FAQ section': 'hidden', 'Time zone': 'America/Chicago', 'Editor notes': '\n'.join(notes), 'Record ID': r['id'], 'Slug': 'legacy-' + r['id']})
