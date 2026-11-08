@@ -17,6 +17,7 @@ const picks = list.filter((x) => x.e.tags.some((t: string) => /^(featured|our pi
 const kinds = [...new Set(list.map((x) => x.e.eventType).filter(Boolean))].sort();
 const places = profiles.filter((p) => p.type === 'Place').sort((a, b) => a.name.localeCompare(b.name));
 const placeAreas = [...new Set(places.map((p) => p.area).filter(Boolean))].sort();
+const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
 const DAY = 86400000;
 ---
 <Base title="Things to do" active="Things to do" description="Events, places, and weekend ideas, checked and sorted for you.">
@@ -95,10 +96,12 @@ const DAY = 86400000;
   <section class="band tint" id="places">
     <div class="wrap">
       <p class="eyebrow">Places to visit</p><h2 style="margin-bottom:16px">Worth a trip any day</h2>
-      <div class="card pad search" style="margin-bottom:24px"><label for="p-area">Area</label><select id="p-area"><option value="">All of Greater Houston</option>{placeAreas.map((a) => <option>{a}</option>)}</select></div>
+      <div class="card pad search" style="margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap"><div style="flex:2;min-width:220px"><label for="p-find">Find a place</label><input id="p-find" type="search" placeholder="Try park, market, or a name" autocomplete="off" /></div><div style="flex:1;min-width:200px"><label for="p-area">Area</label><select id="p-area"><option value="">All of Greater Houston</option>{placeAreas.map((a) => <option>{a}</option>)}</select></div></div>
+      <p class="meta" id="p-count" style="margin-bottom:16px" aria-live="polite"></p>
       <div class="grid g3" id="p-grid">
-        {places.map((p) => <a class="card pad p-item" href={href(p)} data-area={p.area} style="text-decoration:none"><h4 style="margin-bottom:4px">{p.name}</h4><p class="meta">{[p.subCategory, p.area].filter(Boolean).join(', ')}</p></a>)}
+        {places.map((p, i) => <a class={i < 12 ? 'card pad p-item' : 'card pad p-item hidden'} href={href(p)} data-area={p.area} data-find={[p.name, p.summary, p.subCategory, p.area].join(' ').toLowerCase()} style="text-decoration:none"><h4 style="margin-bottom:4px">{p.name}</h4>{(p.subCategory || p.area) && <p class="meta">{[p.subCategory, p.area].filter(Boolean).join(', ')}</p>}{p.summary && <p class="meta" style="margin-top:6px;font-size:15px">{clip(p.summary, 115)}</p>}</a>)}
       </div>
+      <p style="margin-top:24px"><button class="btn line hidden" id="p-more" type="button">Show more places</button></p>
     </div>
   </section>
 
@@ -206,7 +209,18 @@ const DAY = 86400000;
       function wire(id, key) { var el = $(id); if (!el) return; el.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; if (key === 'w') when = b.dataset.w; else kind = b.dataset.k;
         [].forEach.call(el.children, function (c) { c.classList.toggle('on', c === b); c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); }); run(); week(); drawCal(); }); }
       wire('t-when', 'w'); wire('t-kind', 'k'); run(); week(); drawCal();
-      var pa = $('p-area'); pa.addEventListener('change', function () { document.querySelectorAll('.p-item').forEach(function (i) { i.classList.toggle('hidden', !!pa.value && i.dataset.area !== pa.value); }); });
+      var pa = $('p-area'), pf = $('p-find'), pm = $('p-more'), pc = $('p-count'), pitems = [].slice.call(document.querySelectorAll('.p-item')), shown = 12, STEP = 12;
+      function pRender() {
+        var q = (pf.value || '').toLowerCase().trim().split(/\s+/).filter(Boolean), match = [];
+        pitems.forEach(function (i) { var ok = (!pa.value || i.dataset.area === pa.value) && q.every(function (w) { return i.dataset.find.indexOf(w) > -1; }); i.classList.add('hidden'); if (ok) match.push(i); });
+        match.slice(0, shown).forEach(function (i) { i.classList.remove('hidden'); });
+        pc.textContent = match.length ? 'Showing ' + Math.min(shown, match.length) + ' of ' + match.length + (match.length === 1 ? ' place' : ' places') : 'No places match. Try a shorter word or a different area.';
+        pm.classList.toggle('hidden', match.length <= shown);
+      }
+      pa.addEventListener('change', function () { shown = STEP; pRender(); });
+      pf.addEventListener('input', function () { shown = STEP; pRender(); });
+      pm.addEventListener('click', function () { shown += STEP; pRender(); });
+      pRender();
     })();
   </script>
 </Base>
