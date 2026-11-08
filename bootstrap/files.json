@@ -1,0 +1,1 @@
+{"__patches":[{"path":"src/pages/make-it-home.astro","find":"{tools.map(([name, blurb, path, label, live]) => (","replace":"{[...tools].sort((a, b) => a[0].localeCompare(b[0])).map(([name, blurb, path, label, live]) => ("}]}
