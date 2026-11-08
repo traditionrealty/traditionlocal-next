@@ -6,14 +6,12 @@ interface Props { title: string; description?: string; active?: string; sub?: st
 const { title, description = 'Honest reviews, weekend plans, and neighborhood guides from people who live here.', active = '', sub = '' } = Astro.props;
 const main = [['Food', '/food'], ['Neighborhoods', '/neighborhoods'], ['Things to do', '/things-to-do']];
 const more = [
+  ['Newsletters', '/newsletters', 'In the Loop and Locally'],
   ['Make it home', '/make-it-home', 'Moving, renting, or buying'],
-  ['Find your fit', '/find-your-fit', 'Match neighborhoods to what you love'],
-  ['New builds', '/new-builds', 'Communities to compare'],
   ['Local Directory', '/local-directory', 'Providers we know, for members'],
   ['Ask Dillon', '/ask-dillon', 'Questions about an area'],
-  ['Newsletters', '/newsletters', 'In the Loop and Locally'],
 ];
-const subs = [['Overview', '/make-it-home'], ['Find your fit', '/find-your-fit'], ['New builds', '/new-builds'], ['Local Directory', '/local-directory'], ['Ask Dillon', '/ask-dillon']];
+const subs = [['Overview', '/make-it-home'], ['Find your fit', '/find-your-fit'], ['New builds', '/new-builds'], ['Ask Dillon', '/ask-dillon']];
 const moreOn = sub !== '' || active === 'More';
 ---
 <!doctype html>
