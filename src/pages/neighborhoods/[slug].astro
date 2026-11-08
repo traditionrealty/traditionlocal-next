@@ -1,0 +1,109 @@
+---
+import Base from '../../layouts/Base.astro';
+import Prefs from '../../components/Prefs.astro';
+import '../../styles/pages.css';
+import { href, url } from '../../lib/data';
+import { areaPages, bizIn, subsIn, placesIn, topRating, category, cleanList } from '../../lib/helpers';
+import { config } from '../../config';
+export function getStaticPaths() { return areaPages().map((p) => ({ params: { slug: p.slug }, props: { p } })); }
+const { p } = Astro.props;
+const biz = bizIn(p.name).map((b) => ({ b, r: topRating(b.name) })).sort((x, y) => y.r - x.r).slice(0, 8);
+const bizTotal = bizIn(p.name).length;
+const subs = subsIn(p.name), places = placesIn(p.name).slice(0, 6);
+const glance = p.bestFor || p.typicalHomes || p.schools;
+const schools = cleanList(p.schools);
+const label = p.type === 'City' ? 'City guide' : p.type === 'Area' ? 'Area guide' : 'Neighborhood guide';
+---
+<Base title={p.name} description={p.summary} active="Neighborhoods">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="meta" style="margin-bottom:12px"><a href={url('/neighborhoods')} style="font-weight:700">Neighborhoods</a> &rsaquo; {p.name}</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">{label}</span>{p.region && <span class="tag soft">{p.region}</span>}</div>
+      <h1 style="margin-bottom:16px">{p.name}</h1>
+      {p.summary && <p class="lead" style="margin-bottom:28px">{p.summary}</p>}
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn" id="set-area" data-name={p.name}>Make this my area</button><button class="btn line" id="follow" data-name={p.name}>Follow {p.name}</button><a class="btn line" href={url('/ask-dillon')}>Ask Dillon</a></div>
+    </div>
+  </section>
+
+  {glance && (
+    <section class="band">
+      <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:start">
+        <div style="grid-column:span 5">
+          <p class="eyebrow">At a glance</p><h2 style="margin-bottom:24px">Living in {p.name}</h2>
+          <div class="card pad">
+            {p.bestFor && <p class="fact"><span>Best for</span><b>{p.bestFor}</b></p>}
+            {p.typicalHomes && <p class="fact"><span>Typical homes</span><b>{p.typicalHomes}</b></p>}
+            {schools && <p class="fact"><span>Schools</span><b>{schools}</b></p>}
+          </div>
+        </div>
+        {p.localTake && (
+          <div style="grid-column:span 7"><div style="background:var(--butter);border-radius:12px;padding:40px"><p class="eyebrow" style="color:var(--navy)">Our local take</p><p style="font-family:var(--serif);font-weight:600;font-size:26px;line-height:1.3">{p.localTake}</p></div></div>
+        )}
+      </div>
+    </section>
+  )}
+
+  <section class="band" style="padding-top:0">
+    <div class="wrap">
+      <div class="card pad pick" style="padding:32px;max-width:760px">
+        <p class="eyebrow">Locally for {p.name}</p>
+        <h3 style="margin-bottom:8px">A closer look at where you live.</h3>
+        <p class="meta" style="margin-bottom:20px;font-size:16px">Your neighborhood, in your inbox. Free with your account.</p>
+        <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
+          <div style="flex:1;min-width:220px"><label class="sr" for="loc-email">Your email</label><input id="loc-email" name="email" type="email" required placeholder="name@email.com" /></div>
+          <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+          <input type="hidden" name="return" class="nl-return" />
+          <button class="btn" type="submit">Get Locally</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  {biz.length > 0 && (
+    <section class="band tint">
+      <div class="wrap">
+        <p class="eyebrow">Eat and explore</p><h2 style="margin-bottom:28px">Places we reviewed in {p.name}</h2>
+        <div class="grid g4">
+          {biz.map(({ b, r }) => <a class="card pad" href={href(b)} style="text-decoration:none">{r > 0 && <span class="tag">{r} out of 5</span>}<h4 style="margin:12px 0 4px">{b.name}</h4><p class="meta">{category(b)}</p></a>)}
+        </div>
+        {bizTotal > biz.length && <p style="margin-top:24px"><a href={url(`/food?area=${encodeURIComponent(p.name)}`)} style="font-weight:700">See all {bizTotal} places in {p.name}</a></p>}
+      </div>
+    </section>
+  )}
+
+  {places.length > 0 && (
+    <section class="band">
+      <div class="wrap">
+        <p class="eyebrow">Things to do</p><h2 style="margin-bottom:28px">Places to visit near {p.name}</h2>
+        <div class="grid g3">{places.map((x) => <a class="card pad" href={href(x)} style="text-decoration:none"><h4 style="margin-bottom:4px">{x.name}</h4><p class="meta">{x.subCategory || x.postalCity}</p></a>)}</div>
+      </div>
+    </section>
+  )}
+
+  {subs.length > 0 && (
+    <section class="band tint">
+      <div class="wrap">
+        <p class="eyebrow">Subdivisions</p><h2 style="margin-bottom:28px">Know the streets in {p.name}</h2>
+        <div class="chips">{subs.slice(0, 40).map((s) => <a class="chip" href={href(s)}>{s.name}</a>)}</div>
+        {subs.length > 40 && <p class="meta" style="margin-top:16px">And {subs.length - 40} more.</p>}
+      </div>
+    </section>
+  )}
+
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
+      <div style="max-width:700px"><p class="eyebrow" style="color:var(--navy)">A neighbor to ask</p><h3 style="margin-bottom:8px">Curious about living in {p.name}?</h3><p style="font-size:17px">Dillon is a local Realtor who loves these neighborhoods. Questions are always welcome, with no pressure.</p></div>
+      <a class="btn" href={url('/ask-dillon')}>Explore living here</a>
+    </div>
+  </section>
+  <Prefs />
+  <script is:inline define:vars={{ NAME: p.name }}>
+    var TLD = window.TL, a = document.getElementById('set-area'), f = document.getElementById('follow');
+    function show() { var mine = TLD.area() === NAME, fol = TLD.follows().indexOf(NAME) > -1;
+      a.textContent = mine ? 'This is your area' : 'Make this my area'; a.classList.toggle('line', mine);
+      f.textContent = fol ? 'Following ' + NAME : 'Follow ' + NAME; f.classList.toggle('gold', fol); }
+    a.addEventListener('click', function () { TLD.setArea(TLD.area() === NAME ? '' : NAME); show(); });
+    f.addEventListener('click', function () { var l = TLD.follows(), i = l.indexOf(NAME); if (i > -1) l.splice(i, 1); else l.push(NAME); TLD.setFollows(l); show(); });
+    show(); document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });
+  </script>
+</Base>

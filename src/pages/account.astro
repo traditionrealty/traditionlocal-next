@@ -1,0 +1,91 @@
+---
+import Base from '../layouts/Base.astro';
+import Prefs from '../components/Prefs.astro';
+import '../styles/pages.css';
+import { businesses, href, url } from '../lib/data';
+import { areaPages, bizIn, topRating, category } from '../lib/helpers';
+import { config } from '../config';
+const areas = areaPages().map((p) => p.name).sort();
+const index = businesses().map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b) }));
+const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openings', 'New openings'], ['homes', 'Neighborhoods and homes']];
+---
+<Base title="Your account" description="Your area, the places you follow, and what you receive.">
+  <section class="band hero"><div class="wrap"><p class="eyebrow">Your account</p><h1 style="margin-bottom:12px">Account and settings</h1><p class="lead">Choose your area, follow the places you care about, and decide what you receive.</p>
+    <p class="meta" style="margin-top:16px">Your choices are saved on this device. Sign in is coming, and we will move them to your account then.</p></div></section>
+  <section class="band">
+    <div class="wrap" style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
+      <nav aria-label="Account sections" style="flex:0 0 240px"><a class="menu" href="#areas">Your areas</a><a class="menu" href="#locally">Locally</a><a class="menu" href="#loop">In the Loop</a><a class="menu" href="#saved">Saved places</a><a class="menu" href="#privacy">Privacy and data</a></nav>
+      <div class="stack" style="flex:999 1 560px;min-width:0">
+
+        <div class="panel" id="areas"><p class="eyebrow">Your areas</p><h2 style="font-size:32px;margin-bottom:8px">Where do you call home?</h2>
+          <p class="meta" style="font-size:16px;margin-bottom:20px">We use this for your local picks and to open Food on your area first.</p>
+          <div style="max-width:380px"><label for="a-home">Your area</label><select id="a-home"><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}<option value="__other">Other</option></select></div>
+          <div id="a-other-wrap" hidden style="max-width:380px;margin-top:12px"><label for="a-other">Your area or ZIP code</label><input id="a-other" type="text" placeholder="Try Cypress or 77449" /></div>
+          <p style="font-size:13px;font-weight:700;margin:28px 0 10px">Areas you follow</p>
+          <div class="chips" id="a-follow"></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;max-width:520px"><div style="flex:1;min-width:220px"><label class="sr" for="a-add">Follow another area</label><select id="a-add"><option value="">Follow another area</option>{areas.map((a) => <option>{a}</option>)}</select></div><button class="btn line sm" id="a-add-btn" type="button">Follow</button></div>
+          <div id="a-picks" style="margin-top:28px;padding:20px;border-radius:12px;background:var(--ivory)" hidden><p class="eyebrow" id="a-picks-h" style="margin-bottom:8px"></p><div id="a-picks-list"></div></div>
+        </div>
+
+        <div class="panel" id="locally"><p class="eyebrow">Locally</p><h2 style="font-size:32px;margin-bottom:8px">Your neighborhood, in your inbox</h2>
+          <p class="meta" style="font-size:16px;margin-bottom:20px">Locally is a closer look at where you live, written for your area and the areas you follow. Separate from In the Loop.</p>
+          <div style="margin-bottom:24px"><button class="chip" id="l-on" aria-pressed="false">Locally is on</button></div>
+          <p style="font-size:13px;font-weight:700;margin-bottom:10px">What to include</p>
+          <div class="chips" id="l-topics">{topics.map(([k, l]) => <button class="chip" data-k={k} aria-pressed="false">{l}</button>)}</div>
+          <p style="font-size:13px;font-weight:700;margin:24px 0 10px">How often</p>
+          <div class="chips" id="l-freq"><button class="chip" data-f="twice" aria-pressed="false">Twice a month</button><button class="chip" data-f="monthly" aria-pressed="false">Monthly</button></div>
+          <p class="meta" style="margin-top:20px">We save these now. Locally emails start once sign in is connected.</p>
+        </div>
+
+        <div class="panel" id="loop"><p class="eyebrow">In the Loop</p><h2 style="font-size:32px;margin-bottom:8px">Every Monday, the same for everyone</h2>
+          <p class="meta" style="font-size:16px;margin-bottom:20px">Food we trust, what is happening, and what just opened. It is not tailored to your area.</p>
+          <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap;max-width:560px">
+            <div style="flex:1;min-width:240px"><label class="sr" for="loop-email">Your email</label><input id="loop-email" name="email" type="email" required placeholder="name@email.com" /></div>
+            <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" id="loop-return" />
+            <button class="btn" type="submit">Join In the Loop</button>
+          </form>
+        </div>
+
+        <div class="panel" id="saved"><p class="eyebrow">Saved places</p><h2 style="font-size:32px;margin-bottom:8px">Your list</h2>
+          <p class="meta" style="font-size:16px;margin-bottom:12px">Places you saved on Food, ready whenever you are.</p>
+          <div id="s-list"></div><p style="margin-top:16px"><a href={url('/food')} style="font-weight:700">Find more places</a></p></div>
+
+        <div class="panel" id="privacy"><p class="eyebrow">Privacy and data</p><h2 style="font-size:32px;margin-bottom:8px">You are in control</h2>
+          <p class="meta" style="font-size:16px;margin-bottom:12px">We never sell your email, and you can leave at any time.</p>
+          <div class="row"><div style="flex:1;min-width:240px"><b>Clear what is saved on this device</b><br /><span class="meta">Your area, followed areas, Locally choices, and saved places.</span></div><button class="btn line sm" id="p-clear" type="button">Clear</button></div></div>
+      </div>
+    </div>
+  </section>
+  <Prefs />
+  <script is:inline define:vars={{ INDEX: index }}>
+    var TLD = window.TL, $ = function (id) { return document.getElementById(id); };
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+    $('loop-return').value = location.origin + location.pathname;
+    var home = $('a-home'), other = $('a-other');
+    function areaName() { var v = TLD.area(); return v; }
+    function initHome() { var v = TLD.area(), opts = [].map.call(home.options, function (o) { return o.value; });
+      if (!v) home.value = ''; else if (opts.indexOf(v) > -1) home.value = v; else { home.value = '__other'; other.value = v; } $('a-other-wrap').hidden = home.value !== '__other'; }
+    function picks() { var a = TLD.area(), box = $('a-picks'); if (!a || a === '__other') { box.hidden = true; return; }
+      var list = INDEX.filter(function (x) { return x.a === a; }).sort(function (x, y) { return y.r - x.r; }).slice(0, 3); box.hidden = !list.length; if (!list.length) return;
+      $('a-picks-h').textContent = 'Local picks for ' + a;
+      $('a-picks-list').innerHTML = list.map(function (x) { return '<div class="row" style="border-top:1px solid var(--line)"><b style="flex:1"><a href="' + esc(x.u) + '">' + esc(x.n) + '</a></b><span class="meta">' + esc(x.c) + (x.r ? ', ' + x.r + ' out of 5' : '') + '</span></div>'; }).join(''); }
+    function follows() { var f = TLD.follows(); $('a-follow').innerHTML = f.length ? f.map(function (a) { return '<button class="chip on" data-a="' + esc(a) + '" title="Unfollow">' + esc(a) + ' &times;</button>'; }).join('') : '<span class="meta">You are not following any areas yet.</span>'; }
+    home.addEventListener('change', function () { if (home.value === '__other') { $('a-other-wrap').hidden = false; TLD.setArea(other.value.trim()); } else { $('a-other-wrap').hidden = true; TLD.setArea(home.value); } picks(); });
+    other.addEventListener('input', function () { TLD.setArea(other.value.trim()); picks(); });
+    $('a-follow').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; var f = TLD.follows().filter(function (x) { return x !== b.dataset.a; }); TLD.setFollows(f); follows(); });
+    $('a-add-btn').addEventListener('click', function () { var v = $('a-add').value; if (!v) return; var f = TLD.follows(); if (f.indexOf(v) < 0) f.push(v); TLD.setFollows(f); $('a-add').value = ''; follows(); });
+    var pref = TLD.get('tl_locally', { on: true, topics: { food: true, things: true, openings: false, homes: true }, freq: 'twice' });
+    function savePref() { TLD.set('tl_locally', pref); }
+    function drawLocally() { var on = $('l-on'); on.classList.toggle('on', pref.on); on.setAttribute('aria-pressed', pref.on); on.textContent = pref.on ? 'Locally is on' : 'Locally is off';
+      document.querySelectorAll('#l-topics button').forEach(function (b) { var v = !!pref.topics[b.dataset.k]; b.classList.toggle('on', v); b.setAttribute('aria-pressed', v); });
+      document.querySelectorAll('#l-freq button').forEach(function (b) { var v = pref.freq === b.dataset.f; b.classList.toggle('on', v); b.setAttribute('aria-pressed', v); }); }
+    $('l-on').addEventListener('click', function () { pref.on = !pref.on; savePref(); drawLocally(); });
+    $('l-topics').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; pref.topics[b.dataset.k] = !pref.topics[b.dataset.k]; savePref(); drawLocally(); });
+    $('l-freq').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; pref.freq = b.dataset.f; savePref(); drawLocally(); });
+    function saved() { var s = TLD.saved(), box = $('s-list'); var rows = s.map(function (slug) { return INDEX.filter(function (x) { return x.s === slug; })[0]; }).filter(Boolean);
+      box.innerHTML = rows.length ? rows.map(function (x) { return '<div class="row"><div style="flex:1;min-width:220px"><a href="' + esc(x.u) + '" style="font-size:18px;font-weight:700">' + esc(x.n) + '</a><br><span class="meta">' + esc([x.c, x.a].filter(Boolean).join(', ')) + '</span></div><button class="btn line sm" data-slug="' + esc(x.s) + '" type="button">Remove</button></div>'; }).join('') : '<div class="row"><span class="meta">Nothing saved yet. Tap the heart on any place to add it here.</span></div>'; }
+    $('s-list').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; TLD.toggleSaved(b.dataset.slug); saved(); });
+    $('p-clear').addEventListener('click', function () { if (!confirm('Clear your saved choices on this device?')) return; ['tl_area', 'tl_follows', 'tl_saved', 'tl_locally'].forEach(function (k) { try { localStorage.removeItem(k); } catch (e) {} }); location.reload(); });
+    initHome(); picks(); follows(); drawLocally(); saved();
+  </script>
+</Base>

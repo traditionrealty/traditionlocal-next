@@ -9,14 +9,14 @@ export type Profile = {
   status: string; address: string; website: string; phone: string; postalCity: string;
   heroImage: string; heroAlt: string; heroCredit: string; heroRights: string; gallery: string[];
   faqs: { q: string; a: string }[]; typicalHomes: string; localTake: string; bestFor: string;
-  schools: string; zips: string; region: string; tags: string[];
+  schools: string; zips: string; region: string; subCategory: string; tags: string[];
   show: Record<string, boolean>; published: boolean;
 };
 export type Content = {
   slug: string; type: string; title: string; profile: string; summary: string; body: string;
   author: string; reviewDate: string; rating: string; heroImage: string; heroAlt: string; heroCredit: string;
   heroRights: string; gallery: string[]; starts: string; ends: string; eventLink: string; cost: string;
-  venue: string; address: string; city: string; zip: string; eventType: string; tags: string[];
+  venue: string; address: string; city: string; zip: string; eventType: string; startTime: string; endTime: string; tags: string[];
   faqs: { q: string; a: string }[]; published: boolean;
 };
 
@@ -61,7 +61,7 @@ export const profiles: Profile[] = rawProfiles.filter((r) => r.name).map((r) => 
   status: r.status, address: r.address, website: r.website, phone: r.phone, postalCity: r.postal_city,
   heroImage: r.hero_image, heroAlt: r.hero_alt, heroCredit: r.hero_credit, heroRights: r.hero_rights, gallery: list(r.gallery),
   faqs: faqs(r.faqs), typicalHomes: r.typical_homes, localTake: r.local_take, bestFor: r.best_for, schools: r.school_district,
-  zips: r.zip_codes, region: r.region, tags: list(r.tags),
+  zips: r.zip_codes, region: r.region, subCategory: r.sub_category, tags: list(r.tags),
   show: { living: on(r.show_living), reviews: on(r.show_reviews), nearby: on(r.show_nearby), events: on(r.show_events), newsletter: on(r.show_newsletter), faq: on(r.show_faq), media: on(r.show_media) },
   published: (r.page_status || '').toLowerCase() === 'published',
 })).filter((p) => IS_PREVIEW || p.published);
@@ -70,7 +70,7 @@ export const content: Content[] = rawContent.filter((r) => r.title).map((r) => (
   slug: r.slug || slugify(r.title), type: r.type, title: r.title, profile: r.profile, summary: r.summary, body: r.body, author: r.author,
   reviewDate: r.review_date, rating: r.rating, heroImage: r.hero_image, heroAlt: r.hero_alt, heroCredit: r.hero_credit, heroRights: r.hero_rights,
   gallery: list(r.gallery), starts: r.starts, ends: r.ends, eventLink: r.event_link, cost: r.cost, venue: r.venue_name, address: r.address,
-  city: r.city, zip: r.zip_code, eventType: r.event_type, tags: list(r.tags), faqs: faqs(r.faqs),
+  city: r.city, zip: r.zip_code, eventType: r.event_type, startTime: r.start_time, endTime: r.end_time, tags: list(r.tags), faqs: faqs(r.faqs),
   published: (r.page_status || '').toLowerCase() === 'published',
 })).filter((c) => IS_PREVIEW || c.published);
 

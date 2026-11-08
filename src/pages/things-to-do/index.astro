@@ -1,0 +1,70 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/pages.css';
+import { profiles, events, href, eventDates, url } from '../../lib/data';
+import { venuePlace } from '../../lib/helpers';
+const today = new Date(); const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+const toDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
+const list = events().map((e) => ({ e, a: toDate(e.starts), b: toDate(e.ends || e.starts) })).filter((x) => x.a && x.b && x.b >= t0).sort((x, y) => +x.a! - +y.a!)
+  .map((x) => ({ ...x, s: +x.a!, f: +x.b!, place: venuePlace(x.e) }));
+const kinds = [...new Set(list.map((x) => x.e.eventType).filter(Boolean))].sort();
+const places = profiles.filter((p) => p.type === 'Place').sort((a, b) => a.name.localeCompare(b.name));
+const placeAreas = [...new Set(places.map((p) => p.area).filter(Boolean))].sort();
+const DAY = 86400000;
+---
+<Base title="Things to do" active="Things to do" description="Events, places, and weekend ideas, checked and sorted for you.">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow">Make a little time for local</p>
+      <h1 style="margin-bottom:12px">Things to do in Houston</h1>
+      <p class="lead" style="margin-bottom:28px">Festivals, markets, music, and small neighborhood happenings, checked and sorted for you.</p>
+      <div class="tabs" id="t-when"><button class="chip on" data-w="all" aria-pressed="true">All upcoming</button><button class="chip" data-w="weekend" aria-pressed="false">This weekend</button><button class="chip" data-w="week" aria-pressed="false">Next 7 days</button><button class="chip" data-w="month" aria-pressed="false">Next 30 days</button></div>
+      {kinds.length > 0 && <div class="tabs" id="t-kind" style="margin-top:12px"><button class="chip on" data-k="" aria-pressed="true">Any kind</button>{kinds.map((k) => <button class="chip" data-k={k} aria-pressed="false">{k}</button>)}</div>}
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Events</p><h2 style="margin-bottom:8px">Coming up</h2><p class="meta" id="t-count" style="margin-bottom:12px">{list.length} events</p>
+      <div id="t-list">
+        {list.map((x) => (
+          <div class="row t-item" data-s={x.s} data-f={x.f} data-k={x.e.eventType}>
+            <span class="tag">{eventDates(x.e)}</span>
+            <div style="flex:1;min-width:240px"><a href={href(x.e)} style="font-size:18px;font-weight:700;text-decoration:none">{x.e.title}</a><br /><span class="meta">{x.place ? <a href={href(x.place)}>{x.place.name}</a> : (x.e.venue || x.e.profile || 'Houston')}{x.e.eventType && `, ${x.e.eventType}`}</span></div>
+            <a class="btn line sm" href={href(x.e)}>See details</a>
+          </div>
+        ))}
+      </div>
+      <div class="card pad hidden" id="t-empty" style="margin-top:8px"><b>Nothing listed for that choice yet.</b><p class="meta" style="margin-top:4px">Try another time or kind of event.</p></div>
+    </div>
+  </section>
+
+  <section class="band tint" id="places">
+    <div class="wrap">
+      <p class="eyebrow">Places to visit</p><h2 style="margin-bottom:16px">Worth a trip any day</h2>
+      <div class="card pad search" style="margin-bottom:24px"><label for="p-area">Area</label><select id="p-area"><option value="">All of Greater Houston</option>{placeAreas.map((a) => <option>{a}</option>)}</select></div>
+      <div class="grid g3" id="p-grid">
+        {places.map((p) => <a class="card pad p-item" href={href(p)} data-area={p.area} style="text-decoration:none"><h4 style="margin-bottom:4px">{p.name}</h4><p class="meta">{[p.subCategory, p.area].filter(Boolean).join(', ')}</p></a>)}
+      </div>
+    </div>
+  </section>
+
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+      <div><h4 style="margin-bottom:4px">Hosting something local?</h4><p>Tell us about your event, and we will share it with neighbors.</p></div>
+      <a class="btn" href={`mailto:traditionlocal@gmail.com?subject=${encodeURIComponent('List my event')}`}>List your event</a>
+    </div>
+  </section>
+  <script is:inline define:vars={{ DAY }}>
+    var now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime(), when = 'all', kind = '';
+    function weekendRange() { var d = new Date(t0), dow = d.getDay(); var fri = dow === 6 ? t0 - DAY : dow === 0 ? t0 - 2 * DAY : t0 + (5 - dow) * DAY; return [fri, fri + 2 * DAY]; }
+    function run() { var items = document.querySelectorAll('.t-item'), n = 0, r = weekendRange();
+      items.forEach(function (i) { var s = +i.dataset.s, f = +i.dataset.f, ok = true;
+        if (when === 'weekend') ok = s <= r[1] && f >= Math.max(r[0], t0); else if (when === 'week') ok = s <= t0 + 7 * DAY; else if (when === 'month') ok = s <= t0 + 30 * DAY;
+        if (kind && i.dataset.k !== kind) ok = false; i.classList.toggle('hidden', !ok); if (ok) n++; });
+      document.getElementById('t-count').textContent = n + (n === 1 ? ' event' : ' events'); document.getElementById('t-empty').classList.toggle('hidden', n > 0); }
+    function wire(id, key) { var el = document.getElementById(id); if (!el) return; el.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; if (key === 'w') when = b.dataset.w; else kind = b.dataset.k; [].forEach.call(el.children, function (c) { c.classList.toggle('on', c === b); c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); }); run(); }); }
+    wire('t-when', 'w'); wire('t-kind', 'k'); run();
+    var pa = document.getElementById('p-area'); pa.addEventListener('change', function () { document.querySelectorAll('.p-item').forEach(function (i) { i.classList.toggle('hidden', !!pa.value && i.dataset.area !== pa.value); }); });
+  </script>
+</Base>

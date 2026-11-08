@@ -1,0 +1,60 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/pages.css';
+import { events, href, media, eventDates, dateText, url } from '../../lib/data';
+import { venuePlace } from '../../lib/helpers';
+import { config } from '../../config';
+export function getStaticPaths() { return events().map((e) => ({ params: { slug: e.slug }, props: { e } })); }
+const { e } = Astro.props;
+const place = venuePlace(e), m = media(e) || (place ? media(place) : null);
+const web = e.eventLink.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '');
+const dates = e.starts && e.ends && e.ends !== e.starts ? `${dateText(e.starts)} to ${dateText(e.ends)}` : dateText(e.starts);
+const where = place ? place.name : e.venue || e.profile;
+---
+<Base title={e.title} description={e.summary} active="Things to do">
+  <section class="band hero">
+    <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
+      <div style="grid-column:span 8">
+        <p class="meta" style="margin-bottom:12px"><a href={url('/things-to-do')} style="font-weight:700">Things to do</a> &rsaquo; {e.eventType || 'Event'}</p>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">{e.eventType || 'Event'}</span><span class="tag soft">{eventDates(e)}</span></div>
+        <h1 style="margin-bottom:16px">{e.title}</h1>
+        {e.summary && <p class="lead" style="margin-bottom:28px">{e.summary}</p>}
+        <div style="display:flex;gap:12px;flex-wrap:wrap">{e.eventLink && <a class="btn" href={e.eventLink} rel="noopener">Visit {web}</a>}<button class="btn line" id="ics">Add to calendar</button></div>
+      </div>
+      <div style="grid-column:span 4">{m ? <img class="photo" style="height:300px;border-radius:16px" src={m.src} alt={m.alt} /> : <div class="ph" style="height:300px;border-radius:16px">Event image</div>}</div>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">The details</p><h2 style="margin-bottom:28px">Plan your visit</h2>
+      <div class="grid g3">
+        <div class="card pad"><p class="eyebrow">When</p><p style="font-size:20px;font-weight:700">{dates}</p>{(e.startTime || e.endTime) && <p class="meta" style="margin-top:6px">{[e.startTime, e.endTime].filter(Boolean).join(' to ')}</p>}</div>
+        <div class="card pad"><p class="eyebrow">Where</p>{where ? <p style="font-size:20px;font-weight:700">{place ? <a href={href(place)}>{place.name}</a> : where}</p> : <p class="meta">Location coming soon.</p>}{e.address && <p class="meta" style="margin-top:6px">{e.address}</p>}</div>
+        <div class="card pad"><p class="eyebrow">Cost</p><p style="font-size:20px;font-weight:700">{e.cost || 'Check the event site'}</p></div>
+      </div>
+      <p class="meta" style="margin-top:20px">Dates and prices can change, so check the event site before you go.</p>
+      {e.tags.length > 0 && <div class="chips" style="margin-top:20px">{e.tags.map((t) => <span class="chip">{t}</span>)}</div>}
+      <div class="card pad pick" style="padding:32px;margin-top:40px;max-width:760px">
+        <p class="eyebrow">In the Loop</p><h3 style="margin-bottom:8px">Do not miss the next one.</h3>
+        <p class="meta" style="margin-bottom:20px;font-size:16px">Every Monday: three local finds, the weekend list, and what just opened.</p>
+        <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
+          <div style="flex:1;min-width:220px"><label class="sr" for="ev-email">Your email</label><input id="ev-email" name="email" type="email" required placeholder="name@email.com" /></div>
+          <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
+          <button class="btn" type="submit">Join In the Loop</button>
+        </form>
+      </div>
+    </div>
+  </section>
+  <script is:inline define:vars={{ T: e.title, S: e.starts, E: e.ends || e.starts, W: where, L: e.eventLink }}>
+    document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });
+    function ymd(s) { var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? m[3] + ('0' + m[1]).slice(-2) + ('0' + m[2]).slice(-2) : ''; }
+    document.getElementById('ics').addEventListener('click', function () {
+      var a = ymd(S), b = ymd(E) || a; if (!a) { alert('This event has no date yet.'); return; }
+      var end = new Date(+b.slice(0, 4), +b.slice(4, 6) - 1, +b.slice(6, 8) + 1), pad = function (n) { return ('0' + n).slice(-2); };
+      var endStr = end.getFullYear() + pad(end.getMonth() + 1) + pad(end.getDate());
+      var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Tradition Local//EN', 'BEGIN:VEVENT', 'UID:' + a + '-' + T.replace(/\W+/g, '') + '@traditionlocal.com', 'DTSTAMP:' + a + 'T000000Z', 'DTSTART;VALUE=DATE:' + a, 'DTEND;VALUE=DATE:' + endStr,
+        'SUMMARY:' + T.replace(/[,;]/g, ' '), 'LOCATION:' + (W || '').replace(/[,;]/g, ' '), 'DESCRIPTION:' + (L || ''), 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+      var blob = new Blob([ics], { type: 'text/calendar' }), link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'event.ics'; link.click();
+    });
+  </script>
+</Base>

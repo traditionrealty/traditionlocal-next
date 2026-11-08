@@ -1,0 +1,74 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/pages.css';
+import { url } from '../lib/data';
+import { areaPages, bizIn, subsIn } from '../lib/helpers';
+import { config } from '../config';
+const popular = areaPages().map((p) => ({ n: p.name, w: bizIn(p.name).length + subsIn(p.name).length })).sort((a, b) => b.w - a.w).slice(0, 10).map((x) => x.n);
+const topics = [['Neighborhood guide', 'Get a feel for the area and daily life.'], ['Food and coffee', 'Find your next restaurant or favorite cafe.'], ['Things to do', 'Parks, outings, and local events.'],
+  ['Homes and market trends', 'Home styles, prices, and market updates.'], ['Schools', 'Districts and what to check for an address.'], ['Moving to the area', 'Practical resources for your next move.']];
+---
+<Base title="Ask Dillon" active="More" sub="makeithome" description="Tell us which Houston neighborhoods you are curious about, and Dillon will reply personally.">
+  <section class="band hero"><div class="wrap"><p class="eyebrow">A neighbor to ask</p><h1 style="margin-bottom:16px">Get to know a neighborhood.</h1><p class="lead">Tell us what matters to you, and Dillon will reply personally. Questions are always welcome, with no pressure.</p></div></section>
+  <section class="band">
+    <div class="wrap split">
+      <div class="main">
+        <div class="panel" id="ask-thanks" hidden style="border-color:var(--gold)">
+          <p class="eyebrow">Thank you</p><h2 id="ask-title" style="margin-bottom:12px">Your request is in.</h2>
+          <p style="font-size:18px;margin-bottom:20px">Dillon will reply personally. In the meantime, here are a few places to start.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/neighborhoods')}>Explore neighborhoods</a><a class="btn line" href={url('/find-your-fit')}>Find your fit</a></div>
+        </div>
+        <form class="panel" id="ask-form" novalidate data-endpoint={config.newsletterAction} data-contact={config.contactEmail}>
+          <fieldset style="border:0;padding:0;margin:0 0 24px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">Where are you curious about? Choose one or more.</legend>
+            <div class="chips" id="ask-areas">{[...popular, 'Somewhere else'].map((a) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="areas" value={a} style="position:absolute;opacity:0;width:1px;height:1px" />{a}</label>)}</div>
+            <div id="ask-else-wrap" hidden style="margin-top:12px;max-width:380px"><label for="ask-else">Which area?</label><input id="ask-else" type="text" placeholder="Try Cypress or 77449" /></div>
+            <p class="msg-err" id="ask-area-err" hidden>Choose at least one area.</p>
+          </fieldset>
+          <fieldset style="border:0;padding:0;margin:0 0 24px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">What would you like to know?</legend>
+            <div class="chips" id="ask-topics">{topics.map(([t]) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="topics" value={t} style="position:absolute;opacity:0;width:1px;height:1px" />{t}</label>)}</div></fieldset>
+          <div class="grid g2" style="margin-bottom:20px">
+            <div><label for="ask-first">First name</label><input id="ask-first" type="text" autocomplete="given-name" placeholder="Your first name" /><p class="msg-err" id="ask-first-err" hidden>Please add your first name.</p></div>
+            <div><label for="ask-email">Email</label><input id="ask-email" type="email" autocomplete="email" placeholder="name@email.com" /><p class="msg-err" id="ask-email-err" hidden>Enter an email address like name@company.com</p></div>
+          </div>
+          <div style="margin-bottom:20px"><label for="ask-note">Anything else? Optional</label><textarea id="ask-note" placeholder="Tell us about your timing, budget, or what you are hoping for."></textarea></div>
+          <label style="display:flex;gap:10px;align-items:flex-start;font-weight:400;margin-bottom:20px"><input id="ask-sub" type="checkbox" checked style="width:auto;min-height:0;margin-top:4px" /><span>Also send me In the Loop, every Monday.</span></label>
+          <input id="ask-company" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+          <button class="btn" id="ask-send" type="submit" style="min-height:52px">Send my request</button>
+          <p class="msg-err" id="ask-fail" hidden></p>
+          <p class="meta" style="margin-top:14px">By sending this, you agree to receive emails from Tradition Local. You can unsubscribe anytime. We only call or text if you ask us to.</p>
+        </form>
+      </div>
+      <div class="side">
+        <div class="card pad"><p class="eyebrow">What to expect</p>
+          <div class="row" style="border-top:0"><span class="tag">1</span><div><b>Dillon reads it</b><br /><span class="meta">Every request is read by a person.</span></div></div>
+          <div class="row"><span class="tag">2</span><div><b>A personal reply</b><br /><span class="meta">A short local overview that fits what you asked.</span></div></div>
+          <div class="row"><span class="tag">3</span><div><b>No pressure</b><br /><span class="meta">Take your time. Ask as much as you like.</span></div></div></div>
+        <div class="card pad" style="margin-top:24px;background:var(--butter);border-color:var(--butter)"><p class="eyebrow" style="color:var(--navy)">Prefer to explore first?</p><p style="margin-bottom:16px">Try the quiz to see which neighborhoods match what you love.</p><a class="btn" href={url('/find-your-fit')}>Find your fit</a></div>
+      </div>
+    </div>
+  </section>
+  <script is:inline>
+    var form = document.getElementById('ask-form'), $ = function (id) { return document.getElementById(id); };
+    function paint() { form.querySelectorAll('label.chip').forEach(function (l) { var c = l.querySelector('input'); l.classList.toggle('on', c.checked); }); $('ask-else-wrap').hidden = !form.querySelector('input[value="Somewhere else"]').checked; }
+    form.addEventListener('change', paint); paint();
+    function checked(name) { return [].map.call(form.querySelectorAll('input[name=' + name + ']:checked'), function (x) { return x.value; }); }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var picked = checked('areas'), first = $('ask-first').value.trim(), em = $('ask-email').value.trim(), elseVal = $('ask-else').value.trim();
+      var areaOk = picked.length > 0, nameOk = first.length > 0, emOk = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em);
+      $('ask-area-err').hidden = areaOk; $('ask-first-err').hidden = nameOk; $('ask-email-err').hidden = emOk;
+      if (!areaOk || !nameOk || !emOk) return;
+      var areas = picked.filter(function (a) { return a !== 'Somewhere else'; }); if (picked.indexOf('Somewhere else') > -1) areas.push(elseVal || 'Somewhere else');
+      var payload = { first_name: first, email: em, areas: areas, address: '', topics: checked('topics'), note: $('ask-note').value.trim(), subscribe: $('ask-sub').checked, company: $('ask-company').value };
+      var btn = $('ask-send'), fail = $('ask-fail'); fail.hidden = true; btn.disabled = true; btn.textContent = 'Sending...';
+      try {
+        var res = await fetch(form.dataset.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        var out = await res.json(); if (!out.ok) throw new Error('rejected');
+        $('ask-title').textContent = 'Thank you, ' + first + '.'; form.hidden = true; $('ask-thanks').hidden = false; window.scrollTo({ top: 0 });
+      } catch (err) {
+        fail.textContent = 'We could not send your request. Please try again in a moment, or email us at ' + form.dataset.contact + '.'; fail.hidden = false;
+      } finally { btn.disabled = false; btn.textContent = 'Send my request'; }
+    });
+  </script>
+</Base>

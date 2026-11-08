@@ -1,0 +1,27 @@
+<script is:inline>
+  // Remembers a reader's area, followed areas, and saved places on this device until sign in is connected.
+  (function () {
+    function g(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
+    function s(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    var TL = window.TL = {
+      get: g, set: s,
+      area: function () { return g('tl_area', ''); }, setArea: function (a) { s('tl_area', a); },
+      follows: function () { return g('tl_follows', []); }, setFollows: function (a) { s('tl_follows', a); },
+      saved: function () { return g('tl_saved', []); },
+      toggleSaved: function (slug) { var a = g('tl_saved', []), i = a.indexOf(slug); if (i > -1) a.splice(i, 1); else a.push(slug); s('tl_saved', a); return i < 0; }
+    };
+    function paint() {
+      var saved = TL.saved();
+      document.querySelectorAll('.save').forEach(function (b) {
+        var on = saved.indexOf(b.dataset.slug) > -1;
+        b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        b.setAttribute('aria-label', (on ? 'Remove ' : 'Save ') + (b.dataset.name || 'place') + (on ? ' from saved' : ''));
+      });
+    }
+    document.addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('.save'); if (!b) return;
+      e.preventDefault(); TL.toggleSaved(b.dataset.slug); paint(); document.dispatchEvent(new Event('tl:saved'));
+    });
+    document.addEventListener('tl:repaint', paint); paint();
+  })();
+</script>

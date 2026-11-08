@@ -1,34 +1,120 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { businesses, reviewsFor, href, stars } from '../../lib/data';
-const list = businesses().sort((a, b) => a.name.localeCompare(b.name));
-const areas = [...new Set(list.map((b) => b.area).filter(Boolean))].sort();
+import Prefs from '../../components/Prefs.astro';
+import '../../styles/pages.css';
+import { businesses, href, url } from '../../lib/data';
+import { category, foodTab, cuisineRegion, topRating, FOOD_TABS, WORLD } from '../../lib/helpers';
+
+const cards = businesses().filter((b) => b.status !== 'Closed').map((b) => ({ b, cat: category(b), tab: foodTab(b), world: cuisineRegion(b), rating: topRating(b.name) }))
+  .sort((x, y) => y.rating - x.rating || x.b.name.localeCompare(y.b.name));
+const areaCount: Record<string, number> = {};
+cards.forEach((c) => { if (c.b.area) areaCount[c.b.area] = (areaCount[c.b.area] || 0) + 1; });
+const areas = Object.keys(areaCount).sort();
+const topAreas = Object.entries(areaCount).sort((a, b) => b[1] - a[1]).slice(0, 6).map((x) => x[0]);
+const worldLists: Record<string, typeof cards> = {};
+WORLD.forEach(([k]) => { worldLists[k] = (k === 'all' ? cards.filter((c) => c.world) : cards.filter((c) => c.world === k)).slice(0, 9); });
+// small index the page script uses for "Eat by neighborhood" and for saved places
+const index = cards.map((c) => ({ s: c.b.slug, n: c.b.name, a: c.b.area, c: c.cat, r: c.rating, u: href(c.b) }));
+const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/></svg>';
 ---
-<Base title="Food" active="Food">
+<Base title="Food" active="Food" description="Reviews from Sara, with a rating you can trust.">
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Eat like a local</p>
       <h1 style="margin-bottom:12px">What sounds good?</h1>
-      <p class="lead" style="margin-bottom:28px">Reviews from Sara, with a rating you can trust.</p>
-      <div class="card pad" style="max-width:520px"><label for="f-area">Area</label><select id="f-area"><option value="">Anywhere</option>{areas.map((a) => <option>{a}</option>)}</select></div>
+      <p class="lead" style="margin-bottom:28px">Reviews from Sara, with a rating you can trust. Start with a craving, an area, or what is new.</p>
+      <div class="card pad"><div class="filters">
+        <div><label for="f-q">Search</label><input id="f-q" type="search" placeholder="Try thai, coffee, or a place name" /></div>
+        <div><label for="f-area">Area</label><select id="f-area"><option value="">Anywhere</option>{areas.map((a) => <option>{a}</option>)}</select></div>
+      </div></div>
+      <div class="tabs" id="f-tabs" style="margin-top:20px">{FOOD_TABS.map(([k, l], i) => <button class={`chip${i === 0 ? ' on' : ''}`} data-tab={k} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}</div>
     </div>
   </section>
+
+  <section class="band" id="browse">
+    <div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div><p class="eyebrow">Browse</p><h2>Every place we have reviewed</h2><p class="meta" id="f-count" style="margin-top:6px">{cards.length} places</p></div>
+        <a class="btn line" href={url('/account#saved')}>Saved places (<span id="f-saved">0</span>)</a>
+      </div>
+      <div class="grid g3" id="f-grid">
+        {cards.map((c) => (
+          <div class="card tcard f-item" data-area={c.b.area} data-tab={c.tab} data-name={`${c.b.name} ${c.cat} ${c.b.area}`.toLowerCase()}>
+            <a href={href(c.b)}>
+              {c.rating > 0 && <span class="tag">{c.rating} out of 5</span>}
+              <h4 style="margin:12px 0 4px">{c.b.name}</h4><p class="meta">{[c.cat, c.b.area].filter(Boolean).join(', ')}</p>
+            </a>
+            <button class="save" data-slug={c.b.slug} data-name={c.b.name} set:html={heart}></button>
+          </div>
+        ))}
+      </div>
+      <div class="card pad hidden" id="f-empty" style="margin-top:8px"><b>No places match yet.</b><p class="meta" style="margin-top:4px">Try a different area or search.</p></div>
+    </div>
+  </section>
+
+  <section class="band tint">
+    <div class="wrap">
+      <p class="eyebrow">Eat around the world</p>
+      <h2 style="margin-bottom:24px">Follow a cuisine</h2>
+      <div class="tabs" id="w-tabs" style="margin-bottom:24px">{WORLD.map(([k, l], i) => <button class={`chip${i === 0 ? ' on' : ''}`} data-world={k} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}</div>
+      {WORLD.map(([k], i) => (
+        <div class={`w-block${i === 0 ? '' : ' hidden'}`} data-world={k}>
+          {worldLists[k].length ? (
+            <div class="grid g3">{worldLists[k].map((c) => <a class="card pad" href={href(c.b)} style="text-decoration:none">{c.rating > 0 && <span class="tag">{c.rating} out of 5</span>}<h4 style="margin:12px 0 4px">{c.b.name}</h4><p class="meta">{[c.cat, c.b.area].filter(Boolean).join(', ')}</p></a>)}</div>
+          ) : (
+            <div class="card pad" style="max-width:640px"><b>We are still finding places for this region.</b><p class="meta" style="margin-top:4px">Know a favorite? Tell us and we will look into it.</p></div>
+          )}
+        </div>
+      ))}
+    </div>
+  </section>
+
   <section class="band">
     <div class="wrap">
-      <p class="meta" id="f-count" style="margin-bottom:16px">{list.length} places</p>
-      <div class="grid g3">
-        {list.map((b) => { const r = reviewsFor(b.name)[0]; return (
-          <a class="card pad f-item" data-area={b.area} href={href(b)} style="text-decoration:none">
-            {r && stars(r.rating) > 0 && <span class="tag">{stars(r.rating)} out of 5</span>}
-            <h4 style="margin:12px 0 4px">{b.name}</h4><p class="meta">{[b.tags[0], b.area].filter(Boolean).join(', ')}</p>
-          </a>); })}
-      </div>
+      <p class="eyebrow">Eat by neighborhood</p>
+      <h2 style="margin-bottom:12px">Start close to home</h2>
+      <p class="meta" id="n-note" style="font-size:16px;margin-bottom:24px">Showing the busiest areas. Set your area in your account and it opens first.</p>
+      <div class="tabs" id="n-tabs" style="margin-bottom:24px"></div>
+      <div class="grid g3" id="n-grid"></div>
+      <p style="margin-top:24px"><a id="n-link" href={url('/neighborhoods')} style="font-weight:700">See all neighborhoods</a></p>
     </div>
   </section>
-  <script is:inline>
-    var sel = document.getElementById('f-area'), items = [].slice.call(document.querySelectorAll('.f-item')), cnt = document.getElementById('f-count');
-    function run() { var a = sel.value, n = 0; items.forEach(function (i) { var show = !a || i.dataset.area === a; i.style.display = show ? '' : 'none'; if (show) n++; }); cnt.textContent = n + (n === 1 ? ' place' : ' places'); }
-    var q = new URLSearchParams(location.search).get('area'); if (q) sel.value = q;
-    sel.addEventListener('change', run); run();
+
+  <Prefs />
+  <script is:inline define:vars={{ INDEX: index, TOP: topAreas, BASE: url('') }}>
+    var TLD = window.TL;
+    // filters
+    var q = document.getElementById('f-q'), sel = document.getElementById('f-area'), items = [].slice.call(document.querySelectorAll('.f-item')), tab = 'all';
+    function run() {
+      var term = q.value.trim().toLowerCase(), a = sel.value, n = 0;
+      items.forEach(function (i) { var ok = (!a || i.dataset.area === a) && (tab === 'all' || i.dataset.tab === tab) && (!term || i.dataset.name.indexOf(term) > -1); i.classList.toggle('hidden', !ok); if (ok) n++; });
+      document.getElementById('f-count').textContent = n + (n === 1 ? ' place' : ' places');
+      document.getElementById('f-empty').classList.toggle('hidden', n > 0);
+    }
+    var pre = new URLSearchParams(location.search).get('area'); if (pre) sel.value = pre;
+    q.addEventListener('input', run); sel.addEventListener('change', run);
+    document.getElementById('f-tabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; tab = b.dataset.tab; [].forEach.call(this.children, function (c) { c.classList.toggle('on', c === b); c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); }); run(); });
+    run();
+    // cuisine tabs
+    document.getElementById('w-tabs').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; [].forEach.call(this.children, function (c) { c.classList.toggle('on', c === b); c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); });
+      document.querySelectorAll('.w-block').forEach(function (d) { d.classList.toggle('hidden', d.dataset.world !== b.dataset.world); }); });
+    // saved count
+    function savedCount() { document.getElementById('f-saved').textContent = TLD.saved().length; }
+    document.addEventListener('tl:saved', savedCount); savedCount();
+    // eat by neighborhood: the reader's area and followed areas come first
+    var mine = TLD.area(), fol = TLD.follows(), names = [];
+    [mine].concat(fol, TOP).forEach(function (a) { if (a && names.indexOf(a) < 0) names.push(a); });
+    names = names.slice(0, 8);
+    var current = names[0], tabs = document.getElementById('n-tabs'), grid = document.getElementById('n-grid');
+    function label(a) { return a + (a === mine ? ' (your area)' : fol.indexOf(a) > -1 ? ' (following)' : ''); }
+    function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+    function draw() {
+      tabs.innerHTML = names.map(function (a) { return '<button class="chip' + (a === current ? ' on' : '') + '" data-a="' + esc(a) + '" aria-pressed="' + (a === current) + '">' + esc(label(a)) + '</button>'; }).join('');
+      var list = INDEX.filter(function (x) { return x.a === current; }).sort(function (a, b) { return b.r - a.r; }).slice(0, 6);
+      grid.innerHTML = list.length ? list.map(function (x) { return '<a class="card pad" href="' + esc(x.u) + '" style="text-decoration:none">' + (x.r ? '<span class="tag">' + x.r + ' out of 5</span>' : '') + '<h4 style="margin:12px 0 4px">' + esc(x.n) + '</h4><p class="meta">' + esc([x.c, x.a].filter(Boolean).join(', ')) + '</p></a>'; }).join('') : '<div class="card pad" style="max-width:640px"><b>No reviews here yet.</b><p class="meta" style="margin-top:4px">We are adding more every week.</p></div>';
+      document.getElementById('n-note').textContent = current === mine ? 'Showing your area first.' : fol.indexOf(current) > -1 ? 'Showing an area you follow.' : 'Showing the busiest areas. Set your area in your account and it opens first.';
+    }
+    tabs.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; current = b.dataset.a; draw(); });
+    draw();
   </script>
 </Base>
