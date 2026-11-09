@@ -6,7 +6,7 @@ import { areaPages } from '../lib/helpers';
 import { config } from '../config';
 const areas = areaPages().map((p) => p.name).sort();
 ---
-<Base title="Newsletters" active="More" description="In the Loop every Monday, and Locally for your neighborhood.">
+<Base title="Newsletters" active="More" description="In the Loop every Monday, and Locally Plus for your neighborhood.">
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Newsletters</p>
@@ -20,26 +20,27 @@ const areas = areaPages().map((p) => p.name).sort();
       <div class="main">
         <div class="grid g2" style="margin-bottom:40px">
           <div class="card pad"><span class="tag">Every Monday</span><h3 style="margin:14px 0 8px">In the Loop</h3><p style="margin-bottom:12px">The same note for everyone, from Dillon and Sara in their own voice.</p><ul style="padding-left:20px;margin:0 0 12px;display:grid;gap:6px"><li>Three local finds, short enough to read with your coffee</li><li>The weekend list</li><li>One Worth the Drive pick</li><li>What just opened</li></ul><p class="meta">Written by Sara and Dillon.</p></div>
-          <div class="card pad"><span class="tag">For your area</span><h3 style="margin:14px 0 8px">Locally</h3><p style="margin-bottom:12px">A closer look at where you live, written for your neighborhood and the areas you follow.</p><ul style="padding-left:20px;margin:0 0 12px;display:grid;gap:6px"><li>Food and drink to try nearby</li><li>Things to do coming up near you</li><li>New openings in your area</li><li>Neighborhoods and homes</li></ul><p class="meta">Separate from In the Loop.</p></div>
+          <div class="card pad"><span class="tag">For your area</span><h3 style="margin:14px 0 8px">Locally Plus</h3><p style="margin-bottom:12px">A closer look at where you live, written for your neighborhood and the areas you follow.</p><ul style="padding-left:20px;margin:0 0 12px;display:grid;gap:6px"><li>Food and drink to try nearby</li><li>Things to do coming up near you</li><li>New openings in your area</li><li>Neighborhoods and homes</li></ul><p class="meta">Separate from In the Loop.</p></div>
         </div>
         <form class="panel" id="nl-form" action={config.newsletterAction} method="post">
           <h2 style="font-size:32px;margin-bottom:20px">Sign up</h2>
-          <div style="max-width:460px;margin-bottom:20px"><label for="nl-email">Your email</label><input id="nl-email" name="email" type="email" required placeholder="name@email.com" autocomplete="email" /></div>
+          <div id="nl-email-wrap" style="max-width:460px;margin-bottom:20px"><label for="nl-email">Your email</label><input id="nl-email" name="email" type="email" required placeholder="name@email.com" autocomplete="email" /></div>
+          <p class="meta hidden" id="nl-as" style="margin-bottom:20px"></p>
           <p style="font-size:13px;font-weight:700;margin-bottom:10px">Which editions?</p>
           <div style="display:grid;gap:10px;margin-bottom:20px">
             <label style="display:flex;gap:10px;align-items:center;font-weight:400"><input type="checkbox" checked disabled style="width:auto;min-height:0" /><span>In the Loop, every Monday</span></label>
-            <label style="display:flex;gap:10px;align-items:center;font-weight:400"><input id="nl-locally" type="checkbox" style="width:auto;min-height:0" /><span>Locally, for my area</span></label>
+            <label style="display:flex;gap:10px;align-items:center;font-weight:400"><input id="nl-locally" type="checkbox" style="width:auto;min-height:0" /><span>Locally Plus, for my area</span></label>
           </div>
           <div id="nl-area-wrap" class="hidden" style="max-width:460px;margin-bottom:20px"><label for="nl-area">Your area</label><select id="nl-area"><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}</select>
-            <p class="meta" style="margin-top:8px">We save your area on this device. Locally emails start once sign in is connected.</p></div>
+            <p class="meta" style="margin-top:8px">We save your area on this device. Locally Plus emails start once sign in is connected.</p></div>
           <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
           <input type="hidden" name="return" id="nl-return" />
-          <button class="btn" type="submit" style="min-height:52px">Join In the Loop</button>
+          <button class="btn" id="nl-go" type="submit" style="min-height:52px">Join In the Loop</button>
           <p class="meta" style="margin-top:14px">Free, and one click to leave. We never sell your email.</p>
         </form>
       </div>
       <div class="side">
-        <div class="card pad"><p class="eyebrow">Already reading?</p><p style="margin-bottom:16px">Choose your area, follow places, and manage Locally in your account.</p><a class="btn line" href={url('/account')}>Open your account</a></div>
+        <div class="card pad"><p class="eyebrow">Already reading?</p><p style="margin-bottom:16px">Choose your area, follow places, and manage Locally Plus in your account.</p><a class="btn line" href={url('/account')}>Open your account</a></div>
       </div>
     </div>
   </section>
@@ -47,6 +48,8 @@ const areas = areaPages().map((p) => p.name).sort();
     (function () {
       var $ = function (id) { return document.getElementById(id); };
       $('nl-return').value = location.origin + location.pathname;
+      var user = null; try { user = JSON.parse(localStorage.getItem('tl_user') || 'null'); } catch (e) {}
+      if (user && user.email) { $('nl-email').value = user.email; $('nl-email-wrap').classList.add('hidden'); $('nl-as').textContent = 'Signed in as ' + user.email + '. Choose your editions and add yourself.'; $('nl-as').classList.remove('hidden'); $('nl-go').textContent = 'Add me'; }
       var q = new URLSearchParams(location.search).get('newsletter'), flash = $('nl-flash');
       if (q) { flash.classList.remove('hidden'); flash.textContent = q === 'ok' ? 'Thanks, you are subscribed. Welcome to Tradition Local.' : q === 'invalid' ? 'That email address does not look right. Please try again.' : 'Something went wrong. Please try again, or email us.'; }
       $('nl-locally').addEventListener('change', function () { $('nl-area-wrap').classList.toggle('hidden', !this.checked); });

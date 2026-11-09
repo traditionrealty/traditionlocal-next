@@ -23,7 +23,7 @@ const pages: [string, string, string][] = [
   ['Things to do', '/things-to-do', 'Events, calendar, and places to visit'],
   ['Videos', '/videos', 'Walks, coffee runs, and reviews on YouTube'],
   ['Openings and closings', '/openings-and-closings', 'What just opened, what is coming, and what closed'],
-  ['Newsletters', '/newsletters', 'In the Loop and Locally'],
+  ['Newsletters', '/newsletters', 'In the Loop and Locally Plus'],
   ['Make it home', '/make-it-home', 'Moving, renting, or buying'],
   ['Find your fit', '/find-your-fit', 'Match neighborhoods to what you love'],
   ['New builds', '/new-builds', 'Newer and master planned communities'],
