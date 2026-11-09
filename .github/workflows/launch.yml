@@ -16,7 +16,7 @@ on:
         required: false
         default: ''
       min_pages:
-        description: 'Safety stop: do not publish if fewer pages than this would go live'
+        description: 'Safety stop: do not publish if fewer real pages than this would go live'
         required: false
         default: '600'
 
@@ -24,10 +24,6 @@ permissions:
   contents: read
   pages: write
   id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: false
 
 jobs:
   build:
@@ -60,8 +56,8 @@ jobs:
           {
             echo "## Live site readiness"
             echo ""
-            echo "- Pages that would go live: **$PAGES** (the draft preview has about 1,650)"
-            echo "- Addresses in the sitemap: **$URLS**"
+            echo "- Real pages that would go live (the sitemap): **$URLS**. With everything published, the full site has about 1,600."
+            echo "- Files built in total: $PAGES, including redirects from your old Wix addresses. Those point at pages that do not exist until the content is published."
             for d in food neighborhoods reviews events things-to-do subdivisions; do
               echo "- /$d: $(find dist/$d -name '*.html' 2>/dev/null | wc -l) pages"
             done
@@ -71,8 +67,8 @@ jobs:
       - name: Safety checks
         if: ${{ inputs.publish == 'true' }}
         run: |
-          PAGES=$(find dist -name '*.html' | wc -l)
-          if [ "$PAGES" -lt "$MIN_PAGES" ]; then echo "Only $PAGES pages would go live, below the safety stop of $MIN_PAGES. Most content is still Draft. Nothing was published."; exit 1; fi
+          URLS=$(grep -c '<loc>' dist/sitemap.xml || true)
+          if [ "$URLS" -lt "$MIN_PAGES" ]; then echo "Only $URLS real pages would go live, below the safety stop of $MIN_PAGES. Most content is still Draft. Nothing was published."; exit 1; fi
           if grep -q 'noindex, nofollow' dist/index.html; then echo "The home page still blocks Google. Nothing was published."; exit 1; fi
           if grep -q 'Draft preview' dist/index.html; then echo "The draft banner is still on the home page. Nothing was published."; exit 1; fi
           echo "www.traditionlocal.com" > dist/CNAME
@@ -83,6 +79,9 @@ jobs:
   deploy:
     needs: build
     if: ${{ inputs.publish == 'true' }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     environment:
       name: github-pages
