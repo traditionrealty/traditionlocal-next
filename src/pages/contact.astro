@@ -6,9 +6,9 @@ import { config } from '../config';
 const mail = (subject: string) => 'mailto:' + config.contactEmail + '?subject=' + encodeURIComponent(subject);
 const ways = [
   ['Ask Dillon', 'Questions about a neighborhood, a move, or renting or buying in Houston.', 'Ask Dillon', url('/ask-dillon')],
-  ['Suggest a place', 'Know a spot we should visit and review? Tell us about it.', 'Suggest a place', mail('Suggest a place')],
-  ['List an event', 'Hosting something local? We would love to share it with neighbors.', 'List your event', mail('List my event')],
-  ['Partnerships and press', 'Working on something together, or writing about Houston? Say hello.', 'Email us', mail('Partnerships and press')],
+  ['Suggest a place', 'Know a spot we should visit and review? Tell us about it.', 'Suggest a place', '?reason=place#message'],
+  ['List an event', 'Hosting something local? We would love to share it with neighbors.', 'List your event', '?reason=event#message'],
+  ['Partnerships and press', 'Working on something together, or writing about Houston? Say hello.', 'Send a message', '?reason=partner#message'],
 ];
 ---
 <Base title="Contact" active="" description="Questions, ideas, or a place we should know about? Get in touch.">
@@ -32,7 +32,30 @@ const ways = [
     </div>
   </section>
 
-  <section class="band tint">
+  <section class="band tint" id="message">
+    <div class="wrap" style="max-width:860px">
+      <p class="eyebrow">Send a message</p><h2 style="margin-bottom:12px">We read every one.</h2>
+      <p class="meta" style="font-size:17px;margin-bottom:24px">Tell us what is on your mind and we will reply by email.</p>
+      <div class="panel" id="ct-thanks" hidden style="border-color:var(--gold)"><p class="eyebrow">Thank you</p><h3 id="ct-title" style="margin-bottom:10px">Your message is in.</h3><p style="font-size:17px">We read every message and will reply soon.</p></div>
+      <form class="panel" id="ct-form" novalidate data-endpoint={config.formsAction + '/contact'} data-contact={config.contactEmail}>
+        <div class="grid g2" style="margin-bottom:20px">
+          <div><label for="ct-reason">What is this about?</label><select id="ct-reason"><option value="question">A question</option><option value="place">Suggest a place</option><option value="event">List an event</option><option value="partner">Partnerships or press</option><option value="other">Something else</option></select></div>
+          <div></div>
+        </div>
+        <div class="grid g2" style="margin-bottom:20px">
+          <div><label for="ct-name">Your name</label><input id="ct-name" type="text" autocomplete="name" placeholder="Your name" /><p class="msg-err" id="ct-name-err" hidden>Please add your name.</p></div>
+          <div><label for="ct-email">Email</label><input id="ct-email" type="email" autocomplete="email" placeholder="name@email.com" /><p class="msg-err" id="ct-email-err" hidden>Enter an email address like name@company.com</p></div>
+        </div>
+        <div style="margin-bottom:20px"><label for="ct-note">Message</label><textarea id="ct-note" placeholder="Tell us about the place, the event, or your question."></textarea><p class="msg-err" id="ct-note-err" hidden>Please add a short message.</p></div>
+        <input id="ct-company" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+        <button class="btn" id="ct-send" type="submit" style="min-height:52px">Send message</button>
+        <p class="msg-err" id="ct-fail" hidden></p>
+        <p class="meta" style="margin-top:14px">We will only use your details to reply. We never sell your email.</p>
+      </form>
+    </div>
+  </section>
+
+  <section class="band">
     <div class="wrap split">
       <div class="main">
         <p class="eyebrow">Real estate</p><h2 style="margin-bottom:16px">Talk to Dillon.</h2>
@@ -55,4 +78,30 @@ const ways = [
       <p class="meta" style="font-size:15px">For legal notices, see <a href={url('/disclosures')}>Texas real estate disclosures</a>. To learn how we handle your information, see <a href={url('/privacy')}>Privacy</a>.</p>
     </div>
   </section>
+  <script is:inline>
+    (function () {
+      var form = document.getElementById('ct-form'); if (!form) return;
+      var $ = function (id) { return document.getElementById(id); };
+      var LABELS = { question: 'A question', place: 'Suggest a place', event: 'List an event', partner: 'Partnerships or press', other: 'Something else' };
+      var want = (location.search.match(/reason=([a-z]+)/) || [])[1]; if (want && LABELS[want]) $('ct-reason').value = want;
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var name = $('ct-name').value.trim(), em = $('ct-email').value.trim(), note = $('ct-note').value.trim();
+        var okName = name.length > 0, okEm = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em), okNote = note.length > 2;
+        $('ct-name-err').hidden = okName; $('ct-email-err').hidden = okEm; $('ct-note-err').hidden = okNote;
+        if (!okName || !okEm || !okNote) return;
+        var btn = $('ct-send'), fail = $('ct-fail'); fail.hidden = true; btn.disabled = true; btn.textContent = 'Sending...';
+        try {
+          var res = await fetch(form.dataset.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: LABELS[$('ct-reason').value], name: name, email: em, message: note, company: $('ct-company').value }) });
+          var out = await res.json(); if (!out.ok) throw new Error('rejected');
+          $('ct-title').textContent = 'Thank you, ' + name.split(' ')[0] + '.'; form.hidden = true; $('ct-thanks').hidden = false;
+        } catch (err) {
+          fail.textContent = 'We could not send your message. Please try again in a moment, or email us at ' + form.dataset.contact + '.'; fail.hidden = false;
+        } finally { btn.disabled = false; btn.textContent = 'Send message'; }
+      });
+    })();
+  </script>
+  <style>
+    .msg-err { color: var(--danger); font-size: 14px; font-weight: 700; margin-top: 6px; }
+  </style>
 </Base>

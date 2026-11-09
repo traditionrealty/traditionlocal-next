@@ -4,6 +4,7 @@ import '../../styles/pages.css';
 import { events, upcomingEvents, href, media, eventDates, dateText, url } from '../../lib/data';
 import { venuePlace } from '../../lib/helpers';
 import { config } from '../../config';
+import { hostsRsvp } from '../../lib/rsvp';
 export function getStaticPaths() { return events().map((e) => ({ params: { slug: e.slug }, props: { e } })); }
 const { e } = Astro.props;
 const place = venuePlace(e), m = media(e) || (place ? media(place) : null);
@@ -11,6 +12,10 @@ const web = e.eventLink.replace(/^https?:\/\/(www\.)?/, '').replace(/\/.*$/, '')
 const dates = e.starts && e.ends && e.ends !== e.starts ? `${dateText(e.starts)} to ${dateText(e.ends)}` : dateText(e.starts);
 const where = place ? place.name : e.venue || e.profile;
 const more = upcomingEvents(8).filter((x) => x.slug !== e.slug).slice(0, 3);
+const rsvp = hostsRsvp(e);
+const rsvpUrl = String(config.newsletterAction).replace(/\/$/, '') + '/rsvp';
+const when = [dates, e.startTime].filter(Boolean).join(', ');
+const loc = e.address && where && e.address.toLowerCase().indexOf(where.toLowerCase()) === 0 ? e.address : [where, e.address].filter(Boolean).join(', ');
 ---
 <Base title={e.title} description={e.summary} active="Things to do">
   <section class="band hero">
@@ -35,6 +40,33 @@ const more = upcomingEvents(8).filter((x) => x.slug !== e.slug).slice(0, 3);
       </div>
       <p class="meta" style="margin-top:20px">Dates and prices can change, so check the event site before you go.</p>
       {e.tags.length > 0 && <div class="chips" style="margin-top:20px">{e.tags.map((t) => <span class="chip">{t}</span>)}</div>}
+      {rsvp && (
+        <div class="card pad" id="rsvp" data-starts={e.starts} data-ends={e.ends || e.starts} style="padding:32px;margin-top:40px;max-width:760px">
+          <p class="eyebrow">RSVP</p><h3 style="margin-bottom:8px">Save your spot.</h3>
+          {e.starts ? (
+            <>
+              <p class="meta" id="rsvp-intro" style="margin-bottom:20px;font-size:16px">A Tradition Local event. Tell us who is coming and we will send a confirmation.</p>
+              <div id="rsvp-ended" hidden><b>This event has ended.</b> <a href={url('/things-to-do')} style="font-weight:700">See what is coming up</a>.</div>
+              <form id="rsvp-form" novalidate data-slug={e.slug} data-title={e.title} data-when={when} data-location={loc} data-endpoint={rsvpUrl} data-contact={config.contactEmail}>
+                <div class="grid g2" style="margin-bottom:16px">
+                  <div><label for="rsvp-first">First name</label><input id="rsvp-first" type="text" autocomplete="given-name" placeholder="Your first name" /><p class="msg-err" id="rsvp-first-err" hidden>Please add your first name.</p></div>
+                  <div><label for="rsvp-last">Last name</label><input id="rsvp-last" type="text" autocomplete="family-name" placeholder="Your last name" /></div>
+                </div>
+                <div class="grid g2" style="margin-bottom:20px">
+                  <div><label for="rsvp-email">Email</label><input id="rsvp-email" type="email" autocomplete="email" placeholder="name@email.com" /><p class="msg-err" id="rsvp-email-err" hidden>Enter an email address like name@company.com</p></div>
+                  <div><label for="rsvp-guests">Guests, including you</label><select id="rsvp-guests"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+                </div>
+                <input id="rsvp-company" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+                <button class="btn" id="rsvp-send" type="submit" style="min-height:52px">RSVP</button>
+                <p class="msg-err" id="rsvp-fail" hidden></p>
+              </form>
+              <p id="rsvp-ok" hidden style="font-weight:700;color:var(--green);font-size:18px"></p>
+            </>
+          ) : (
+            <p class="meta" style="font-size:16px">The date is coming soon. RSVP opens once it is set.</p>
+          )}
+        </div>
+      )}
       <div class="card pad pick" style="padding:32px;margin-top:40px;max-width:760px">
         <p class="eyebrow">In the Loop</p><h3 style="margin-bottom:8px">Do not miss the next one.</h3>
         <p class="meta" style="margin-bottom:20px;font-size:16px">Every Monday: three local finds, the weekend list, and what just opened.</p>
@@ -62,4 +94,33 @@ const more = upcomingEvents(8).filter((x) => x.slug !== e.slug).slice(0, 3);
       var blob = new Blob([ics], { type: 'text/calendar' }), link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'event.ics'; link.click();
     });
   </script>
+  <script is:inline>
+    (function () {
+      var card = document.getElementById('rsvp'), form = document.getElementById('rsvp-form'); if (!card || !form) return;
+      var $ = function (id) { return document.getElementById(id); };
+      function day(s) { var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; }
+      var last = day(card.getAttribute('data-ends')) || day(card.getAttribute('data-starts'));
+      if (last && Date.now() > last.getTime() + 86400000) { form.hidden = true; $('rsvp-intro').hidden = true; $('rsvp-ended').hidden = false; return; }
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var first = $('rsvp-first').value.trim(), em = $('rsvp-email').value.trim();
+        var okFirst = first.length > 0, okEm = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em);
+        $('rsvp-first-err').hidden = okFirst; $('rsvp-email-err').hidden = okEm;
+        if (!okFirst || !okEm) return;
+        var btn = $('rsvp-send'), fail = $('rsvp-fail'); fail.hidden = true; btn.disabled = true; btn.textContent = 'Sending...';
+        var body = { event_slug: form.dataset.slug, event_title: form.dataset.title, event_when: form.dataset.when, event_location: form.dataset.location, first_name: first, last_name: $('rsvp-last').value.trim(), email: em, party_size: +$('rsvp-guests').value, company: $('rsvp-company').value };
+        try {
+          var res = await fetch(form.dataset.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+          var out = await res.json(); if (!out.ok) throw new Error('rejected');
+          form.hidden = true; $('rsvp-intro').hidden = true;
+          var ok = $('rsvp-ok'); ok.textContent = out.duplicate ? 'You are already on the list for this event. See you there.' : 'You are on the list. Check your email for a confirmation.'; ok.hidden = false;
+        } catch (err) {
+          fail.textContent = 'We could not send your RSVP. Please try again in a moment, or email us at ' + form.dataset.contact + '.'; fail.hidden = false;
+        } finally { btn.disabled = false; btn.textContent = 'RSVP'; }
+      });
+    })();
+  </script>
+  <style>
+    .msg-err { color: var(--danger); font-size: 14px; font-weight: 700; margin-top: 6px; }
+  </style>
 </Base>

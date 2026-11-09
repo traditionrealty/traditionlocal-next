@@ -18,7 +18,7 @@ const topics = [['Neighborhood guide', 'Get a feel for the area and daily life.'
           <p style="font-size:18px;margin-bottom:20px">Dillon will reply personally. In the meantime, here are a few places to start.</p>
           <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/neighborhoods')}>Explore neighborhoods</a><a class="btn line" href={url('/find-your-fit')}>Find your fit</a></div>
         </div>
-        <form class="panel" id="ask-form" novalidate data-endpoint={config.newsletterAction} data-contact={config.contactEmail}>
+        <form class="panel" id="ask-form" novalidate data-endpoint={config.formsAction + '/ask'} data-contact={config.contactEmail}>
           <fieldset style="border:0;padding:0;margin:0 0 24px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">Where are you curious about? Choose one or more.</legend>
             <div class="chips" id="ask-areas">{[...popular, 'Somewhere else'].map((a) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="areas" value={a} style="position:absolute;opacity:0;width:1px;height:1px" />{a}</label>)}</div>
             <div id="ask-else-wrap" hidden style="margin-top:12px;max-width:380px"><label for="ask-else">Which area?</label><input id="ask-else" type="text" placeholder="Try Cypress or 77449" /></div>

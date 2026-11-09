@@ -6,5 +6,6 @@ export const config = {
   searchMembersOnly: false,
   // The newsletter signup service the live site already uses. It accepts a normal form post.
   newsletterAction: 'https://tl-newsletter-signup.bold-bush-f938.workers.dev',
+  formsAction: 'https://tl-forms.bold-bush-f938.workers.dev',
   brokerage: { name: 'Tradition Realty Group', url: 'https://traditionrealtygroup.kw.com/' },
 };
