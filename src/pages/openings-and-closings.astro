@@ -56,7 +56,7 @@ const tip = 'mailto:traditionlocal@gmail.com?subject=Opening%20or%20closing%20ti
     <section class="band" id="reviewed-closed">
       <div class="wrap">
         <p class="eyebrow">From our reviews</p><h2 style="margin-bottom:8px">Places we reviewed that have closed.</h2>
-        <p class="meta" style="font-size:17px;margin-bottom:24px;max-width:720px">{gone.length} places we have reviewed are marked closed in our latest check. Their reviews stay up as a record.</p>
+        <p class="meta" style="font-size:17px;margin-bottom:24px;max-width:720px">{gone.length} places we have reviewed are marked closed in our latest check. Their reviews stay up as a record. You can also <a href={url('/food') + '?closed=1#browse'} style="font-weight:700">find them in Food</a>, marked closed.</p>
         <div class="grid g3">{gone.map((b) => <a class="card pad" href={href(b)} style="text-decoration:none"><h4 style="margin-bottom:4px">{b.name}</h4><p class="meta">{b.area || 'Houston area'}</p></a>)}</div>
       </div>
     </section>

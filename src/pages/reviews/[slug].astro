@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { reviews, byName, reviewsFor, href, media, galleryMedia, stars, dateText, url } from '../../lib/data';
+import { reviews, byName, reviewsFor, isClosed, href, media, galleryMedia, stars, dateText, url } from '../../lib/data';
 export function getStaticPaths() { return reviews().map((r) => ({ params: { slug: r.slug }, props: { r } })); }
 const { r } = Astro.props;
 const biz = byName(r.profile);
@@ -14,6 +14,7 @@ const more = biz ? reviewsFor(biz.name).filter((x) => x.slug !== r.slug) : [];
     <div class="wrap">
       <p class="meta" style="margin-bottom:12px"><a href={url('/food')} style="font-weight:700">Food</a>{biz && <> &rsaquo; <a href={href(biz)} style="font-weight:700">{biz.name}</a></>} &rsaquo; Review</p>
       <p class="eyebrow">Review</p>
+      {biz && isClosed(biz) && <div class="closed-note"><b>{/temporar/i.test(biz.status) ? 'Temporarily closed.' : 'Closed.'}</b> This review is from when {biz.name} was open. {/temporar/i.test(biz.status) ? 'It is closed for now, so check with them before you go.' : 'It has since closed, so we do not recommend it.'} See <a href={url('/openings-and-closings#reviewed-closed')}>other places that have closed</a>.</div>}
       <h1 style="margin-bottom:20px;max-width:900px">{r.title}</h1>
       <div style="display:flex;align-items:baseline;gap:12px"><span style="font-family:var(--serif);font-weight:600;font-size:48px;line-height:1">{stars(r.rating)}</span><span class="meta">out of 5{r.reviewDate && `, reviewed ${dateText(r.reviewDate)}`}</span></div>
       <p class="meta" style="margin-top:14px"><a href={url('/how-we-review')} style="font-weight:700">How we review places</a></p>

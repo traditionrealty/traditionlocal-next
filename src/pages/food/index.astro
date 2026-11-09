@@ -8,8 +8,8 @@ import '../../styles/pages.css';
 import { businesses, href, url, isClosed } from '../../lib/data';
 import { category, foodTab, cuisineRegion, topRating, isFood, FOOD_TABS, WORLD } from '../../lib/helpers';
 
-const cards = businesses().filter((b) => !isClosed(b) && isFood(b)).map((b) => ({ b, cat: category(b), tab: foodTab(b), world: cuisineRegion(b), rating: topRating(b.name) }))
-  .sort((x, y) => y.rating - x.rating || x.b.name.localeCompare(y.b.name));
+const cards = businesses().filter(isFood).map((b) => ({ b, gone: isClosed(b), cat: category(b), tab: foodTab(b), world: cuisineRegion(b), rating: topRating(b.name) }))
+  .sort((x, y) => Number(x.gone) - Number(y.gone) || y.rating - x.rating || x.b.name.localeCompare(y.b.name));
 const areaCount: Record<string, number> = {};
 cards.forEach((c) => { if (c.b.area) areaCount[c.b.area] = (areaCount[c.b.area] || 0) + 1; });
 const areas = Object.keys(areaCount).sort();
@@ -31,10 +31,11 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
             <div class="fsel"><label for="f-area">Area</label><select id="f-area"><option value="">Anywhere</option>{areas.map((a) => <option>{a}</option>)}</select></div>
             <div class="fsel"><label for="f-world">Cuisine</label><select id="f-world"><option value="">Any cuisine</option>{WORLD.filter(([k]) => k !== 'all').map(([k, l]) => <option value={k}>{l}</option>)}</select></div>
             <div class="fsel"><label for="f-rating">Rating</label><select id="f-rating"><option value="0">Any</option><option value="5">5 out of 5</option><option value="4">4 or higher</option><option value="3">3 or higher</option></select></div>
+            <label class="fcheck" for="f-closed"><input type="checkbox" id="f-closed" />Include places that have closed</label>
             <div class="fbar-cats tabs" id="f-tabs">{FOOD_TABS.map(([k, l], i) => <button class={i === 0 ? 'chip on' : 'chip'} data-tab={k} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}</div>
           </div>
         </div>
-        <div class="fbar-status"><div class="fpills" id="f-pills"></div><button class="flink hidden" id="f-mine" type="button"></button><button class="flink hidden" id="f-clear" type="button">Clear all</button><span class="meta" id="f-count">{cards.length} places</span></div>
+        <div class="fbar-status"><div class="fpills" id="f-pills"></div><button class="flink hidden" id="f-mine" type="button"></button><button class="flink hidden" id="f-clear" type="button">Clear all</button><span class="meta" id="f-count">{cards.filter((c) => !c.gone).length} places</span></div>
       </div>
     </div>
   </section>
@@ -59,16 +60,18 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
       </div>
       <div class="grid g3" id="f-grid">
         {cards.map((c, i) => (
-          <div class={i < 24 ? 'card tcard f-item' : 'card tcard f-item hidden'} data-world={c.world} data-area={c.b.area} data-tab={c.tab} data-r={c.rating} data-name={`${c.b.name} ${c.cat} ${c.b.area}`.toLowerCase()}>
+          <div class={i < 24 && !c.gone ? 'card tcard f-item' : 'card tcard f-item hidden'} data-closed={c.gone ? '1' : '0'} data-world={c.world} data-area={c.b.area} data-tab={c.tab} data-r={c.rating} data-name={`${c.b.name} ${c.cat} ${c.b.area}`.toLowerCase()}>
             <a href={href(c.b)}>
-              {c.rating > 0 && <span class="tag">{c.rating} out of 5</span>}
+              {c.gone ? <span class="tag closed">Closed</span> : c.rating > 0 && <span class="tag">{c.rating} out of 5</span>}
               <h4 style="margin:12px 0 4px">{c.b.name}</h4><p class="meta">{[c.cat, c.b.area].filter(Boolean).join(', ')}</p>
+              {c.gone && <p class="meta" style="margin-top:6px">No longer open. We do not recommend it.</p>}
             </a>
             <button class="save" data-slug={c.b.slug} data-name={c.b.name} set:html={heart}></button>
           </div>
         ))}
       </div>
       <p style="margin-top:24px"><button class="btn line hidden" id="f-more" type="button">Show more places</button></p>
+      <p class="meta hidden" id="f-closed-hint" style="margin-top:16px;font-size:16px"><span id="f-closed-n"></span> <button class="flink" id="f-show-closed" type="button">Show closed places</button></p>
       <div class="card pad hidden" id="f-empty" style="margin-top:8px"><b>No places match yet.</b><p class="meta" style="margin-top:4px">Try a different area, rating, or search.</p></div>
       <p style="margin-top:24px"><a href="mailto:traditionlocal@gmail.com?subject=Suggest%20a%20place" style="font-weight:700">Know a favorite we missed? Suggest a place</a></p>
     </div>
@@ -84,9 +87,22 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
     var pre = new URLSearchParams(location.search).get('area'); if (pre) area.value = pre;
     var pr = new URLSearchParams(location.search).get('rating'); if (pr && /^[1-5]$/.test(pr)) rating.value = pr;
     var cats = TLF.chips(tabs, 'tab', 'all');
+    var closedBox = $('f-closed'), hint = $('f-closed-hint');
+    if (new URLSearchParams(location.search).get('closed') === '1') closedBox.checked = true;
+    var showClosed = { test: function (it) { return it.dataset.closed !== '1' || closedBox.checked; }, pills: function () { return closedBox.checked ? [{ label: 'Including closed places', remove: function () { closedBox.checked = false; } }] : []; }, clear: function () { closedBox.checked = false; } };
     var kit = TLF.init({ bar: $('f-bar'), items: [].slice.call(document.querySelectorAll('.f-item')), search: $('f-q'), step: 24, noun: ['place', 'places'], count: $('f-count'), empty: $('f-empty'), more: $('f-more'), clear: $('f-clear'), pills: $('f-pills'), badge: $('f-badge'),
-      filters: [TLF.select(area, 'area'), TLF.select(world, 'world'), TLF.min(rating, 'r', 'Rating: '), cats] });
+      filters: [TLF.select(area, 'area'), TLF.select(world, 'world'), TLF.min(rating, 'r', 'Rating: '), cats, showClosed] });
     [area, world, rating].forEach(function (s) { s.addEventListener('change', kit.refresh); });
+    closedBox.addEventListener('change', kit.refresh);
+    var closedItems = [].filter.call(document.querySelectorAll('.f-item'), function (x) { return x.dataset.closed === '1'; });
+    function closedHint() {
+      var q = ($('f-q').value || '').toLowerCase().trim(), n = 0;
+      if (q && !closedBox.checked) n = closedItems.filter(function (x) { return q.split(/\s+/).every(function (t) { return x.dataset.name.indexOf(t) > -1; }); }).length;
+      hint.classList.toggle('hidden', !n); if (n) $('f-closed-n').textContent = n === 1 ? 'A place that has closed matches your search.' : n + ' places that have closed match your search.';
+    }
+    $('f-q').addEventListener('input', closedHint); closedBox.addEventListener('change', closedHint);
+    $('f-show-closed').addEventListener('click', function () { closedBox.checked = true; kit.refresh(); closedHint(); });
+    closedHint();
     tabs.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { cats.set(b); kit.refresh(); } });
     // saved count
     function savedCount() { document.getElementById('f-saved').textContent = TLD.saved().length; }

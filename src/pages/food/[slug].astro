@@ -16,17 +16,18 @@ const hasFacts = b.address || b.phone || b.website;
 const status = isClosed(b) ? (/temporar/i.test(b.status) ? 'Temporarily closed' : 'Closed') : b.status === 'Open' ? 'Open' : 'Status not confirmed';
 const web = b.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 ---
-<Base title={b.name} description={b.summary} active="Food">
+<Base title={isClosed(b) ? b.name + ' (closed)' : b.name} description={isClosed(b) ? 'Closed. ' + (b.summary || '') : b.summary} active="Food">
   <section class="band hero">
     <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
       <div style="grid-column:span 7">
         <p class="meta" style="margin-bottom:12px">{area ? <a href={href(area)} style="font-weight:700">{b.area}</a> : b.area} &rsaquo; <a href={url('/food')}>Food</a></p>
-        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">{category(b) && <span class="tag">{category(b)}</span>}<span class="tag soft">{status}</span></div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">{category(b) && <span class="tag">{category(b)}</span>}<span class={isClosed(b) ? 'tag closed' : 'tag soft'}>{status}</span></div>
         <h1 style="margin-bottom:16px">{b.name}</h1>
+        {isClosed(b) && <div class="closed-note"><b>{status}.</b> {/temporar/i.test(b.status) ? 'It is closed for now, so check with them before you go.' : 'We reviewed this place while it was open. It is no longer open, so we do not recommend it.'} See <a href={url('/openings-and-closings#reviewed-closed')}>other places that have closed</a>, or <a href={url('/food')}>find somewhere to eat now</a>.</div>}
         {b.summary && <p class="lead" style="margin-bottom:28px">{b.summary}</p>}
         <div style="display:flex;gap:12px;flex-wrap:wrap">
-          {b.phone && <a class="btn" href={`tel:${b.phone}`}>Call {b.phone}</a>}
-          {b.website && <a class="btn line" href={b.website} rel="noopener">Visit {web}</a>}
+          {b.phone && !(isClosed(b) && !/temporar/i.test(b.status)) && <a class="btn" href={`tel:${b.phone}`}>Call {b.phone}</a>}
+          {b.website && !(isClosed(b) && !/temporar/i.test(b.status)) && <a class="btn line" href={b.website} rel="noopener">Visit {web}</a>}
           <button class="btn line save-btn" data-slug={b.slug} data-name={b.name} type="button" aria-pressed="false">Save</button>
         </div>
       </div>

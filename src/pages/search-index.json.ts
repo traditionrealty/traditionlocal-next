@@ -1,5 +1,5 @@
 // The list the search box reads. Built with the site, so it always matches what is published.
-import { businesses, profiles, liveReviews, isClosed, events, byName, href, url, dateText, eventDates } from '../lib/data';
+import { businesses, profiles, reviews, isClosed, events, byName, href, url, dateText, eventDates } from '../lib/data';
 import { areaPages, category, isFood } from '../lib/helpers';
 import { videos, channelVideos } from '../lib/videos';
 import { openings, whenText } from '../lib/openings';
@@ -8,10 +8,12 @@ import { issues } from '../lib/issues';
 type Row = { k: string; t: string; u: string; s?: string; x?: string };
 const clip = (s: string, n: number) => (s || '').replace(/\s+/g, ' ').trim().slice(0, n);
 const rows: Row[] = [];
+// How a closed place is marked in search: plain Closed, or Temporarily closed.
+const closedWord = (p: { status?: string }) => (/temporar/i.test(p.status || '') ? 'Temporarily closed' : 'Closed');
 
-for (const b of businesses().filter((b) => !isClosed(b))) rows.push({ k: isFood(b) ? 'food' : 'biz', t: b.name, u: href(b), s: [category(b), b.area].filter(Boolean).join(', '), x: clip(b.summary || b.description, 110) });
-for (const r of liveReviews()) { const b = byName(r.profile); rows.push({ k: 'review', t: b ? b.name : r.title, u: href(r), s: 'Review' + (r.reviewDate ? ', ' + dateText(r.reviewDate) : ''), x: clip(r.summary || r.body, 140) }); }
-for (const p of profiles.filter((p) => p.type === 'Place' && !isClosed(p))) rows.push({ k: 'thing', t: p.name, u: href(p), s: [p.subCategory, p.area].filter(Boolean).join(', '), x: clip(p.summary || p.description, 110) });
+for (const b of businesses()) rows.push({ k: isClosed(b) ? 'closed' : isFood(b) ? 'food' : 'biz', t: b.name, u: href(b), s: [isClosed(b) ? closedWord(b) : '', category(b), b.area].filter(Boolean).join(', '), x: clip(b.summary || b.description, 110) });
+for (const r of reviews()) { const b = byName(r.profile), gone = isClosed(b); rows.push({ k: gone ? 'closed' : 'review', t: b ? b.name : r.title, u: href(r), s: (gone ? (/temporar/i.test(b ? b.status : '') ? 'Review of a place that is closed for now' : 'Review of a place that has closed') : 'Review') + (r.reviewDate ? ', ' + dateText(r.reviewDate) : ''), x: clip(r.summary || r.body, 140) }); }
+for (const p of profiles.filter((p) => p.type === 'Place')) rows.push({ k: isClosed(p) ? 'closed' : 'thing', t: p.name, u: href(p), s: [isClosed(p) ? closedWord(p) : '', p.subCategory, p.area].filter(Boolean).join(', '), x: clip(p.summary || p.description, 110) });
 for (const p of areaPages()) rows.push({ k: 'area', t: p.name, u: href(p), s: p.region || p.type, x: clip([p.summary, p.bestFor].filter(Boolean).join(' '), 140) });
 for (const p of profiles.filter((p) => p.type === 'Subdivision')) rows.push({ k: 'sub', t: p.name, u: href(p), s: p.area, x: clip(p.summary, 100) });
 for (const e of events()) rows.push({ k: 'event', t: e.title, u: href(e), s: [eventDates(e), e.venue || e.profile].filter(Boolean).join(', '), x: clip(e.summary, 110) });
