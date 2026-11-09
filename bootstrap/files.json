@@ -1,0 +1,1 @@
+{"__patches":[{"path":"src/pages/index.astro","find":"'Get curated food to try, things to do, neighborhoods, and new openings near ' + a.n + ', with Locally Plus.'","replace":"'Get curated food picks, things to do, and more near ' + a.n + ', with Locally Plus.'"}],"__expect":{"src/pages/index.astro":"d65137b0e7fc"}}
