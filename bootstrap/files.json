@@ -1,1 +1,0 @@
-{"__patches":[{"path":"src/layouts/Base.astro","find":"Real estate services by <a href={config.brokerage.url}>{config.brokerage.name}</a>","replace":"Real estate services by <a href={url('/tradition-realty-group')}>{config.brokerage.name}</a>"}],"__expect":{"src/layouts/Base.astro":"6d4d7fcb5e55"}}
