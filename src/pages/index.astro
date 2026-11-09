@@ -255,7 +255,7 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
               a.t.forEach(function (t) { var li = document.createElement('li'), l = document.createElement('a'), r = document.createElement('span'); l.href = t[2]; l.textContent = t[0]; r.className = 'meta'; r.textContent = t[1] + ' out of 5'; li.appendChild(l); li.appendChild(r); ul.appendChild(li); });
               $('hp-top').classList.toggle('hidden', !a.t.length);
               var g = $('hp-guide'); g.href = a.u; g.textContent = 'Read the ' + a.n + ' guide';
-              $('hp-form-label').textContent = 'Get Locally Plus for ' + a.n; $('hp-note').textContent = 'Get curated food to try, things to do, neighborhoods, and new openings near ' + a.n + ', with Locally Plus.'; $('hp-add').textContent = 'Add ' + a.n + ' to Locally Plus'; $('hp-form').setAttribute('data-area', a.n);
+              $('hp-form-label').textContent = 'Get Locally Plus for ' + a.n; $('hp-note').textContent = 'Get curated food picks, things to do, and more near ' + a.n + ', with Locally Plus.'; $('hp-add').textContent = 'Add ' + a.n + ' to Locally Plus'; $('hp-form').setAttribute('data-area', a.n);
               $('hp-empty').classList.add('hidden'); $('hp-detail').classList.remove('hidden');
               [].forEach.call(document.querySelectorAll('#hp-chips .chip'), function (c) { c.classList.toggle('on', c.getAttribute('data-n') === a.n); });
             }
