@@ -210,7 +210,7 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
                 <div class="hp-row" id="hp-row-guest"><input id="hp-email" name="email" type="email" required placeholder="name@email.com" /><button class="btn" type="submit">Join</button></div>
                 <div id="hp-row-user" class="hidden"><button class="btn" type="submit" id="hp-add">Add to Locally Plus</button><p class="meta" id="hp-as" style="font-size:13px;margin-top:8px"></p></div>
                 <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
-                <p class="meta" style="font-size:13px;margin-top:8px">We never sell your email. Your area is saved on this device.</p>
+                <p class="meta" id="hp-note" style="font-size:13px;margin-top:8px"></p>
               </form>
             </div>
           </div>
@@ -255,7 +255,7 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
               a.t.forEach(function (t) { var li = document.createElement('li'), l = document.createElement('a'), r = document.createElement('span'); l.href = t[2]; l.textContent = t[0]; r.className = 'meta'; r.textContent = t[1] + ' out of 5'; li.appendChild(l); li.appendChild(r); ul.appendChild(li); });
               $('hp-top').classList.toggle('hidden', !a.t.length);
               var g = $('hp-guide'); g.href = a.u; g.textContent = 'Read the ' + a.n + ' guide';
-              $('hp-form-label').textContent = 'Get Locally Plus for ' + a.n; $('hp-add').textContent = 'Add ' + a.n + ' to Locally Plus'; $('hp-form').setAttribute('data-area', a.n);
+              $('hp-form-label').textContent = 'Get Locally Plus for ' + a.n; $('hp-note').textContent = 'Get curated food to try, things to do, neighborhoods, and new openings near ' + a.n + ', with Locally Plus.'; $('hp-add').textContent = 'Add ' + a.n + ' to Locally Plus'; $('hp-form').setAttribute('data-area', a.n);
               $('hp-empty').classList.add('hidden'); $('hp-detail').classList.remove('hidden');
               [].forEach.call(document.querySelectorAll('#hp-chips .chip'), function (c) { c.classList.toggle('on', c.getAttribute('data-n') === a.n); });
             }
