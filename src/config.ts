@@ -14,5 +14,6 @@ export const config = {
   // The newsletter signup service the live site already uses. It accepts a normal form post.
   newsletterAction: 'https://tl-newsletter-signup.bold-bush-f938.workers.dev',
   formsAction: 'https://tl-forms.bold-bush-f938.workers.dev',
+  mark: '', // path to a white version of the Tradition Local mark for the navy bar, for example '/mark.svg'. Leave empty until the file is added.
   brokerage: { name: 'Tradition Realty Group', url: 'https://traditionrealtygroup.kw.com/' },
 };
