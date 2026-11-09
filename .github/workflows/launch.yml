@@ -1,0 +1,92 @@
+name: Launch the live site
+
+# Press "Run workflow" to check readiness (a dry run) or to publish the live site.
+# Dry run: builds the live version and reports how many pages it has. Nothing is published.
+# Publish: needs the word LAUNCH, and stops by itself if the site would be mostly empty.
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish the live site? Leave "false" for a dry run that only checks readiness.'
+        type: choice
+        options: ['false', 'true']
+        default: 'false'
+      confirm:
+        description: 'To publish, type LAUNCH'
+        required: false
+        default: ''
+      min_pages:
+        description: 'Safety stop: do not publish if fewer pages than this would go live'
+        required: false
+        default: '600'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      PUBLISH: ${{ inputs.publish }}
+      CONFIRM: ${{ inputs.confirm }}
+      MIN_PAGES: ${{ inputs.min_pages }}
+    steps:
+      - name: Check the request
+        run: |
+          if [ "$PUBLISH" = "true" ] && [ "$CONFIRM" != "LAUNCH" ]; then
+            echo "To publish, type LAUNCH in the confirm box. Nothing was changed."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - name: Build the live version
+        run: npm run build
+        env:
+          SITE_URL: https://www.traditionlocal.com
+          BASE_PATH: /
+          SITE_MODE: production
+      - name: Readiness report
+        run: |
+          PAGES=$(find dist -name '*.html' | wc -l)
+          URLS=$(grep -c '<loc>' dist/sitemap.xml || true)
+          {
+            echo "## Live site readiness"
+            echo ""
+            echo "- Pages that would go live: **$PAGES** (the draft preview has about 1,650)"
+            echo "- Addresses in the sitemap: **$URLS**"
+            for d in food neighborhoods reviews events things-to-do subdivisions; do
+              echo "- /$d: $(find dist/$d -name '*.html' 2>/dev/null | wc -l) pages"
+            done
+            echo ""
+            echo "Most pages are missing when content is still marked Draft in the sheet. Mark rows Published, then run this again."
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Safety checks
+        if: ${{ inputs.publish == 'true' }}
+        run: |
+          PAGES=$(find dist -name '*.html' | wc -l)
+          if [ "$PAGES" -lt "$MIN_PAGES" ]; then echo "Only $PAGES pages would go live, below the safety stop of $MIN_PAGES. Most content is still Draft. Nothing was published."; exit 1; fi
+          if grep -q 'noindex, nofollow' dist/index.html; then echo "The home page still blocks Google. Nothing was published."; exit 1; fi
+          if grep -q 'Draft preview' dist/index.html; then echo "The draft banner is still on the home page. Nothing was published."; exit 1; fi
+          echo "www.traditionlocal.com" > dist/CNAME
+      - uses: actions/upload-pages-artifact@v3
+        if: ${{ inputs.publish == 'true' }}
+        with: { path: dist }
+
+  deploy:
+    needs: build
+    if: ${{ inputs.publish == 'true' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
