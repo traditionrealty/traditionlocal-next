@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import '../styles/pages.css';
 import { url } from '../lib/data';
 import MoreWays from '../components/MoreWays.astro';
+const ORDER = ['Ask Dillon', 'Find your fit', 'Local Directory', 'Apartment locating', 'Neighborhoods', 'New builds'];
 const tools = [
   ['Apartment locating', 'Tell us what matters, and we will help you narrow the list of rentals.', '/apartments', 'Open', true],
   ['Ask Dillon', 'Tell us where you are curious about, and Dillon replies personally. No pressure.', '/ask-dillon', 'Open', true],
@@ -30,7 +31,7 @@ const services = [
     <div class="wrap">
       <p class="eyebrow">Where to start</p><h2 style="margin-bottom:28px">Tools for getting to know a place</h2>
       <div class="grid g3">
-        {[...tools].sort((a, b) => a[0].localeCompare(b[0])).map(([name, blurb, path, label, live]) => (
+        {[...tools].sort((a, b) => ORDER.indexOf(String(a[0])) - ORDER.indexOf(String(b[0]))).map(([name, blurb, path, label, live]) => (
           <a class="card pad" href={url(path as string)} style="text-decoration:none"><span class={live ? 'tag' : 'tag soft'}>{label}</span><h4 style="margin:12px 0 8px">{name}</h4><p class="meta" style="font-size:16px">{blurb}</p></a>
         ))}
       </div>
