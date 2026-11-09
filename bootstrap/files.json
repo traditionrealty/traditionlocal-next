@@ -1,0 +1,1 @@
+{"__patches":[{"path":"src/pages/index.astro","find":"<p class=\"meta\" style=\"margin-top:12px\">One click to leave anytime. We never sell your email.</p>","replace":"<p class=\"meta\" style=\"margin-top:12px\">A weekly email that keeps you in the know with hidden gems, hot headlines, and new openings.</p>"}],"__expect":{"src/pages/index.astro":"a7bceeadc98b"}}
