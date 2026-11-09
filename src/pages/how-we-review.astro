@@ -1,9 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
 import '../styles/pages.css';
-import { businesses, url } from '../lib/data';
+import { businesses, url, isClosed } from '../lib/data';
 import { isFood, topRating } from '../lib/helpers';
-const rated = businesses().filter((b) => b.status !== 'Closed' && isFood(b)).map((b) => topRating(b.name)).filter((r) => r > 0);
+const rated = businesses().filter((b) => !isClosed(b) && isFood(b)).map((b) => topRating(b.name)).filter((r) => r > 0);
 const exactly = (n: number) => rated.filter((r) => r === n).length;
 const atLeast = (n: number) => rated.filter((r) => r >= n).length;
 const scale: [number, string][] = [

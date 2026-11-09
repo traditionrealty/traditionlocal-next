@@ -1,5 +1,5 @@
 // Shared lookups and groupings for the page types.
-import { profiles, content, ofType, reviewsFor, stars } from './data';
+import { profiles, content, ofType, reviewsFor, stars, isClosed } from './data';
 import type { Profile, Content } from './data';
 
 export const norm = (s: string) => (s || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '');
@@ -8,9 +8,9 @@ export const cleanList = (s: string) => (s || '').replace(/^\[|\]$/g, '').replac
 
 export const AREA_TYPES = ['Neighborhood', 'City', 'Area'];
 export const areaPages = () => ofType(...AREA_TYPES);
-export const bizIn = (name: string) => profiles.filter((p) => p.type === 'Business' && p.area === name);
+export const bizIn = (name: string) => profiles.filter((p) => p.type === 'Business' && p.area === name && !isClosed(p));
 export const subsIn = (name: string) => profiles.filter((p) => p.type === 'Subdivision' && p.area === name);
-export const placesIn = (name: string) => profiles.filter((p) => p.type === 'Place' && p.area === name);
+export const placesIn = (name: string) => profiles.filter((p) => p.type === 'Place' && p.area === name && !isClosed(p));
 export const topRating = (name: string) => reviewsFor(name).reduce((m, r) => Math.max(m, stars(r.rating)), 0);
 // Tags come from the sheet as slugs like coffee-and-tea. Show them as plain words.
 export const category = (p: Profile) => {

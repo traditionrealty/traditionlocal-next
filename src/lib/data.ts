@@ -81,6 +81,12 @@ export const reviewsFor = (name: string) => content.filter((c) => c.type === 'Re
 export const eventsAt = (name: string) => content.filter((c) => c.type === 'Event' && c.profile === name);
 export const inArea = (area: string, type: string) => profiles.filter((p) => p.type === type && p.area === area);
 export const reviews = () => content.filter((c) => c.type === 'Review');
+// Any version of closed: Closed, Permanently closed, Temporarily closed, Closed for good, Out of business, and so on.
+// Closed places stay on their own pages and in the closed area, and are left out of searches, filters, and picks.
+const CLOSED = /\bclosed\b|\bclosure\b|out of business|shut\s*down|shuttered|no longer (open|operating)|defunct|ceased operat/i;
+export const isClosed = (p?: { status?: string } | null) => !!p && CLOSED.test(p.status || '');
+// Reviews for places that are still open. A review of a closed place is only found in the closed area.
+export const liveReviews = () => reviews().filter((r) => !isClosed(byName(r.profile)));
 export const events = () => content.filter((c) => c.type === 'Event');
 
 // Where each kind of page lives.

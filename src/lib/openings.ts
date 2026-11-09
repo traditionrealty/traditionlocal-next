@@ -1,6 +1,6 @@
 // New openings, places to watch, and closings. Read from data/openings.csv.
 // Preview shows every row. The live site shows only rows marked verified, so nothing unchecked goes public.
-import { readTable, byName, businesses, href, IS_PREVIEW } from './data';
+import { readTable, byName, businesses, href, IS_PREVIEW, isClosed } from './data';
 
 export type Opening = {
   kind: 'open' | 'watch' | 'closed'; name: string; area: string; detail: string; date: string; dateNote: string;
@@ -35,7 +35,7 @@ export const whenText = (o: Opening) => {
 // A page on this site, when the place is one we have a profile for.
 export const profileHref = (o: Opening) => { const p = byName(o.profile || o.name); return p ? href(p) : ''; };
 // Places we reviewed that the sheet marks closed.
-export const closedReviewed = () => businesses().filter((b) => b.status === 'Closed').sort((a, b) => a.name.localeCompare(b.name));
+export const closedReviewed = () => businesses().filter(isClosed).sort((a, b) => a.name.localeCompare(b.name));
 export const lastChecked = () => {
   const t = stamp(openings.map((o) => o.checked).filter(Boolean).sort().slice(-1)[0] || '');
   if (!t) return '';

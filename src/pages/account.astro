@@ -2,12 +2,12 @@
 import Base from '../layouts/Base.astro';
 import Prefs from '../components/Prefs.astro';
 import '../styles/pages.css';
-import { businesses, profiles, href, url } from '../lib/data';
+import { businesses, profiles, href, url, isClosed } from '../lib/data';
 import { areaPages, bizIn, topRating, category, isFood } from '../lib/helpers';
 import { config } from '../config';
 const areas = areaPages().map((p) => p.name).sort();
-const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b) }))
-  .concat(profiles.filter((p) => p.type === 'Place').map((p) => ({ s: 'p:' + p.slug, n: p.name, a: p.area, c: p.subCategory || 'Place', r: 0, u: href(p) })));
+const index = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b) }))
+  .concat(profiles.filter((p) => p.type === 'Place' && !isClosed(p)).map((p) => ({ s: 'p:' + p.slug, n: p.name, a: p.area, c: p.subCategory || 'Place', r: 0, u: href(p) })));
 const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openings', 'New openings'], ['homes', 'Neighborhoods and homes']];
 ---
 <Base title="Your account" description="Your area, the places you follow, and what you receive.">

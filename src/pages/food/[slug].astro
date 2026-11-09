@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { businesses, byName, reviewsFor, inArea, href, media, galleryMedia, stars, dateText, url } from '../../lib/data';
+import { businesses, byName, reviewsFor, inArea, isClosed, href, media, galleryMedia, stars, dateText, url } from '../../lib/data';
 import { config } from '../../config';
 import { category } from '../../lib/helpers';
 import Prefs from '../../components/Prefs.astro';
@@ -11,9 +11,9 @@ const gallery = galleryMedia(b).filter((g) => !m || g.src !== m.src);
 const reviews = reviewsFor(b.name);
 const top = reviews[0];
 const area = byName(b.area);
-const nearby = inArea(b.area, 'Business').filter((x) => x.slug !== b.slug).slice(0, 3);
+const nearby = inArea(b.area, 'Business').filter((x) => x.slug !== b.slug && !isClosed(x)).slice(0, 3);
 const hasFacts = b.address || b.phone || b.website;
-const status = b.status === 'Open' ? 'Open' : b.status === 'Closed' ? 'Closed' : 'Status not confirmed';
+const status = isClosed(b) ? (/temporar/i.test(b.status) ? 'Temporarily closed' : 'Closed') : b.status === 'Open' ? 'Open' : 'Status not confirmed';
 const web = b.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 ---
 <Base title={b.name} description={b.summary} active="Food">

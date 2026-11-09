@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { businesses, ofType, reviews, reviewsFor, byName, events as allEvents, upcomingEvents, eventDates, dateText, href, media, stars, url } from '../lib/data';
+import { businesses, ofType, liveReviews, isClosed, reviewsFor, byName, events as allEvents, upcomingEvents, eventDates, dateText, href, media, stars, url } from '../lib/data';
 import { config } from '../config';
 import { isFood, foodTab, category, topRating, venuePlace, areaPages, foodIn } from '../lib/helpers';
 import OpeningsPanel from '../components/OpeningsPanel.astro';
@@ -12,7 +12,7 @@ import { spots, rotating } from '../lib/spotlight';
 const events = upcomingEvents(5);
 const homeVideos = videos.slice(0, 3);
 const tiles = [
-  { n: businesses().filter((b) => b.status !== 'Closed' && isFood(b) && topRating(b.name) > 0).length, unit: 'places reviewed', title: 'Where to eat', blurb: 'Honest reviews, sorted by what you are craving.', cta: 'Browse food', path: '/food' },
+  { n: businesses().filter((b) => !isClosed(b) && isFood(b) && topRating(b.name) > 0).length, unit: 'places reviewed', title: 'Where to eat', blurb: 'Honest reviews, sorted by what you are craving.', cta: 'Browse food', path: '/food' },
   { n: areaPages().length, unit: 'neighborhood guides', title: 'Neighborhoods', blurb: 'Find the part of Houston that fits your life.', cta: 'Explore areas', path: '/neighborhoods' },
   { n: upcomingEvents(999).length, unit: 'coming up', title: 'Things to do', blurb: 'Festivals, markets, and weekend plans.', cta: 'See the calendar', path: '/things-to-do' },
   { n: videos.length, unit: 'walks and reviews', title: 'Videos', blurb: 'Watch the neighborhood before you go.', cta: 'Watch now', path: '/videos' },
@@ -23,7 +23,7 @@ const wkDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec
 const wkIso = (d: Date) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 const weekData = allEvents().map((e) => { const a = wkDate(e.starts), b = wkDate(e.ends || e.starts), pl = venuePlace(e); return a && b ? { t: e.title, s: wkIso(a), f: wkIso(b), v: pl ? pl.name : (e.venue || e.profile || ''), u: href(e) } : null; }).filter(Boolean);
 const areas = [...new Set(businesses().map((b) => b.area).filter(Boolean))].sort();
-const picks = businesses().filter(isFood).map((b) => ({ b, r: reviewsFor(b.name).sort((x, y) => stars(y.rating) - stars(x.rating))[0] })).filter((x) => x.r && stars(x.r.rating) >= 4)
+const picks = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) => ({ b, r: reviewsFor(b.name).sort((x, y) => stars(y.rating) - stars(x.rating))[0] })).filter((x) => x.r && stars(x.r.rating) >= 4)
   .sort((x, y) => stars(y.r.rating) - stars(x.r.rating)).slice(0, 4);
 const places = ofType('Neighborhood', 'City').filter((p) => p.show.living).slice(0, 8);
 const POPULAR = ['Bellaire', 'Cypress', 'Energy Corridor', 'Galleria', 'The Heights', 'Katy', 'Memorial Villages', 'Oak Forest', 'Spring Branch', 'Sugar Land'];
@@ -31,10 +31,10 @@ const popular = POPULAR.map((n) => areaPages().find((p) => p.name === n)).filter
 const hoodCount = areaPages().length;
 const ts = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? +new Date(+m[3], +m[1] - 1, +m[2]) : 0; };
 const snippet = (r: any) => { const t = (r.summary || r.body || '').replace(/\s+/g, ' ').trim(); return t.length > 150 ? t.slice(0, 150).replace(/\s+\S*$/, '') + '...' : t; };
-const written = reviews().filter((r) => snippet(r));
-const feedPool = (written.length >= 6 ? written : reviews()).slice().sort((a, b) => ts(b.reviewDate) - ts(a.reviewDate)).slice(0, 18);
+const written = liveReviews().filter((r) => snippet(r));
+const feedPool = (written.length >= 6 ? written : liveReviews()).slice().sort((a, b) => ts(b.reviewDate) - ts(a.reviewDate)).slice(0, 18);
 const feed = feedPool.map((r) => { const biz = byName(r.profile); return { r, biz, text: snippet(r), m: media(r) || (biz ? media(biz) : null) }; });
-const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed').map((b) => ({ n: b.name, u: href(b), a: b.area, c: category(b), r: topRating(b.name), t: foodTab(b) }));
+const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) => ({ n: b.name, u: href(b), a: b.area, c: category(b), r: topRating(b.name), t: foodTab(b) }));
 ---
 <Base title="Home" active="">
   <section class="band hero">

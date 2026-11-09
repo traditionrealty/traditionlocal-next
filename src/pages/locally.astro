@@ -2,10 +2,10 @@
 import Base from '../layouts/Base.astro';
 import Prefs from '../components/Prefs.astro';
 import '../styles/pages.css';
-import { businesses, events, href, url } from '../lib/data';
+import { businesses, events, href, url, isClosed } from '../lib/data';
 import { areaPages, subsIn, topRating, category, cleanList, isFood, venuePlace } from '../lib/helpers';
 const areas = areaPages().map((p) => ({ n: p.name, u: href(p), take: p.localTake, best: p.bestFor, homes: p.typicalHomes, schools: cleanList(p.schools), subs: subsIn(p.name).slice(0, 8).map((s) => ({ n: s.name, u: href(s) })) }));
-const food = businesses().filter(isFood).filter((b) => b.status !== 'Closed').map((b) => ({ s: b.slug, n: b.name, u: href(b), a: b.area, c: category(b), r: topRating(b.name) }));
+const food = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) => ({ s: b.slug, n: b.name, u: href(b), a: b.area, c: category(b), r: topRating(b.name) }));
 const toDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
 const pad = (n: number) => String(n).padStart(2, '0');
 const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;

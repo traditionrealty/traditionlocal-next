@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
-import { profiles, byName, href, media, eventDates, url } from '../../lib/data';
+import { profiles, byName, isClosed, href, media, eventDates, url } from '../../lib/data';
 import { eventsAtPlace, placesIn } from '../../lib/helpers';
 import { config } from '../../config';
 import Prefs from '../../components/Prefs.astro';
@@ -9,7 +9,7 @@ export function getStaticPaths() { return profiles.filter((p) => p.type === 'Pla
 const { p } = Astro.props;
 const m = media(p), area = byName(p.area), events = eventsAtPlace(p), near = placesIn(p.area).filter((x) => x.slug !== p.slug).slice(0, 3);
 const web = p.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
-const status = p.status === 'Open' ? 'Open' : p.status === 'Closed' ? 'Closed' : 'Status not confirmed';
+const status = isClosed(p) ? (/temporar/i.test(p.status) ? 'Temporarily closed' : 'Closed') : p.status === 'Open' ? 'Open' : 'Status not confirmed';
 ---
 <Base title={p.name} description={p.summary} active="Things to do">
   <section class="band hero">

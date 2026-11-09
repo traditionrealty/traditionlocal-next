@@ -1,7 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
-import { profiles, events, href, eventDates, url } from '../../lib/data';
+import { profiles, events, isClosed, href, eventDates, url } from '../../lib/data';
 import { venuePlace } from '../../lib/helpers';
 import { config } from '../../config';
 const today = new Date(); const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -15,7 +15,7 @@ const cal = dated.map((x) => ({ t: x.e.title, s: iso(x.a), f: iso(x.b), v: x.pla
 // Events tagged Featured or Our pick in the sheet show up in Our picks. The section stays hidden when none are tagged.
 const picks = list.filter((x) => x.e.tags.some((t: string) => /^(featured|our picks?|picks?)$/i.test(t))).slice(0, 3);
 const kinds = [...new Set(list.map((x) => x.e.eventType).filter(Boolean))].sort();
-const places = profiles.filter((p) => p.type === 'Place').sort((a, b) => a.name.localeCompare(b.name));
+const places = profiles.filter((p) => p.type === 'Place' && !isClosed(p)).sort((a, b) => a.name.localeCompare(b.name));
 const placeAreas = [...new Set(places.map((p) => p.area).filter(Boolean))].sort();
 const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
 const DAY = 86400000;
