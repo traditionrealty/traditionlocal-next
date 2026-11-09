@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import { businesses, ofType, reviews, reviewsFor, byName, events as allEvents, upcomingEvents, eventDates, dateText, href, media, stars, url } from '../lib/data';
 import { config } from '../config';
-import { isFood, foodTab, category, topRating, venuePlace, areaPages } from '../lib/helpers';
+import { isFood, foodTab, category, topRating, venuePlace, areaPages, foodIn } from '../lib/helpers';
 import OpeningsPanel from '../components/OpeningsPanel.astro';
 import { openingsOf } from '../lib/openings';
 import VideoCard from '../components/VideoCard.astro';
@@ -26,6 +26,8 @@ const areas = [...new Set(businesses().map((b) => b.area).filter(Boolean))].sort
 const picks = businesses().filter(isFood).map((b) => ({ b, r: reviewsFor(b.name).sort((x, y) => stars(y.rating) - stars(x.rating))[0] })).filter((x) => x.r && stars(x.r.rating) >= 4)
   .sort((x, y) => stars(y.r.rating) - stars(x.r.rating)).slice(0, 4);
 const places = ofType('Neighborhood', 'City').filter((p) => p.show.living).slice(0, 8);
+const popular = areaPages().map((p) => ({ p, n: foodIn(p.name).length })).sort((a, b) => b.n - a.n).slice(0, 5).map((x) => x.p);
+const hoodCount = areaPages().length;
 const ts = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? +new Date(+m[3], +m[1] - 1, +m[2]) : 0; };
 const snippet = (r: any) => { const t = (r.summary || r.body || '').replace(/\s+/g, ' ').trim(); return t.length > 150 ? t.slice(0, 150).replace(/\s+\S*$/, '') + '...' : t; };
 const written = reviews().filter((r) => snippet(r));
@@ -149,31 +151,24 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
   {places.length > 0 && (
     <section class="band" id="home-hood">
       <div class="wrap">
-        <div class={spots.length > 0 ? 'hood-split' : ''}>
-          <div>
-            <p class="eyebrow">Neighborhood guides</p>
-            <h2 style="margin-bottom:16px">Where do you call home?</h2>
-            <p style="font-size:17px;margin-bottom:20px">Pick an area to see what is good nearby.</p>
-            <div class="chips">{places.map((p) => <a class="chip" href={href(p)}>{p.name}</a>)}</div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px"><a class="btn line" href={url('/neighborhoods')}>Browse all neighborhoods</a><a class="btn line" href={url('/find-your-fit')}>Not sure? Find your fit</a></div>
-          </div>
-          {spots.length > 0 && (
-            <aside aria-label="Neighborhood spotlight">
-              {spots.map((s, i) => (
-                <a class={i === 0 ? 'card spot-card' : 'card spot-card hidden'} href={s.link} rel={s.external ? 'noopener' : undefined}>
+        {spots.length > 0 && (
+          <aside class="spot-wrap" aria-label="Neighborhood spotlight">
+            {spots.map((s, i) => (
+              <a class={i === 0 ? 'card spot-card' : 'card spot-card hidden'} href={s.link} rel={s.external ? 'noopener' : undefined}>
+                <div class="spot-main">
                   <p class="eyebrow">Neighborhood spotlight</p>
                   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><span class="tag">{s.label}</span>{s.region && <span class="tag soft">{s.region}</span>}{s.date && <span class="tag soft">{s.date}</span>}</div>
                   <h3>{s.title}</h3>
-                  <p class="meta" style="font-size:16px;margin:8px 0 12px">{s.summary}</p>
+                  <p class="meta" style="font-size:16px;margin:8px 0 10px">{s.summary}</p>
                   {s.bestFor && <p class="meta" style="margin-bottom:4px"><b>Best for:</b> {s.bestFor}</p>}
                   {s.homes && <p class="meta" style="margin-bottom:4px"><b>Typical homes:</b> {s.homes}</p>}
                   {(s.places > 0 || s.subs > 0) && <p class="meta"><b>{s.places}</b> places reviewed, <b>{s.subs}</b> subdivisions</p>}
-                  <span class="spot-link">{s.cta}</span>
-                </a>
-              ))}
-            </aside>
-          )}
-        </div>
+                </div>
+                <span class="btn spot-btn">{s.cta}</span>
+              </a>
+            ))}
+          </aside>
+        )}
         <script is:inline>
           (function () {
             var cards = document.querySelectorAll('.spot-card');
@@ -182,12 +177,104 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
             [].forEach.call(cards, function (c, k) { c.classList.toggle('hidden', k !== pick); });
           })();
         </script>
-        <form class="card pad" id="home-locally" action={config.newsletterAction} method="post" style="margin-top:28px;max-width:760px;display:grid;gap:14px">
-          <div><p class="eyebrow">Locally</p><h3 style="margin-bottom:6px">Your neighborhood, in your inbox.</h3><p class="meta" style="font-size:16px">For now, signing up joins In the Loop, and Locally for your area follows when it opens. Your area is saved on this device.</p></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label for="hl-area">Your area</label><select id="hl-area"><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}</select></div><div><label for="hl-email">Your email</label><input id="hl-email" name="email" type="email" required placeholder="name@email.com" /></div></div>
-          <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
-          <div><button class="btn" type="submit">Get Locally</button></div>
-        </form>
+        <div class="hood-pick">
+          <div>
+            <p class="eyebrow">Neighborhood guides</p>
+            <h2 style="margin-bottom:12px">Where do you call home?</h2>
+            <p style="font-size:17px;margin-bottom:18px">Search for your neighborhood, or start with a popular one.</p>
+            <div class="hp-search">
+              <label class="sr" for="hp-q">Search neighborhoods</label>
+              <input id="hp-q" type="search" role="combobox" aria-expanded="false" aria-controls="hp-list" aria-autocomplete="list" autocomplete="off" placeholder={'Search ' + hoodCount + ' neighborhoods'} />
+              <div id="hp-list" class="hp-list hidden" role="listbox"></div>
+            </div>
+            <div class="chips" id="hp-chips" style="margin-top:14px">{popular.map((p) => <a class="chip" href={href(p)} data-n={p.name}>{p.name}</a>)}</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px"><a class="btn line" href={url('/neighborhoods')}>Browse all neighborhoods</a><a class="btn line" href={url('/find-your-fit')}>Not sure? Find your fit</a></div>
+          </div>
+          <div class="card hp-card" id="hp-card" aria-live="polite">
+            <div id="hp-empty">
+              <p class="eyebrow">Your area</p>
+              <h3 style="margin-bottom:8px">Pick a neighborhood</h3>
+              <p class="meta" style="font-size:16px">Search above or tap a popular area. We will show what is good there, and you can get its picks by email.</p>
+            </div>
+            <div id="hp-detail" class="hidden">
+              <p class="eyebrow">Your area</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px"><span class="tag soft hidden" id="hp-region"></span></div>
+              <h3 id="hp-name" style="margin-bottom:6px"></h3>
+              <p class="meta" id="hp-summary" style="font-size:16px;margin-bottom:10px"></p>
+              <p class="meta hidden" id="hp-best" style="margin-bottom:4px"><b>Best for:</b> <span></span></p>
+              <p class="meta hidden" id="hp-homes" style="margin-bottom:12px"><b>Typical homes:</b> <span></span></p>
+              <div id="hp-top" class="hidden"><p style="font-size:13px;font-weight:700;margin-bottom:6px">Top rated places</p><ul class="hp-places" id="hp-places"></ul></div>
+              <a class="btn line" id="hp-guide" href="#">Read the guide</a>
+              <form class="hp-form" id="hp-form" action={config.newsletterAction} method="post">
+                <label for="hp-email" id="hp-form-label">Get picks by email</label>
+                <div class="hp-row"><input id="hp-email" name="email" type="email" required placeholder="name@email.com" /><button class="btn" type="submit">Join</button></div>
+                <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
+                <p class="meta" style="font-size:13px;margin-top:8px">Joins In the Loop, our Monday email. Your area is saved on this device, so Locally can tailor it when it opens.</p>
+              </form>
+            </div>
+          </div>
+        </div>
+        <script is:inline define:vars={{ AREAS_URL: url('/area-preview.json') }}>
+          (function () {
+            var $ = function (id) { return document.getElementById(id); };
+            var q = $('hp-q'); if (!q) return;
+            var list = $('hp-list'), data = null, loading = null, matches = [], active = -1;
+            function load() {
+              if (data) return Promise.resolve(data);
+              if (!loading) loading = fetch(AREAS_URL).then(function (r) { return r.json(); }).catch(function () { return []; }).then(function (j) { data = j; return j; });
+              return loading;
+            }
+            function find(name) { var d = data || []; for (var i = 0; i < d.length; i++) if (d[i].n === name) return d[i]; return null; }
+            function close() { list.classList.add('hidden'); q.setAttribute('aria-expanded', 'false'); q.removeAttribute('aria-activedescendant'); active = -1; }
+            function paintList() {
+              list.innerHTML = '';
+              matches.forEach(function (a, i) {
+                var o = document.createElement('button'); o.type = 'button'; o.className = 'hp-opt'; o.id = 'hp-o-' + i; o.setAttribute('role', 'option'); o.setAttribute('aria-selected', i === active ? 'true' : 'false'); o.textContent = a.n;
+                if (a.g) { var s = document.createElement('small'); s.textContent = a.g; o.appendChild(s); }
+                o.addEventListener('mousedown', function (e) { e.preventDefault(); choose(a); });
+                list.appendChild(o);
+              });
+              if (!matches.length) { var n = document.createElement('p'); n.className = 'meta'; n.style.padding = '10px 12px'; n.textContent = 'No neighborhood found. Try a shorter name.'; list.appendChild(n); }
+              list.classList.remove('hidden'); q.setAttribute('aria-expanded', 'true');
+            }
+            function search() {
+              var t = q.value.trim().toLowerCase(); if (!t) { close(); return; }
+              load().then(function (d) {
+                var starts = d.filter(function (a) { return a.n.toLowerCase().indexOf(t) === 0; }), has = d.filter(function (a) { return a.n.toLowerCase().indexOf(t) > 0; });
+                matches = starts.concat(has).slice(0, 8); active = matches.length ? 0 : -1; paintList();
+                if (active > -1) q.setAttribute('aria-activedescendant', 'hp-o-0');
+              });
+            }
+            function choose(a) {
+              q.value = a.n; close();
+              $('hp-name').textContent = a.n; $('hp-summary').textContent = a.s;
+              var rg = $('hp-region'); rg.textContent = a.g; rg.classList.toggle('hidden', !a.g);
+              [['hp-best', a.b], ['hp-homes', a.h]].forEach(function (x) { var p = $(x[0]); p.querySelector('span').textContent = x[1]; p.classList.toggle('hidden', !x[1]); });
+              var ul = $('hp-places'); ul.innerHTML = '';
+              a.t.forEach(function (t) { var li = document.createElement('li'), l = document.createElement('a'), r = document.createElement('span'); l.href = t[2]; l.textContent = t[0]; r.className = 'meta'; r.textContent = t[1] + ' out of 5'; li.appendChild(l); li.appendChild(r); ul.appendChild(li); });
+              $('hp-top').classList.toggle('hidden', !a.t.length);
+              var g = $('hp-guide'); g.href = a.u; g.textContent = 'Read the ' + a.n + ' guide';
+              $('hp-form-label').textContent = 'Get ' + a.n + ' picks by email'; $('hp-form').setAttribute('data-area', a.n);
+              $('hp-empty').classList.add('hidden'); $('hp-detail').classList.remove('hidden');
+              [].forEach.call(document.querySelectorAll('#hp-chips .chip'), function (c) { c.classList.toggle('on', c.getAttribute('data-n') === a.n); });
+            }
+            q.addEventListener('input', search);
+            q.addEventListener('focus', function () { load(); if (q.value.trim()) search(); });
+            q.addEventListener('blur', function () { setTimeout(close, 120); });
+            q.addEventListener('keydown', function (e) {
+              if (e.key === 'Escape') { close(); return; }
+              if (list.classList.contains('hidden') || !matches.length) return;
+              if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); active = (active + (e.key === 'ArrowDown' ? 1 : matches.length - 1)) % matches.length; paintList(); q.setAttribute('aria-activedescendant', 'hp-o-' + active); }
+              else if (e.key === 'Enter') { e.preventDefault(); choose(matches[active > -1 ? active : 0]); }
+            });
+            $('hp-chips').addEventListener('click', function (e) {
+              var c = e.target.closest('.chip'); if (!c) return; e.preventDefault();
+              load().then(function () { var a = find(c.getAttribute('data-n')); if (a) choose(a); else location.href = c.href; });
+            });
+            var saved = ''; try { saved = JSON.parse(localStorage.getItem('tl_area') || '""'); } catch (e) {}
+            if (saved) load().then(function () { var a = find(saved); if (a) choose(a); });
+          })();
+        </script>
       </div>
     </section>
   )}
@@ -302,20 +389,33 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
       $('surprise').addEventListener('click', surprise); $('finder-again').addEventListener('click', surprise);
       var fm = $('feed-more-btn');
       if (fm) fm.addEventListener('click', function () { var hid = document.querySelectorAll('.feed-more.hidden'); for (var i = 0; i < Math.min(6, hid.length); i++) hid[i].classList.remove('hidden'); if (document.querySelectorAll('.feed-more.hidden').length === 0) fm.classList.add('hidden'); });
-      $('home-locally').addEventListener('submit', function () { try { var v = $('hl-area').value; if (v) localStorage.setItem('tl_area', JSON.stringify(v)); } catch (e) {} });
+      var hpf = $('hp-form'); if (hpf) hpf.addEventListener('submit', function () { try { var v = hpf.getAttribute('data-area'); if (v) localStorage.setItem('tl_area', JSON.stringify(v)); } catch (e) {} });
     })();
   </script>
   <style is:global>
     .tile { transition: transform .18s, box-shadow .18s; }
     .tile:hover, .tile:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
   </style>
-  <style>
-    .hood-split { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: start; }
-    @media (max-width: 860px) { .hood-split { grid-template-columns: 1fr; gap: 28px; } }
-    .spot-card { display: block; padding: 26px 28px; text-decoration: none; color: inherit; background: var(--ivory); border-color: var(--gold); transition: transform .18s, box-shadow .18s; }
+  <style is:global>
+    .spot-wrap { margin-bottom: 56px; }
+    .spot-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: center; padding: 28px 32px; text-decoration: none; color: inherit; background: var(--ivory); border-color: var(--gold); transition: transform .18s, box-shadow .18s; }
     .spot-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
     .spot-card.hidden { display: none !important; }
     .spot-card h3 { margin-top: 4px; }
-    .spot-link { display: inline-block; margin-top: 14px; font-weight: 700; color: var(--blue); }
+    .spot-btn { white-space: nowrap; }
+    @media (max-width: 760px) { .spot-card { grid-template-columns: 1fr; gap: 18px; padding: 22px; } .spot-btn { justify-self: start; } }
+    .hood-pick { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+    @media (max-width: 860px) { .hood-pick { grid-template-columns: 1fr; gap: 28px; } }
+    .hp-search { position: relative; }
+    .hp-list { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 6px); max-height: 320px; overflow: auto; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 12px 32px rgba(29, 26, 109, .18); padding: 6px; }
+    .hp-opt { display: block; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 8px; background: none; font: inherit; font-size: 16px; color: var(--navy); text-align: left; cursor: pointer; }
+    .hp-opt small { margin-left: 8px; color: var(--slate); font-size: 13px; }
+    .hp-opt:hover, .hp-opt[aria-selected="true"] { background: var(--ivory); }
+    .hp-card { padding: 28px; }
+    .hp-places { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 6px; }
+    .hp-places li { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
+    .hp-form { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
+    .hp-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .hp-row input { flex: 1 1 200px; width: auto; }
   </style>
 </Base>
