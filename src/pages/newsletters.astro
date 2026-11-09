@@ -4,6 +4,7 @@ import '../styles/pages.css';
 import { url } from '../lib/data';
 import { areaPages } from '../lib/helpers';
 import { config } from '../config';
+import { issues } from '../lib/issues';
 const areas = areaPages().map((p) => p.name).sort();
 ---
 <Base title="Newsletters" active="More" description="In the Loop every Monday, and Locally Plus for your neighborhood.">
@@ -44,6 +45,24 @@ const areas = areaPages().map((p) => p.name).sort();
       </div>
     </div>
   </section>
+  {issues.length > 0 && (
+    <section class="band tint" id="past-issues">
+      <div class="wrap">
+        <p class="eyebrow">Past issues</p><h2 style="margin-bottom:12px">See what lands in your inbox.</h2>
+        <p class="meta" style="font-size:17px;margin-bottom:28px;max-width:720px">Read a recent issue of In the Loop before you join.</p>
+        <div class="grid g2">
+          {issues.map((s, i) => (
+            <a class="card pad" href={url('/newsletters/' + s.slug)} style="text-decoration:none;display:flex;flex-direction:column">
+              <div style="display:flex;gap:8px;flex-wrap:wrap">{i === 0 && <span class="tag">Latest issue</span>}<span class="tag soft">{s.date}</span></div>
+              <h4 style="margin:12px 0 8px">{s.title}</h4>
+              {s.preview && <p class="meta" style="font-size:16px">{s.preview}</p>}
+              <span style="margin-top:auto;padding-top:14px;font-weight:700;color:var(--blue)">Read the issue</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
   <script is:inline>
     (function () {
       var $ = function (id) { return document.getElementById(id); };

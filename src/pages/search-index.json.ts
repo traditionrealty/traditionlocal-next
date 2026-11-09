@@ -3,6 +3,7 @@ import { businesses, profiles, reviews, events, byName, href, url, dateText, eve
 import { areaPages, category, isFood } from '../lib/helpers';
 import { videos, channelVideos } from '../lib/videos';
 import { openings, whenText } from '../lib/openings';
+import { issues } from '../lib/issues';
 
 type Row = { k: string; t: string; u: string; s?: string; x?: string };
 const clip = (s: string, n: number) => (s || '').replace(/\s+/g, ' ').trim().slice(0, n);
@@ -42,5 +43,6 @@ const pages: [string, string, string][] = [
   ['Texas real estate disclosures', '/disclosures', 'Required Texas notices'],
 ];
 for (const [t, p, x] of pages) rows.push({ k: 'page', t, u: url(p), s: 'Page', x });
+for (const s of issues) rows.push({ k: 'page', t: s.title, u: url('/newsletters/' + s.slug), s: 'Newsletter, ' + s.date, x: clip(s.preview, 140) });
 
 export const GET = () => new Response(JSON.stringify(rows), { headers: { 'Content-Type': 'application/json' } });

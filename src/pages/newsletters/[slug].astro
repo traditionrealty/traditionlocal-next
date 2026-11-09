@@ -1,0 +1,31 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/pages.css';
+import { url } from '../../lib/data';
+import { issues, blocks } from '../../lib/issues';
+export function getStaticPaths() { return issues.map((s) => ({ params: { slug: s.slug }, props: { s } })); }
+const { s } = Astro.props;
+const parts = blocks(s.body);
+---
+<Base title={s.title} active="More" description={s.preview || 'A past issue of In the Loop.'}>
+  <section class="band hero">
+    <div class="wrap">
+      <p class="eyebrow"><a href={url('/newsletters')} style="text-decoration:none">Newsletters</a> / In the Loop</p>
+      <h1 style="margin-bottom:12px;max-width:860px">{s.title}</h1>
+      <p class="meta" style="margin-bottom:16px">{s.date}</p>
+      {s.preview && <p class="lead" style="margin-bottom:28px;max-width:760px">{s.preview}</p>}
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/newsletters#nl-form')}>Get the next issue</a><a class="btn line" href={url('/newsletters')}>All newsletters</a></div>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap" style="max-width:780px">
+      {parts.map((b) => b.kind === 'h2' ? <h2 style="margin:44px 0 16px;font-size:30px">{b.text}</h2> : b.kind === 'h3' ? <h3 style="margin:32px 0 12px">{b.text}</h3> : <p style="font-size:18px;line-height:1.75;margin:0 0 20px">{b.text}</p>)}
+    </div>
+  </section>
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Want the next one in your inbox?</h3><p style="font-size:17px">In the Loop is free to join, and you can leave with one click.</p></div>
+      <a class="btn" href={url('/newsletters#nl-form')}>Join In the Loop</a>
+    </div>
+  </section>
+</Base>
