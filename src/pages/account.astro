@@ -7,7 +7,8 @@ import { areaPages, bizIn, topRating, category, isFood } from '../lib/helpers';
 import { config } from '../config';
 const areas = areaPages().map((p) => p.name).sort();
 const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b), x: isClosed(b) ? 1 : 0 }))
-  .concat(profiles.filter((p) => p.type === 'Place' && !isClosed(p)).map((p) => ({ s: 'p:' + p.slug, n: p.name, a: p.area, c: p.subCategory || 'Place', r: 0, u: href(p) })));
+  .concat(profiles.filter((p) => p.type === 'Place' && !isClosed(p)).map((p) => ({ s: 'p:' + p.slug, n: p.name, a: p.area, c: p.subCategory || 'Place', r: 0, u: href(p) })))
+  .concat(areaPages().map((p) => ({ s: 'n:' + p.slug, n: p.name, a: '', c: p.region ? 'Neighborhood, ' + p.region : 'Neighborhood', r: 0, u: href(p), x: 0 })));
 const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openings', 'New openings'], ['homes', 'Neighborhoods and homes']];
 ---
 <Base title="Your account" description="Your area, the places you follow, and what you receive.">

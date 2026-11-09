@@ -105,7 +105,7 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
     closedHint();
     tabs.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { cats.set(b); kit.refresh(); } });
     // saved count
-    function savedCount() { document.getElementById('f-saved').textContent = TLD.saved().length; }
+    function savedCount() { document.getElementById('f-saved').textContent = TLD.saved().filter(function (s) { return INDEX.some(function (x) { return x.s === s; }); }).length; }
     document.addEventListener('tl:saved', savedCount); savedCount();
     document.getElementById('f-mail').addEventListener('click', function () {
       var s = TLD.saved(), rows = INDEX.filter(function (x) { return s.indexOf(x.s) > -1; });

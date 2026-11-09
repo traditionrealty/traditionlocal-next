@@ -31,6 +31,8 @@ html { scroll-padding-top: 104px; }
 .nav-end .btn { min-height: 44px; padding: 0 24px; font-size: 15px; background: var(--gold); border-color: var(--gold); color: var(--navy); }
 .nav-end .btn:hover { background: var(--butter); border-color: var(--butter); color: var(--navy); }
 .nav-end .btn:focus-visible { outline-color: #fff; }
+.signin { padding: 8px 6px; font-size: 15px; font-weight: 500; color: #fff; text-decoration: none; border-bottom: 2px solid transparent; }
+.signin:hover { color: #fff; border-bottom-color: rgba(255, 255, 255, .4); }
 .srch-open { width: 44px; height: 44px; min-height: 0; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, .45); background: transparent; color: #fff; cursor: pointer; flex: none; }
 .srch-open:hover { background: rgba(255, 255, 255, .14); }
 
@@ -67,4 +69,6 @@ html { scroll-padding-top: 104px; }
   .nav-end { margin: 14px 0 0; flex-direction: column; align-items: stretch; gap: 12px; }
   .nav-end .btn { min-height: 48px; font-size: 16px; }
   .nav-end .srch-open { display: none; }
+  .nav-end .btn { order: 1; }
+  .nav-end .signin { order: 2; text-align: center; padding: 12px 0; font-size: 16px; border-bottom: 0; }
 }
