@@ -109,7 +109,9 @@ const moreOn = sub !== '' || active === 'More';
       document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { setMore(false); if (mobile()) set(false); } });
       h.querySelector('.nav').addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
       // pinned header: it shrinks and gains a shadow once the page has moved
-      var onScroll = function () { h.classList.toggle('stuck', window.pageYOffset > 24); };
+      var dock = document.querySelector('.fdock'), root = document.documentElement;
+      var onScroll = function () { var s = window.pageYOffset > 24; h.classList.toggle('stuck', s); root.classList.toggle('hs', s); if (dock) dock.classList.toggle('stuck', window.pageYOffset > 8 && dock.getBoundingClientRect().top <= h.getBoundingClientRect().height + 1); };
+      window.addEventListener('resize', onScroll);
       window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
     })();
   </script>

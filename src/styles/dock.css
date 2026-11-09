@@ -1,0 +1,29 @@
+/* Search and results read as one tool. The filter card overlaps the hero, then docks under the header as you scroll. */
+.band.hero.dock-hero { padding: 56px 0 88px; }
+.band.results { padding: 0 0 80px; }
+.fdock { position: sticky; top: 88px; z-index: 40; margin-top: -56px; margin-bottom: 32px; transition: box-shadow .2s; }
+html.hs .fdock { top: 72px; }
+.fdock .fbar { padding: 20px 24px; gap: 16px; }
+.fdock.stuck { background: #fff; box-shadow: 0 6px 16px rgba(29, 26, 109, .10); border-bottom: 1px solid var(--line); }
+.fdock.stuck .fbar { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 12px 0; gap: 10px; }
+.fdock.stuck .fbar label:not(.fcheck), .fdock.stuck .fbar .flabel { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.fdock.stuck .chip { min-height: 36px; }
+.fbar-status .fbar-cats { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: 8px; }
+.fbar-status .fquiz { font-size: 15px; }
+.fbar-status .fbar-meta { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.fbar-status .fbar-meta .meta { margin-left: 0; }
+.fbar-meta .btn { min-height: 40px; padding: 0 18px; font-size: 14px; }
+@media (max-width: 760px) {
+  .band.hero.dock-hero { padding: 40px 0 72px; }
+  .band.results { padding-bottom: 64px; }
+  .fdock { top: 64px; margin-top: -40px; margin-bottom: 24px; }
+  html.hs .fdock { top: 56px; }
+  .fdock .fbar { padding: 14px; gap: 12px; }
+  .fdock.stuck .fbar { padding: 10px 0; gap: 8px; }
+  .fbar:not(.open) .fbar-status .fbar-cats { display: none; }
+  .fbar-status .fquiz { flex: 1 1 100%; order: 3; }
+  .fbar-status .fbar-meta { margin-left: 0; width: 100%; justify-content: space-between; }
+  .fbar-status .fbar-meta .meta { flex: 0 0 auto; }
+  .fdock.stuck .fbar-meta .btn { display: none; }
+  .fbar.open .fbar-panel { max-height: 55vh; overflow-y: auto; }
+}

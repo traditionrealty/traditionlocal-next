@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Prefs from '../../components/Prefs.astro';
 import FilterKit from '../../components/FilterKit.astro';
 import '../../styles/pages.css';
+import '../../styles/dock.css';
 import { href, url } from '../../lib/data';
 import { areaPages, foodIn, subsIn, cleanList, REGIONS } from '../../lib/helpers';
 const list = areaPages().map((p) => ({ p, biz: foodIn(p.name).length, subs: subsIn(p.name).length })).sort((a, b) => a.p.name.localeCompare(b.p.name));
@@ -15,33 +16,37 @@ const areaRows = list.map(({ p }) => ({ s: 'n:' + p.slug, n: p.name, r: p.region
 const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/></svg>';
 ---
 <Base title="Neighborhoods" active="Neighborhoods" description="Area guides and subdivision profiles from people who live here.">
-  <section class="band hero">
+  <section class="band hero dock-hero">
     <div class="wrap">
       <p class="eyebrow">Around town</p>
       <h1 style="margin-bottom:12px;max-width:900px">Find the neighborhood that fits your life.</h1>
-      <p class="lead" style="margin-bottom:28px">A local perspective on where to eat, what to do, and what it is like to live there.</p>
-      <div class="fbar" id="n-bar">
-        <div class="fbar-row">
-          <div class="fbar-search"><label for="n-q">Search</label><input id="n-q" type="search" placeholder="Try Sugar Land, Montrose, or Cinco Ranch" autocomplete="off" /></div>
-          <button class="chip fbar-toggle" type="button" aria-expanded="false" aria-controls="n-panel">Filters <span class="fcount hidden" id="n-badge"></span></button>
-          <div class="fbar-panel" id="n-panel">
-            <div class="fpop-wrap" id="n-loves"><span class="flabel">What matters most</span>
-              <details class="fpop"><summary><span class="ftext">Anything</span></summary><div class="fpop-menu">{loves.map(([k, l]) => <label><input type="checkbox" value={k} />{l}</label>)}</div></details>
-            </div>
-            <div class="fsel"><label for="n-region">Region</label><select id="n-region"><option value="">All regions</option>{regions.map((r) => <option>{r}</option>)}</select></div>
-          </div>
-        </div>
-        <div class="fbar-status"><div class="fpills" id="n-pills"></div><button class="flink hidden" id="n-clear" type="button">Clear all</button><span class="meta" id="n-count">{list.length} areas</span></div>
-      </div>
-      <p class="meta" style="margin-top:14px;font-size:15px">Not sure? <a href={url('/find-your-fit')} style="font-weight:700">Take the 3 question quiz</a>.</p>
+      <p class="lead" style="margin-bottom:0">A local perspective on where to eat, what to do, and what it is like to live there.</p>
     </div>
   </section>
-  <section class="band" id="browse">
-    <div class="wrap">
-      <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-        <div><p class="eyebrow">Browse</p><h2>All neighborhoods</h2></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn line" href={url('/account#saved')}>Saved neighborhoods (<span id="n-saved">0</span>)</a><button class="btn line" id="n-mail" type="button">Email my list</button></div>
+  <section class="band results" id="browse">
+    <div class="fdock" id="n-dock">
+      <div class="wrap">
+        <div class="fbar" id="n-bar">
+          <div class="fbar-row">
+            <div class="fbar-search"><label for="n-q">Search</label><input id="n-q" type="search" placeholder="Try Sugar Land, Montrose, or Cinco Ranch" autocomplete="off" /></div>
+            <button class="chip fbar-toggle" type="button" aria-expanded="false" aria-controls="n-panel">Filters <span class="fcount hidden" id="n-badge"></span></button>
+            <div class="fbar-panel" id="n-panel">
+              <div class="fpop-wrap" id="n-loves"><span class="flabel">What matters most</span>
+                <details class="fpop"><summary><span class="ftext">Anything</span></summary><div class="fpop-menu">{loves.map(([k, l]) => <label><input type="checkbox" value={k} />{l}</label>)}</div></details>
+              </div>
+              <div class="fsel"><label for="n-region">Region</label><select id="n-region"><option value="">All regions</option>{regions.map((r) => <option>{r}</option>)}</select></div>
+            </div>
+          </div>
+          <div class="fbar-status">
+            <span class="fquiz">Not sure? <a href={url('/find-your-fit')} style="font-weight:700">Take the 3 question quiz</a>.</span>
+            <div class="fpills" id="n-pills"></div><button class="flink hidden" id="n-clear" type="button">Clear all</button>
+            <div class="fbar-meta"><span class="meta" id="n-count">{list.length} areas</span><a class="btn line sm" href={url('/account#saved')}>Saved neighborhoods (<span id="n-saved">0</span>)</a><button class="btn line sm" id="n-mail" type="button">Email my list</button></div>
+          </div>
+        </div>
       </div>
+    </div>
+    <div class="wrap">
+      <h2 class="sr">All neighborhoods</h2>
       <div class="grid g3">
         {list.map(({ p, biz, subs }, i) => (
           <div class={i < 24 ? 'card tcard n-item' : 'card tcard n-item hidden'} data-region={p.region} data-name={p.name.toLowerCase()} data-text={text(p)}>

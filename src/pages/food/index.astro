@@ -5,6 +5,7 @@ import { openingsOf } from '../../lib/openings';
 import Prefs from '../../components/Prefs.astro';
 import FilterKit from '../../components/FilterKit.astro';
 import '../../styles/pages.css';
+import '../../styles/dock.css';
 import { businesses, href, url, isClosed } from '../../lib/data';
 import { category, foodTab, cuisineRegion, topRating, isFood, FOOD_TABS, WORLD } from '../../lib/helpers';
 
@@ -18,46 +19,38 @@ const index = cards.map((c) => ({ s: c.b.slug, n: c.b.name, a: c.b.area, c: c.ca
 const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/></svg>';
 ---
 <Base title="Food" active="Food" description="Reviews from Sara, with a rating you can trust.">
-  <section class="band hero">
+  <section class="band hero dock-hero">
     <div class="wrap">
       <p class="eyebrow">Eat like a local</p>
       <h1 style="margin-bottom:12px">What sounds good?</h1>
-      <p class="lead" style="margin-bottom:28px">Reviews from Sara, with a rating you can trust. Start with a craving, an area, or what is new. <a href={url('/how-we-review')} style="font-weight:700">How we review places</a></p>
-      <div class="fbar" id="f-bar">
-        <div class="fbar-row">
-          <div class="fbar-search"><label for="f-q">Search</label><input id="f-q" type="search" placeholder="Try thai, coffee, or a place name" autocomplete="off" /></div>
-          <button class="chip fbar-toggle" type="button" aria-expanded="false" aria-controls="f-panel">Filters <span class="fcount hidden" id="f-badge"></span></button>
-          <div class="fbar-panel" id="f-panel">
-            <div class="fsel"><label for="f-area">Area</label><select id="f-area"><option value="">Anywhere</option>{areas.map((a) => <option>{a}</option>)}</select></div>
-            <div class="fsel"><label for="f-world">Cuisine</label><select id="f-world"><option value="">Any cuisine</option>{WORLD.filter(([k]) => k !== 'all').map(([k, l]) => <option value={k}>{l}</option>)}</select></div>
-            <div class="fsel"><label for="f-rating">Rating</label><select id="f-rating"><option value="0">Any</option><option value="5">5 out of 5</option><option value="4">4 or higher</option><option value="3">3 or higher</option></select></div>
-            <label class="fcheck" for="f-closed"><input type="checkbox" id="f-closed" />Include places that have closed</label>
-            <div class="fbar-cats tabs" id="f-tabs">{FOOD_TABS.map(([k, l], i) => <button class={i === 0 ? 'chip on' : 'chip'} data-tab={k} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}</div>
-          </div>
-        </div>
-        <div class="fbar-status"><div class="fpills" id="f-pills"></div><button class="flink hidden" id="f-mine" type="button"></button><button class="flink hidden" id="f-clear" type="button">Clear all</button><span class="meta" id="f-count">{cards.filter((c) => !c.gone).length} places</span></div>
-      </div>
+      <p class="lead" style="margin-bottom:0">Reviews from Sara, with a rating you can trust. Start with a craving, an area, or what is new. <a href={url('/how-we-review')} style="font-weight:700">How we review places</a></p>
     </div>
   </section>
 
-  {openingsOf('open').length + openingsOf('watch').length + openingsOf('closed').length > 0 && (
-    <section class="band" id="openings">
+  <section class="band results" id="browse">
+    <div class="fdock" id="f-dock">
       <div class="wrap">
-        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
-          <div><p class="eyebrow">Openings and closings</p><h2>Come along for the first bite</h2></div>
-          <a class="btn line" href={url('/openings-and-closings')}>See openings and closings</a>
+        <div class="fbar" id="f-bar">
+          <div class="fbar-row">
+            <div class="fbar-search"><label for="f-q">Search</label><input id="f-q" type="search" placeholder="Try thai, coffee, or a place name" autocomplete="off" /></div>
+            <button class="chip fbar-toggle" type="button" aria-expanded="false" aria-controls="f-panel">Filters <span class="fcount hidden" id="f-badge"></span></button>
+            <div class="fbar-panel" id="f-panel">
+              <div class="fsel"><label for="f-area">Area</label><select id="f-area"><option value="">Anywhere</option>{areas.map((a) => <option>{a}</option>)}</select></div>
+              <div class="fsel"><label for="f-world">Cuisine</label><select id="f-world"><option value="">Any cuisine</option>{WORLD.filter(([k]) => k !== 'all').map(([k, l]) => <option value={k}>{l}</option>)}</select></div>
+              <div class="fsel"><label for="f-rating">Rating</label><select id="f-rating"><option value="0">Any</option><option value="5">5 out of 5</option><option value="4">4 or higher</option><option value="3">3 or higher</option></select></div>
+              <label class="fcheck" for="f-closed"><input type="checkbox" id="f-closed" />Include places that have closed</label>
+            </div>
+          </div>
+          <div class="fbar-status">
+            <div class="fbar-cats tabs" id="f-tabs">{FOOD_TABS.map(([k, l], i) => <button class={i === 0 ? 'chip on' : 'chip'} data-tab={k} aria-pressed={i === 0 ? 'true' : 'false'}>{l}</button>)}</div>
+            <div class="fpills" id="f-pills"></div><button class="flink hidden" id="f-mine" type="button"></button><button class="flink hidden" id="f-clear" type="button">Clear all</button>
+            <div class="fbar-meta"><span class="meta" id="f-count">{cards.filter((c) => !c.gone).length} places</span><a class="btn line sm" href={url('/account#saved')}>Saved places (<span id="f-saved">0</span>)</a><button class="btn line sm" id="f-mail" type="button">Email my list</button></div>
+          </div>
         </div>
-        <OpeningsPanel limit={4} />
       </div>
-    </section>
-  )}
-
-  <section class="band" id="browse" style="border-top:1px solid var(--line)">
+    </div>
     <div class="wrap">
-      <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:24px;flex-wrap:wrap;gap:12px">
-        <div><p class="eyebrow">Browse</p><h2>Every place we have reviewed</h2></div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn line" href={url('/account#saved')}>Saved places (<span id="f-saved">0</span>)</a><button class="btn line" id="f-mail" type="button">Email my list</button></div>
-      </div>
+      <h2 class="sr">Every place we have reviewed</h2>
       <div class="grid g3" id="f-grid">
         {cards.map((c, i) => (
           <div class={i < 24 && !c.gone ? 'card tcard f-item' : 'card tcard f-item hidden'} data-closed={c.gone ? '1' : '0'} data-world={c.world} data-area={c.b.area} data-tab={c.tab} data-r={c.rating} data-name={`${c.b.name} ${c.cat} ${c.b.area}`.toLowerCase()}>
@@ -76,6 +69,18 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
       <p style="margin-top:24px"><a href="mailto:traditionlocal@gmail.com?subject=Suggest%20a%20place" style="font-weight:700">Know a favorite we missed? Suggest a place</a></p>
     </div>
   </section>
+
+  {openingsOf('open').length + openingsOf('watch').length + openingsOf('closed').length > 0 && (
+    <section class="band tint" id="openings">
+      <div class="wrap">
+        <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
+          <div><p class="eyebrow">Openings and closings</p><h2>Come along for the first bite</h2></div>
+          <a class="btn line" href={url('/openings-and-closings')}>See openings and closings</a>
+        </div>
+        <OpeningsPanel limit={4} />
+      </div>
+    </section>
+  )}
 
   <FilterKit />
   <Prefs />
