@@ -4,6 +4,9 @@ import '../styles/pages.css';
 import { url, IS_PREVIEW } from '../lib/data';
 import { listings } from '../lib/listings';
 import MoreWays from '../components/MoreWays.astro';
+import VideoCard from '../components/VideoCard.astro';
+import VideoScript from '../components/VideoScript.astro';
+import { feed, feedHasPosts, feedHasVideos } from '../lib/realestate';
 const help = [
   ['Relocation', 'Moving to Houston? Start with the neighborhood, then sort out the details.', '/relocation'],
   ['Apartment locating', 'Tell us what matters, and we will help you narrow the list of rentals.', '/apartments'],
@@ -77,9 +80,34 @@ const principles = [
     </div>
   </section>
 
-  <MoreWays cards={help} />
+  {feed.length > 0 && (
+    <section class="band" id="re-feed">
+      <div class="wrap">
+        <p class="eyebrow">Real estate feed</p><h2 style="margin-bottom:12px">What is happening in Houston real estate.</h2>
+        <p class="meta" style="font-size:17px;margin-bottom:24px;max-width:720px">Market updates, news, and videos from Dillon. Check back often.</p>
+        {feedHasPosts && feedHasVideos && <div class="tabs" id="rf-tabs" style="margin-bottom:24px"><button class="chip on" data-k="" aria-pressed="true">All</button><button class="chip" data-k="update" aria-pressed="false">Updates</button><button class="chip" data-k="video" aria-pressed="false">Videos</button></div>}
+        <div class="grid g3" id="rf-grid">
+          {feed.map((it, i) => it.type === 'post' ? (
+            <a class={i < 6 ? 'card pad rf-item' : 'card pad rf-item hidden'} data-k="update" href={it.post.link || url('/ask-dillon')} rel={it.post.external ? 'noopener' : undefined} style="text-decoration:none;display:flex;flex-direction:column">
+              <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag">{it.post.label}</span>{it.post.date && <span class="tag soft">{it.post.date}</span>}{IS_PREVIEW && it.post.example && <span class="tag soft">Example</span>}</div>
+              <h4 style="margin:12px 0 8px">{it.post.title}</h4>
+              {it.post.summary && <p class="meta" style="font-size:15px">{it.post.summary}</p>}
+              {it.post.source && <p class="meta" style="font-size:13px;margin-top:10px">Source: {it.post.source}</p>}
+              <span style="margin-top:auto;padding-top:14px;font-weight:700;color:var(--blue)">{it.post.link ? 'Read more' : 'Ask Dillon about this'}</span>
+            </a>
+          ) : (
+            <div class={i < 6 ? 'rf-item' : 'rf-item hidden'} data-k="video"><VideoCard v={it.v} /></div>
+          ))}
+        </div>
+        <p style="margin-top:24px"><button class="btn line hidden" id="rf-more" type="button">Show more</button></p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:28px"><a class="btn line" href={url('/videos')}>See all videos</a><a class="btn line" href={url('/ask-dillon')}>Ask Dillon a question</a></div>
+      </div>
+    </section>
+  )}
 
-  <section class="band tint">
+  <MoreWays cards={help} tint />
+
+  <section class="band">
     <div class="wrap">
       <p class="eyebrow">How we work</p><h2 style="margin-bottom:28px">Calm, clear, and personal.</h2>
       <div class="grid g3">{principles.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
@@ -98,6 +126,27 @@ const principles = [
       <p class="meta" style="font-size:14px;max-width:760px">Dillon Loren is a Realtor with Tradition Realty Group at Keller Williams Memorial. <a href={url('/disclosures')}>Texas real estate disclosures</a></p>
     </div>
   </section>
+  <VideoScript />
+  <script is:inline>
+    (function () {
+      var g = document.getElementById('rf-grid'); if (!g) return;
+      var items = [].slice.call(g.children), more = document.getElementById('rf-more'), tabs = document.getElementById('rf-tabs'), kind = '', shown = 6;
+      function run() {
+        var m = items.filter(function (i) { return !kind || i.getAttribute('data-k') === kind; });
+        items.forEach(function (i) { i.classList.add('hidden'); });
+        m.slice(0, shown).forEach(function (i) { i.classList.remove('hidden'); });
+        more.classList.toggle('hidden', m.length <= shown);
+      }
+      if (tabs) tabs.addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        kind = b.getAttribute('data-k'); shown = 6;
+        [].forEach.call(tabs.children, function (c) { var on = c === b; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+        run();
+      });
+      more.addEventListener('click', function () { shown += 6; run(); });
+      run();
+    })();
+  </script>
   <style>
     .ls { display: flex; flex-direction: column; text-decoration: none; color: inherit; transition: transform .18s, box-shadow .18s; }
     .ls:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
