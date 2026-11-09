@@ -1,0 +1,11 @@
+/* A dropdown you can type into. It upgrades any select marked data-combo; the original select stays underneath as the source of truth. */
+.combo { position: relative; }
+.combo-in { padding-right: 46px; text-overflow: ellipsis; }
+.combo-in::placeholder { color: var(--slate); }
+.combo-x { position: absolute; right: 8px; top: 0; height: 48px; width: 34px; border: 0; background: none; color: var(--navy); font-size: 22px; line-height: 1; cursor: pointer; border-radius: 999px; }
+.combo-x:hover { background: var(--ivory); }
+.combo-list { position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 6px); margin: 0; padding: 8px; list-style: none; max-height: 280px; overflow-y: auto; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 12px 32px rgba(29, 26, 109, .18); }
+.combo-list li { display: flex; align-items: center; min-height: 44px; padding: 8px 12px; border-radius: 10px; font-size: 16px; cursor: pointer; }
+.combo-list li.act { background: var(--ivory); }
+.combo-list li[aria-selected="true"] { font-weight: 700; }
+.combo-list li.combo-none { color: var(--slate); cursor: default; }

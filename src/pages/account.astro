@@ -4,6 +4,7 @@ import Prefs from '../components/Prefs.astro';
 import '../styles/pages.css';
 import { businesses, profiles, href, url, isClosed } from '../lib/data';
 import { areaPages, bizIn, topRating, category, isFood } from '../lib/helpers';
+import ComboKit from '../components/ComboKit.astro';
 import { config } from '../config';
 const areas = areaPages().map((p) => p.name).sort();
 const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b), x: isClosed(b) ? 1 : 0 }))
@@ -21,11 +22,11 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
 
         <div class="panel" id="areas"><p class="eyebrow">Your areas</p><h2 style="font-size:32px;margin-bottom:8px">Where do you call home?</h2>
           <p class="meta" style="font-size:16px;margin-bottom:20px">We use this for your local picks and to open Food on your area first.</p>
-          <div style="max-width:380px"><label for="a-home">Your area</label><select id="a-home"><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}<option value="__other">Other</option></select></div>
+          <div style="max-width:380px"><label for="a-home">Your area</label><select id="a-home" data-combo><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}<option value="__other">Other (type your area or ZIP code)</option></select></div>
           <div id="a-other-wrap" hidden style="max-width:380px;margin-top:12px"><label for="a-other">Your area or ZIP code</label><input id="a-other" type="text" placeholder="Try Cypress or 77449" /></div>
           <p style="font-size:13px;font-weight:700;margin:28px 0 10px">Areas you follow</p>
           <div class="chips" id="a-follow"></div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;max-width:520px"><div style="flex:1;min-width:220px"><label class="sr" for="a-add">Follow another area</label><select id="a-add"><option value="">Follow another area</option>{areas.map((a) => <option>{a}</option>)}</select></div><button class="btn line sm" id="a-add-btn" type="button">Follow</button></div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;max-width:520px"><div style="flex:1;min-width:220px"><label class="sr" for="a-add">Follow another area</label><select id="a-add" data-combo><option value="">Follow another area</option>{areas.map((a) => <option>{a}</option>)}</select></div><button class="btn line sm" id="a-add-btn" type="button">Follow</button></div>
           <div id="a-picks" style="margin-top:28px;padding:20px;border-radius:12px;background:var(--ivory)" hidden><p class="eyebrow" id="a-picks-h" style="margin-bottom:8px"></p><div id="a-picks-list"></div></div>
         </div>
 
@@ -103,4 +104,5 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
     });
     initHome(); picks(); follows(); drawLocally(); saved();
   </script>
+<ComboKit />
 </Base>

@@ -1,0 +1,64 @@
+---
+import '../styles/combo.css';
+---
+<script is:inline>
+(function () {
+  var PD = Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype, 'value');
+  function build(sel) {
+    var id = sel.id;
+    var opts = [].map.call(sel.options, function (o) { return { v: o.value, t: o.textContent }; });
+    var ph = opts.length && opts[0].v === '' ? opts[0].t : 'Choose';
+    var items = opts.filter(function (o) { return o.v !== ''; });
+    var wrap = document.createElement('div'); wrap.className = 'combo';
+    var inp = document.createElement('input'); inp.type = 'text'; inp.id = id + '-combo'; inp.className = 'combo-in'; inp.autocomplete = 'off'; inp.placeholder = ph;
+    inp.setAttribute('role', 'combobox'); inp.setAttribute('aria-autocomplete', 'list'); inp.setAttribute('aria-expanded', 'false'); inp.setAttribute('aria-controls', id + '-list');
+    var x = document.createElement('button'); x.type = 'button'; x.className = 'combo-x'; x.setAttribute('aria-label', 'Clear'); x.hidden = true; x.textContent = '\u00d7';
+    var ul = document.createElement('ul'); ul.id = id + '-list'; ul.className = 'combo-list'; ul.setAttribute('role', 'listbox'); ul.hidden = true;
+    wrap.appendChild(inp); wrap.appendChild(x); wrap.appendChild(ul);
+    sel.parentNode.insertBefore(wrap, sel.nextSibling);
+    sel.style.display = 'none'; sel.setAttribute('aria-hidden', 'true'); sel.tabIndex = -1;
+    [].forEach.call(document.querySelectorAll('label[for="' + id + '"]'), function (l) { l.setAttribute('for', inp.id); });
+    var act = -1, shown = [];
+    function label() { var o = items.filter(function (i) { return i.v === PD.get.call(sel); })[0]; return o ? o.t : ''; }
+    function sync() { inp.value = label(); x.hidden = !PD.get.call(sel); }
+    function close() { ul.hidden = true; inp.setAttribute('aria-expanded', 'false'); inp.removeAttribute('aria-activedescendant'); act = -1; }
+    function mark(k) {
+      act = k; var lis = ul.querySelectorAll('li[role=option]');
+      [].forEach.call(lis, function (li, n) { li.classList.toggle('act', n === k); });
+      if (k > -1 && lis[k]) { inp.setAttribute('aria-activedescendant', lis[k].id); if (lis[k].scrollIntoView) lis[k].scrollIntoView({ block: 'nearest' }); }
+    }
+    function pick(i) { PD.set.call(sel, i.v); sync(); close(); sel.dispatchEvent(new Event('change', { bubbles: true })); }
+    function draw(q) {
+      q = (q || '').trim().toLowerCase();
+      shown = items.filter(function (i) { return !q || i.t.toLowerCase().indexOf(q) > -1; });
+      if (q) shown.sort(function (a, b) { return (a.t.toLowerCase().indexOf(q) === 0 ? 0 : 1) - (b.t.toLowerCase().indexOf(q) === 0 ? 0 : 1); });
+      ul.innerHTML = '';
+      if (!shown.length) { var n = document.createElement('li'); n.className = 'combo-none'; n.textContent = 'No area matches that'; ul.appendChild(n); }
+      shown.forEach(function (i, k) {
+        var li = document.createElement('li'); li.id = id + '-o' + k; li.setAttribute('role', 'option'); li.textContent = i.t; li.setAttribute('aria-selected', i.v === PD.get.call(sel) ? 'true' : 'false');
+        li.addEventListener('mousedown', function (e) { e.preventDefault(); pick(i); }); ul.appendChild(li);
+      });
+      ul.hidden = false; inp.setAttribute('aria-expanded', 'true'); mark(shown.length ? 0 : -1);
+    }
+    inp.addEventListener('focus', function () { inp.select(); draw(''); });
+    inp.addEventListener('click', function () { if (ul.hidden) draw(''); });
+    inp.addEventListener('input', function () { draw(inp.value); });
+    inp.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (ul.hidden) draw(''); else mark(Math.min(act + 1, shown.length - 1)); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (!ul.hidden) mark(Math.max(act - 1, 0)); }
+      else if (e.key === 'Enter') { if (!ul.hidden && act > -1) { e.preventDefault(); pick(shown[act]); } }
+      else if (e.key === 'Escape') { if (!ul.hidden) { e.preventDefault(); close(); sync(); } }
+    });
+    inp.addEventListener('blur', function () {
+      setTimeout(function () {
+        var t = inp.value.trim().toLowerCase(), hit = items.filter(function (i) { return i.t.toLowerCase() === t; })[0];
+        if (hit && hit.v !== PD.get.call(sel)) pick(hit); else { close(); sync(); }
+      }, 120);
+    });
+    x.addEventListener('click', function () { PD.set.call(sel, ''); sync(); sel.dispatchEvent(new Event('change', { bubbles: true })); inp.focus(); });
+    Object.defineProperty(sel, 'value', { get: function () { return PD.get.call(sel); }, set: function (v) { PD.set.call(sel, v); sync(); }, configurable: true });
+    sync();
+  }
+  [].forEach.call(document.querySelectorAll('select[data-combo]'), build);
+})();
+</script>

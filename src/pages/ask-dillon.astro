@@ -4,6 +4,8 @@ import '../styles/pages.css';
 import { url } from '../lib/data';
 import { areaPages, bizIn, subsIn } from '../lib/helpers';
 import { config } from '../config';
+import ComboKit from '../components/ComboKit.astro';
+const allAreas = areaPages().map((p) => p.name).sort();
 const popular = areaPages().map((p) => ({ n: p.name, w: bizIn(p.name).length + subsIn(p.name).length })).sort((a, b) => b.w - a.w).slice(0, 10).map((x) => x.n);
 const topics = [['Neighborhood guide', 'Get a feel for the area and daily life.'], ['Food and coffee', 'Find your next restaurant or favorite cafe.'], ['Things to do', 'Parks, outings, and local events.'],
   ['Homes and market trends', 'Home styles, prices, and market updates.'], ['Schools', 'Districts and what to check for an address.'], ['Moving to the area', 'Practical resources for your next move.']];
@@ -21,6 +23,7 @@ const topics = [['Neighborhood guide', 'Get a feel for the area and daily life.'
         <form class="panel" id="ask-form" novalidate data-endpoint={config.formsAction + '/ask'} data-contact={config.contactEmail}>
           <fieldset style="border:0;padding:0;margin:0 0 24px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">Where are you curious about? Choose one or more.</legend>
             <div class="chips" id="ask-areas">{[...popular, 'Somewhere else'].map((a) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="areas" value={a} style="position:absolute;opacity:0;width:1px;height:1px" />{a}</label>)}</div>
+            <div style="margin-top:14px;max-width:380px"><label for="ask-more">Not on the list? Search every area</label><select id="ask-more" data-combo><option value="">Search all areas</option>{allAreas.map((a) => <option>{a}</option>)}</select></div>
             <div id="ask-else-wrap" hidden style="margin-top:12px;max-width:380px"><label for="ask-else">Which area?</label><input id="ask-else" type="text" placeholder="Try Cypress or 77449" /></div>
             <p class="msg-err" id="ask-area-err" hidden>Choose at least one area.</p>
           </fieldset>
@@ -51,6 +54,16 @@ const topics = [['Neighborhood guide', 'Get a feel for the area and daily life.'
     var form = document.getElementById('ask-form'), $ = function (id) { return document.getElementById(id); };
     function paint() { form.querySelectorAll('label.chip').forEach(function (l) { var c = l.querySelector('input'); l.classList.toggle('on', c.checked); }); $('ask-else-wrap').hidden = !form.querySelector('input[value="Somewhere else"]').checked; }
     form.addEventListener('change', paint); paint();
+    $('ask-more').addEventListener('change', function () {
+      var v = this.value; if (!v) return;
+      var box = $('ask-areas'), have = [].filter.call(box.querySelectorAll('input[name=areas]'), function (i) { return i.value === v; })[0];
+      if (have) { have.checked = true; } else {
+        var l = document.createElement('label'); l.className = 'chip on'; l.style.cursor = 'pointer';
+        l.innerHTML = '<input type="checkbox" name="areas" value="' + esc(v) + '" style="position:absolute;opacity:0;width:1px;height:1px" checked />' + esc(v);
+        box.insertBefore(l, box.lastElementChild);
+      }
+      this.value = ''; paint();
+    });
     function checked(name) { return [].map.call(form.querySelectorAll('input[name=' + name + ']:checked'), function (x) { return x.value; }); }
     function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
     form.addEventListener('submit', async function (e) {
@@ -71,4 +84,5 @@ const topics = [['Neighborhood guide', 'Get a feel for the area and daily life.'
       } finally { btn.disabled = false; btn.textContent = 'Send my request'; }
     });
   </script>
+<ComboKit />
 </Base>
