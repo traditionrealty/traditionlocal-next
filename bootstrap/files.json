@@ -1,1 +1,0 @@
-{"__patches":[{"path":"src/pages/contact.astro","find":"          <a class=\"menu\" href={config.youtube} rel=\"noopener\">Tradition Local</a>\n","replace":""}],"__expect":{"src/pages/contact.astro":"df8464c2ef46"}}
