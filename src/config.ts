@@ -2,6 +2,13 @@
 export const config = {
   contactEmail: 'traditionlocal@gmail.com',
   youtube: 'https://www.youtube.com/@TraditionLocal',
+  social: {
+    facebook: 'https://www.facebook.com/TraditionLocal',
+    instagram: 'https://www.instagram.com/traditionguides/',
+    tiktok: 'https://www.tiktok.com/@traditionlocal',
+    x: 'https://x.com/TraditionLocal',
+    youtube: 'https://www.youtube.com/@traditionlocal',
+  },
   // Set to true to make search a members only feature once sign in exists.
   searchMembersOnly: false,
   // The newsletter signup service the live site already uses. It accepts a normal form post.

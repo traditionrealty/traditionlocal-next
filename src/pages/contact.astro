@@ -4,6 +4,13 @@ import '../styles/pages.css';
 import { url } from '../lib/data';
 import { config } from '../config';
 const mail = (subject: string) => 'mailto:' + config.contactEmail + '?subject=' + encodeURIComponent(subject);
+const socials = [
+  ['Facebook', config.social.facebook, 'TraditionLocal'],
+  ['Instagram', config.social.instagram, '@traditionguides'],
+  ['TikTok', config.social.tiktok, '@traditionlocal'],
+  ['X', config.social.x, '@TraditionLocal'],
+  ['YouTube', config.social.youtube, '@traditionlocal'],
+];
 const ways = [
   ['Ask Dillon', 'Questions about a neighborhood, a move, or renting or buying in Houston.', 'Ask Dillon', url('/ask-dillon')],
   ['Suggest a place', 'Know a spot we should visit and review? Tell us about it.', 'Suggest a place', '?reason=place#message'],
@@ -55,7 +62,23 @@ const ways = [
     </div>
   </section>
 
-  <section class="band">
+  <section class="band" id="follow">
+    <div class="wrap">
+      <p class="eyebrow">Follow Tradition Local</p><h2 style="margin-bottom:12px">Find us online.</h2>
+      <p class="meta" style="font-size:17px;margin-bottom:28px;max-width:720px">New places, local finds, and events, wherever you like to scroll.</p>
+      <div class="soc">
+        {socials.map(([name, link, handle]) => (
+          <a class="card pad soc-card" href={link} rel="noopener" aria-label={'Follow Tradition Local on ' + name}>
+            <h4 style="margin-bottom:4px">{name}</h4>
+            <p class="meta" style="font-size:15px">{handle}</p>
+            <span class="soc-go">Follow</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="band tint">
     <div class="wrap split">
       <div class="main">
         <p class="eyebrow">Real estate</p><h2 style="margin-bottom:16px">Talk to Dillon.</h2>
@@ -103,5 +126,11 @@ const ways = [
   </script>
   <style>
     .msg-err { color: var(--danger); font-size: 14px; font-weight: 700; margin-top: 6px; }
+    .soc { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+    .soc-card { display: flex; flex-direction: column; text-decoration: none; transition: transform .18s, box-shadow .18s; }
+    .soc-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
+    .soc-go { margin-top: auto; padding-top: 14px; font-weight: 700; color: var(--blue); }
+    @media (max-width: 960px) { .soc { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+    @media (max-width: 560px) { .soc { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   </style>
 </Base>
