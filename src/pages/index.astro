@@ -8,6 +8,7 @@ import { openingsOf } from '../lib/openings';
 import VideoCard from '../components/VideoCard.astro';
 import VideoScript from '../components/VideoScript.astro';
 import { videos } from '../lib/videos';
+import { spots, rotating } from '../lib/spotlight';
 const events = upcomingEvents(5);
 const homeVideos = videos.slice(0, 3);
 const tiles = [
@@ -148,11 +149,39 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
   {places.length > 0 && (
     <section class="band" id="home-hood">
       <div class="wrap">
-        <p class="eyebrow">Neighborhood guides</p>
-        <h2 style="margin-bottom:16px">Where do you call home?</h2>
-        <p style="font-size:17px;margin-bottom:20px">Pick an area to see what is good nearby.</p>
-        <div class="chips">{places.map((p) => <a class="chip" href={href(p)}>{p.name}</a>)}</div>
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px"><a class="btn line" href={url('/neighborhoods')}>Browse all neighborhoods</a><a class="btn line" href={url('/find-your-fit')}>Not sure? Find your fit</a></div>
+        <div class={spots.length > 0 ? 'hood-split' : ''}>
+          <div>
+            <p class="eyebrow">Neighborhood guides</p>
+            <h2 style="margin-bottom:16px">Where do you call home?</h2>
+            <p style="font-size:17px;margin-bottom:20px">Pick an area to see what is good nearby.</p>
+            <div class="chips">{places.map((p) => <a class="chip" href={href(p)}>{p.name}</a>)}</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:20px"><a class="btn line" href={url('/neighborhoods')}>Browse all neighborhoods</a><a class="btn line" href={url('/find-your-fit')}>Not sure? Find your fit</a></div>
+          </div>
+          {spots.length > 0 && (
+            <aside aria-label="Neighborhood spotlight">
+              {spots.map((s, i) => (
+                <a class={i === 0 ? 'card spot-card' : 'card spot-card hidden'} href={s.link} rel={s.external ? 'noopener' : undefined}>
+                  <p class="eyebrow">Neighborhood spotlight</p>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><span class="tag">{s.label}</span>{s.region && <span class="tag soft">{s.region}</span>}{s.date && <span class="tag soft">{s.date}</span>}</div>
+                  <h3>{s.title}</h3>
+                  <p class="meta" style="font-size:16px;margin:8px 0 12px">{s.summary}</p>
+                  {s.bestFor && <p class="meta" style="margin-bottom:4px"><b>Best for:</b> {s.bestFor}</p>}
+                  {s.homes && <p class="meta" style="margin-bottom:4px"><b>Typical homes:</b> {s.homes}</p>}
+                  {(s.places > 0 || s.subs > 0) && <p class="meta"><b>{s.places}</b> places reviewed, <b>{s.subs}</b> subdivisions</p>}
+                  <span class="spot-link">{s.cta}</span>
+                </a>
+              ))}
+            </aside>
+          )}
+        </div>
+        <script is:inline>
+          (function () {
+            var cards = document.querySelectorAll('.spot-card');
+            if (cards.length < 2) return;
+            var pick = Math.floor(Date.now() / 604800000) % cards.length;
+            [].forEach.call(cards, function (c, k) { c.classList.toggle('hidden', k !== pick); });
+          })();
+        </script>
         <form class="card pad" id="home-locally" action={config.newsletterAction} method="post" style="margin-top:28px;max-width:760px;display:grid;gap:14px">
           <div><p class="eyebrow">Locally</p><h3 style="margin-bottom:6px">Your neighborhood, in your inbox.</h3><p class="meta" style="font-size:16px">For now, signing up joins In the Loop, and Locally for your area follows when it opens. Your area is saved on this device.</p></div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label for="hl-area">Your area</label><select id="hl-area"><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}</select></div><div><label for="hl-email">Your email</label><input id="hl-email" name="email" type="email" required placeholder="name@email.com" /></div></div>
@@ -279,5 +308,14 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
   <style is:global>
     .tile { transition: transform .18s, box-shadow .18s; }
     .tile:hover, .tile:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
+  </style>
+  <style>
+    .hood-split { display: grid; grid-template-columns: 1.2fr 1fr; gap: 40px; align-items: start; }
+    @media (max-width: 860px) { .hood-split { grid-template-columns: 1fr; gap: 28px; } }
+    .spot-card { display: block; padding: 26px 28px; text-decoration: none; color: inherit; background: var(--ivory); border-color: var(--gold); transition: transform .18s, box-shadow .18s; }
+    .spot-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
+    .spot-card.hidden { display: none !important; }
+    .spot-card h3 { margin-top: 4px; }
+    .spot-link { display: inline-block; margin-top: 14px; font-weight: 700; color: var(--blue); }
   </style>
 </Base>
