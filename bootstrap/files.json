@@ -1,1 +1,0 @@
-{"__patches":[{"path":"src/pages/food/index.astro","find":"placeholder=\"Try thai, coffee, or a place name\"","replace":"placeholder=\"Try thai, coffee, or a name\""}],"__expect":{"src/pages/food/index.astro":"f0b5bc45676b"}}
