@@ -12,7 +12,7 @@ const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.ge
 const evs = events().map((e) => { const a = toDate(e.starts), b = toDate(e.ends || e.starts), pl = venuePlace(e); return a && b && pl && pl.area ? { t: e.title, s: iso(a), f: iso(b), u: href(e), a: pl.area, v: pl.name } : null; }).filter(Boolean);
 const names = areas.map((a) => a.n).sort();
 ---
-<Base title="Your Locally" active="" description="Local picks for your area and the areas you follow.">
+<Base title="Your Locally" active="" description="Local picks for your area and the areas you follow." noindex>
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Your Locally</p>

@@ -11,7 +11,7 @@ const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a:
   .concat(areaPages().map((p) => ({ s: 'n:' + p.slug, n: p.name, a: '', c: p.region ? 'Neighborhood, ' + p.region : 'Neighborhood', r: 0, u: href(p), x: 0 })));
 const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openings', 'New openings'], ['homes', 'Neighborhoods and homes']];
 ---
-<Base title="Your account" description="Your area, the places you follow, and what you receive.">
+<Base title="Your account" description="Your area, the places you follow, and what you receive." noindex>
   <section class="band hero"><div class="wrap"><p class="eyebrow">Your account</p><h1 style="margin-bottom:12px">Account and settings</h1><p class="lead">Choose your area, follow the places you care about, and decide what you receive.</p>
     <p class="meta" style="margin-top:16px">Your choices are saved on this device. Sign in is coming, and we will move them to your account then.</p></div></section>
   <section class="band">

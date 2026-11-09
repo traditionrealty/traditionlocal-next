@@ -4,8 +4,9 @@ import '../styles/header.css';
 import { IS_PREVIEW, url } from '../lib/data';
 import { config } from '../config';
 import SearchBox from '../components/SearchBox.astro';
-interface Props { title: string; description?: string; active?: string; sub?: string; }
-const { title, description = 'Honest reviews, weekend plans, and neighborhood guides from people who live here.', active = '', sub = '' } = Astro.props;
+interface Props { title: string; description?: string; active?: string; sub?: string; noindex?: boolean; }
+const { title, description = 'Honest reviews, weekend plans, and neighborhood guides from people who live here.', active = '', sub = '', noindex = false } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site || 'https://www.traditionlocal.com').href;
 const main = [['Food', '/food'], ['Neighborhoods', '/neighborhoods'], ['Things to do', '/things-to-do']];
 const more: [string, [string, string, string][]][] = [
   ['Stay in the loop', [['Newsletters', '/newsletters', 'In the Loop and Locally Plus'], ['Videos', '/videos', 'Walks, coffee runs, and reviews']]],
@@ -25,6 +26,14 @@ const moreOn = sub !== '' || active === 'More';
   <title>{title} | Tradition Local</title>
   <meta name="description" content={description} />
   {IS_PREVIEW && <meta name="robots" content="noindex, nofollow" />}
+  {!IS_PREVIEW && noindex && <meta name="robots" content="noindex" />}
+  <link rel="canonical" href={canonical} />
+  <meta property="og:site_name" content="Tradition Local" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={title + ' | Tradition Local'} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta name="twitter:card" content="summary" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600&display=swap" rel="stylesheet" />
 </head>
