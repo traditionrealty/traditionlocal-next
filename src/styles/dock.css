@@ -10,9 +10,14 @@ html.hs .fdock { top: 72px; }
 .fdock.stuck .chip { min-height: 36px; }
 .fbar-status .fbar-cats { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: 8px; }
 .fbar-status .fquiz { font-size: 15px; }
-.fbar-status .fbar-meta { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.fbar-status .fbar-meta { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .fbar-status .fbar-meta .meta { margin-left: 0; }
-.fbar-meta .btn { min-height: 40px; padding: 0 18px; font-size: 14px; }
+.fbar-meta .btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
+.fbar-cats .chip { min-height: 38px; padding: 0 14px; font-size: 14px; }
+.fbar-status .fpills:empty { display: none; }
+.fbar .fcheck { margin: 0; min-height: 48px; }
+.fbar-search input { text-overflow: ellipsis; }
+.dock-hero .lead { text-wrap: pretty; }
 @media (max-width: 760px) {
   .band.hero.dock-hero { padding: 40px 0 72px; }
   .band.results { padding-bottom: 64px; }
@@ -25,5 +30,6 @@ html.hs .fdock { top: 72px; }
   .fbar-status .fbar-meta { margin-left: 0; width: 100%; justify-content: space-between; }
   .fbar-status .fbar-meta .meta { flex: 0 0 auto; }
   .fdock.stuck .fbar-meta .btn { display: none; }
+  .fdock.stuck .fquiz { display: none; }
   .fbar.open .fbar-panel { max-height: 55vh; overflow-y: auto; }
 }
