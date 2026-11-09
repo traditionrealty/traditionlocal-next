@@ -194,7 +194,7 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
             <div id="hp-empty">
               <p class="eyebrow">Your area</p>
               <h3 style="margin-bottom:8px">Pick a neighborhood</h3>
-              <p class="meta" style="font-size:16px">Search above or tap a popular area. We will show what is good there, and you can get its picks by email.</p>
+              <p class="meta" style="font-size:16px">Search above or tap a popular area. We will show what is good there, and you can get its picks with Locally Plus.</p>
             </div>
             <div id="hp-detail" class="hidden">
               <p class="eyebrow">Your area</p>
@@ -206,10 +206,11 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
               <div id="hp-top" class="hidden"><p style="font-size:13px;font-weight:700;margin-bottom:6px">Top rated places</p><ul class="hp-places" id="hp-places"></ul></div>
               <a class="btn line" id="hp-guide" href="#">Read the guide</a>
               <form class="hp-form" id="hp-form" action={config.newsletterAction} method="post">
-                <label for="hp-email" id="hp-form-label">Get picks by email</label>
-                <div class="hp-row"><input id="hp-email" name="email" type="email" required placeholder="name@email.com" /><button class="btn" type="submit">Join</button></div>
+                <label for="hp-email" id="hp-form-label">Get Locally Plus</label>
+                <div class="hp-row" id="hp-row-guest"><input id="hp-email" name="email" type="email" required placeholder="name@email.com" /><button class="btn" type="submit">Join</button></div>
+                <div id="hp-row-user" class="hidden"><button class="btn" type="submit" id="hp-add">Add to Locally Plus</button><p class="meta" id="hp-as" style="font-size:13px;margin-top:8px"></p></div>
                 <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
-                <p class="meta" style="font-size:13px;margin-top:8px">Joins In the Loop, our Monday email. Your area is saved on this device, so Locally can tailor it when it opens.</p>
+                <p class="meta" style="font-size:13px;margin-top:8px">We never sell your email. Your area is saved on this device.</p>
               </form>
             </div>
           </div>
@@ -254,7 +255,7 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
               a.t.forEach(function (t) { var li = document.createElement('li'), l = document.createElement('a'), r = document.createElement('span'); l.href = t[2]; l.textContent = t[0]; r.className = 'meta'; r.textContent = t[1] + ' out of 5'; li.appendChild(l); li.appendChild(r); ul.appendChild(li); });
               $('hp-top').classList.toggle('hidden', !a.t.length);
               var g = $('hp-guide'); g.href = a.u; g.textContent = 'Read the ' + a.n + ' guide';
-              $('hp-form-label').textContent = 'Get ' + a.n + ' picks by email'; $('hp-form').setAttribute('data-area', a.n);
+              $('hp-form-label').textContent = 'Get Locally Plus for ' + a.n; $('hp-add').textContent = 'Add ' + a.n + ' to Locally Plus'; $('hp-form').setAttribute('data-area', a.n);
               $('hp-empty').classList.add('hidden'); $('hp-detail').classList.remove('hidden');
               [].forEach.call(document.querySelectorAll('#hp-chips .chip'), function (c) { c.classList.toggle('on', c.getAttribute('data-n') === a.n); });
             }
@@ -273,6 +274,8 @@ const foodIdx = businesses().filter(isFood).filter((b) => b.status !== 'Closed')
             });
             var saved = ''; try { saved = JSON.parse(localStorage.getItem('tl_area') || '""'); } catch (e) {}
             if (saved) load().then(function () { var a = find(saved); if (a) choose(a); });
+            var user = null; try { user = JSON.parse(localStorage.getItem('tl_user') || 'null'); } catch (e) {}
+            if (user && user.email) { $('hp-email').value = user.email; $('hp-row-guest').classList.add('hidden'); $('hp-row-user').classList.remove('hidden'); $('hp-as').textContent = 'Signed in as ' + user.email; }
           })();
         </script>
       </div>
