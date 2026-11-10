@@ -22,18 +22,19 @@ const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], 
     <div class="wrap split">
       <div class="main">
         <form class="panel" id="fit-form" novalidate>
-          <fieldset style="border:0;padding:0;margin:0 0 28px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">1. What matters most? Pick as many as you like.</legend>
+          <fieldset style="border:0;padding:0;margin:0 0 28px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">1. What matters most? <span class="fit-hint">Pick as many as you like.</span></legend>
             <div class="chips">{priorities.map(([k, l]) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="prior" value={k} data-label={l} style="position:absolute;opacity:0;width:1px;height:1px" />{l}</label>)}</div></fieldset>
           <fieldset style="border:0;padding:0;margin:0 0 28px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">2. What kind of home?</legend>
             <div class="chips">{homes.map(([k, l]) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="home" value={k} data-label={l} style="position:absolute;opacity:0;width:1px;height:1px" />{l}</label>)}</div></fieldset>
-          <fieldset style="border:0;padding:0;margin:0 0 28px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">3. Where in the Houston area? Leave blank for anywhere.</legend>
+          <fieldset style="border:0;padding:0;margin:0 0 28px"><legend style="font-size:13px;font-weight:700;margin-bottom:10px">3. Where in the Houston area? <span class="fit-hint">Leave blank for anywhere.</span></legend>
             <div class="chips">{regions.map((r) => <label class="chip" style="cursor:pointer"><input type="checkbox" name="region" value={r} data-label={r} style="position:absolute;opacity:0;width:1px;height:1px" />{r}</label>)}</div></fieldset>
-          <div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn" type="submit" style="min-height:52px">Show my matches</button><button class="btn line" type="reset" id="fit-reset" style="min-height:52px">Start over</button></div>
+          <div class="fit-foot"><p class="fit-status" id="fit-status" aria-live="polite">Choose what matters to you, and your matches appear below.</p><button class="btn line" type="reset" id="fit-reset">Start over</button></div>
         </form>
-        <div id="fit-results" class="hidden" style="margin-top:40px" aria-live="polite">
+        <div id="fit-results" class="hidden" style="margin-top:40px">
           <p class="eyebrow">Your matches</p><h2 style="margin-bottom:8px">Neighborhoods to explore</h2>
           <p class="meta" id="fit-note" style="margin-bottom:24px"></p>
           <div class="grid g2" id="fit-grid"></div>
+          <p class="fit-more hidden" id="fit-more-wrap"><button class="btn line" id="fit-more" type="button">Show 6 more matches</button></p>
           <div class="card pad hidden" id="fit-none"><b>We did not find a close match for that mix.</b><p class="meta" style="margin-top:4px">Try fewer choices, or ask Dillon and he will suggest a few areas.</p></div>
           <div class="card pad pick hidden" id="fit-locally" style="margin-top:24px;padding:32px">
             <p class="eyebrow">Keep exploring <span id="fit-locally-name"></span></p>
@@ -54,6 +55,14 @@ const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], 
       </div>
     </div>
   </section>
+  <style is:global>
+    .fit-hint { font-size: 12px; font-weight: 400; font-style: italic; color: var(--slate); }
+    .fit-foot { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px 16px; }
+    .fit-status { margin: 0; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--slate); }
+    .fit-foot .btn { margin-left: auto; }
+    .fit-more { margin: 24px 0 0; }
+  </style>
+
   <script is:inline define:vars={{ AREAS: areas }}>
     (function () {
       var $ = function (id) { return document.getElementById(id); };
@@ -65,24 +74,30 @@ const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], 
       form.addEventListener('change', paint);
       function picked(name) { return [].map.call(form.querySelectorAll('input[name=' + name + ']:checked'), function (i) { return { k: i.value, l: i.dataset.label }; }); }
       function hits(text, words) { var n = 0; words.forEach(function (w) { if (text.indexOf(w) > -1) n++; }); return n; }
-      form.addEventListener('submit', function (e) {
-        e.preventDefault();
+      var shown = 6, STEP = 6;
+      function update() {
         var pr = picked('prior'), hm = picked('home'), rg = picked('region').map(function (x) { return x.k; });
+        var any = pr.length || hm.length, st = $('fit-status'), res = $('fit-results');
+        if (!any && !rg.length) { res.classList.add('hidden'); st.textContent = 'Choose what matters to you, and your matches appear below.'; return; }
         var scored = AREAS.filter(function (a) { return !rg.length || rg.indexOf(a.r) > -1; }).map(function (a) {
           var score = 0, why = [];
           pr.forEach(function (p) { var h = hits(a.t, PRIOR[p.k]); if (h) { score += Math.min(h, 2) * 2; why.push(p.l); } });
           hm.forEach(function (p) { var h = hits(a.t, HOME[p.k]); if (h) { score += Math.min(h, 2) * 2; why.push(p.l); } });
           return { a: a, score: score, why: why };
         });
-        var any = pr.length || hm.length;
-        var top = scored.filter(function (x) { return any ? x.score >= 2 : true; }).sort(function (x, y) { return y.score - x.score || x.a.n.localeCompare(y.a.n); }).slice(0, 6);
-        $('fit-results').classList.remove('hidden');
-        $('fit-note').textContent = any ? 'Ranked by how closely each guide matches your choices.' : 'You did not pick any priorities, so here is a mix to start with.';
-$('fit-grid').innerHTML = top.map(function (x) { return '<div class="card pad"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">' + (x.a.r ? '<span class="tag soft">' + esc(x.a.r) + '</span>' : '') + x.why.map(function (w) { return '<span class="tag">' + esc(w) + '</span>'; }).join('') + '</div><h4 style="margin-bottom:6px"><a href="' + esc(x.a.u) + '" style="text-decoration:none">' + esc(x.a.n) + '</a></h4><p class="meta" style="font-size:15px;margin-bottom:14px">' + esc(x.a.b || x.a.s) + '</p><button type="button" class="btn line sm add-visit" data-n="' + esc(x.a.n) + '" data-u="' + esc(x.a.u) + '">Add to my visit list</button></div>'; }).join('');
+        var all = scored.filter(function (x) { return any ? x.score >= 2 : true; }).sort(function (x, y) { return y.score - x.score || x.a.n.localeCompare(y.a.n); });
+        var top = all.slice(0, shown), n = all.length;
+        res.classList.remove('hidden');
+        st.innerHTML = n ? n + (n === 1 ? ' area mentions' : ' areas mention') + ' what you picked. <a href="#fit-results">See the closest</a>' : 'No close match yet. Try fewer choices.';
+        $('fit-note').textContent = any ? 'Ranked by how closely each guide matches your choices.' : 'Add what matters most or the kind of home, and these will be ranked for you.';
+        $('fit-grid').innerHTML = top.map(function (x) { return '<div class="card pad"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">' + (x.a.r ? '<span class="tag soft">' + esc(x.a.r) + '</span>' : '') + x.why.map(function (w) { return '<span class="tag">' + esc(w) + '</span>'; }).join('') + '</div><h4 style="margin-bottom:6px"><a href="' + esc(x.a.u) + '" style="text-decoration:none">' + esc(x.a.n) + '</a></h4><p class="meta" style="font-size:15px;margin-bottom:14px">' + esc(x.a.b || x.a.s) + '</p><button type="button" class="btn line sm add-visit" data-n="' + esc(x.a.n) + '" data-u="' + esc(x.a.u) + '">Add to my visit list</button></div>'; }).join('');
+        $('fit-more-wrap').classList.toggle('hidden', n <= shown);
         $('fit-locally').classList.toggle('hidden', top.length === 0); if (top.length) $('fit-locally-name').textContent = top[0].a.n;
         $('fit-none').classList.toggle('hidden', top.length > 0);
-        $('fit-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
+      }
+      form.addEventListener('change', function () { shown = STEP; update(); });
+      form.addEventListener('submit', function (e) { e.preventDefault(); });
+      $('fit-more').addEventListener('click', function () { shown += STEP; update(); });
       function visits() { try { return JSON.parse(localStorage.getItem('tl_visit') || '[]'); } catch (e) { return []; } }
       function saveVisits(v) { try { localStorage.setItem('tl_visit', JSON.stringify(v)); } catch (e) {} }
       function drawVisits() {
@@ -96,7 +111,8 @@ $('fit-grid').innerHTML = top.map(function (x) { return '<div class="card pad"><
       });
       document.querySelectorAll('.nl-return').forEach(function (el) { el.value = location.origin + location.pathname; });
       drawVisits();
-      $('fit-reset').addEventListener('click', function () { setTimeout(function () { paint(); $('fit-results').classList.add('hidden'); }, 0); });
+      form.addEventListener('reset', function () { setTimeout(function () { paint(); shown = STEP; update(); }, 0); });
+      update();
     })();
   </script>
 </Base>
