@@ -7,13 +7,14 @@ html.hs .fdock { top: 72px; }
 .fdock.stuck { background: #fff; box-shadow: 0 6px 16px rgba(29, 26, 109, .10); border-bottom: 1px solid var(--line); }
 .fdock.stuck .fbar { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 12px 0; gap: 10px; }
 .fdock.stuck .fbar label:not(.fcheck), .fdock.stuck .fbar .flabel { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
-.fdock.stuck .chip { min-height: 36px; }
+.fdock.stuck .chip { min-height: var(--control-h-sm); }
 .fbar-status .fbar-cats { flex: 0 1 auto; display: flex; flex-wrap: wrap; gap: 8px; }
-.fbar-status .fquiz { font-size: 15px; }
+.fbar-status .fquiz { font-size: var(--fs-small); line-height: var(--lh-small); }
 .fbar-status .fbar-meta { margin-left: auto; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 .fbar-status .fbar-meta .meta { margin-left: 0; }
-.fbar-meta .btn { min-height: 40px; padding: 0 16px; font-size: 14px; }
-.fbar-cats .chip { min-height: 38px; padding: 0 14px; font-size: 14px; }
+.fbar-meta .btn { min-height: var(--control-h-sm); padding: 0 16px; font-size: var(--fs-small); }
+.fbar-cats .chip, .n-item .cmp { min-height: var(--control-h-sm); padding: 0 16px; font-size: var(--fs-small); font-weight: 500; }
+.n-item .cmp { font-weight: 700; }
 .fbar-status .fpills:empty { display: none; }
 .fbar .fcheck { margin: 0; min-height: 48px; }
 .fbar-search input { text-overflow: ellipsis; }
