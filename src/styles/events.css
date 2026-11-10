@@ -58,7 +58,7 @@
   .band.tt-main { padding: 20px 0 48px; }
   .tt-bar { gap: 10px; }
   .tt-seg { flex: 1 1 100%; max-width: 100%; overflow-x: auto; }
-  .tt-seg button { flex: none; padding: 0 11px; }
+  .tt-seg button { flex: none; padding: 0 10px; }
   .tt-seg .l { display: none; }
   .tt-seg .s { display: inline; }
   .tt-sel { flex: 1 1 0; min-width: 0; }
