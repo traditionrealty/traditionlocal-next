@@ -43,9 +43,11 @@ const topics = [['Neighborhood guide', 'Get a feel for the area and daily life.'
       </div>
       <div class="side">
         <div class="card pad"><p class="eyebrow">What to expect</p>
-          <div class="row" style="border-top:0"><span class="tag">1</span><div><b>Dillon reads it</b><br /><span class="meta">Every request is read by a person.</span></div></div>
-          <div class="row"><span class="tag">2</span><div><b>A personal reply</b><br /><span class="meta">A short local overview that fits what you asked.</span></div></div>
-          <div class="row"><span class="tag">3</span><div><b>No pressure</b><br /><span class="meta">Take your time. Ask as much as you like.</span></div></div></div>
+          <ol class="wx" role="list">
+            <li><span class="wx-n" aria-hidden="true">1</span><div><b>Dillon reads it</b><span class="meta">Every request is read by a person.</span></div></li>
+            <li><span class="wx-n" aria-hidden="true">2</span><div><b>A personal reply</b><span class="meta">A short local overview that fits what you asked.</span></div></li>
+            <li><span class="wx-n" aria-hidden="true">3</span><div><b>No pressure</b><span class="meta">Take your time. Ask as much as you like.</span></div></li>
+          </ol></div>
         <div class="card pad" style="margin-top:24px;background:var(--butter);border-color:var(--butter)"><p class="eyebrow" style="color:var(--navy)">Prefer to explore first?</p><p style="margin-bottom:16px">Try the quiz to see which neighborhoods match what you love.</p><a class="btn" href={url('/find-your-fit')}>Find your fit</a></div>
       </div>
     </div>
