@@ -93,37 +93,49 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     </section>
   )}
 
-  <section class="band" id="home-events">
-    <div class="wrap">
-      <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:16px;flex-wrap:wrap;gap:12px">
-        <div><p class="eyebrow">What is on</p><h2>Plan something fun</h2></div>
-        <a class="btn line" href={url('/things-to-do')}>See the full calendar</a>
+  <section class="band" id="meet">
+    <div class="wrap ms">
+      <div class="ms-av" aria-hidden="true"><span>S</span><span>D</span></div>
+      <div class="ms-txt">
+        <p class="eyebrow">Who we are</p>
+        <h2>Meet Sara and Dillon</h2>
+        <p>Sara visits the places she writes about. Dillon is a Realtor who answers questions personally.</p>
       </div>
-      <div class="tabs" id="ev-tabs" style="margin-bottom:22px"><button class="chip on" data-p="week" aria-pressed="true">This week</button>{events.length > 0 && <button class="chip" data-p="soon" aria-pressed="false">Coming up</button>}</div>
-      <div id="ev-week">
-        <p class="meta" id="hw-range" style="margin-bottom:20px">&nbsp;</p>
-        <div class="grid g4" id="hw-grid"></div>
-        <div class="card pad hidden" id="hw-empty"><b>Nothing listed for the rest of this week yet.</b><p class="meta" style="margin-top:4px">Browse everything on the calendar, or check back soon.</p></div>
-        <p class="meta" id="hw-ongoing" style="margin-top:18px"></p>
-      </div>
-      {events.length > 0 && (
-        <div id="ev-soon" class="hidden">
-          <div class="grid g4">
-            {events.map((e) => <a class="card pad" href={href(e)} style="text-decoration:none"><span class="tag">{eventDates(e)}</span><h4 style="margin:12px 0 6px">{e.title}</h4><p class="meta">{e.venue || e.profile}</p></a>)}
-          </div>
-        </div>
-      )}
+      <div class="ms-btns"><a class="btn" href={url('/about')}>Meet Sara and Dillon</a><a class="btn line" href={url('/ask-dillon')}>Ask Dillon</a></div>
     </div>
   </section>
 
-  {hasNew && (
-    <section class="band tint" id="new-this-month">
+  {homeVideos.length > 0 && (
+    <section class="band tint" id="home-videos">
       <div class="wrap">
         <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
-          <div><p class="eyebrow">New this month</p><h2>Openings and closings</h2></div>
-          <a class="btn line" href={url('/openings-and-closings')}>See openings and closings</a>
+          <div><p class="eyebrow">Local videos</p><h2>Walk the neighborhood with us</h2></div>
+          <a class="btn line" href={url('/videos')}>See all videos</a>
         </div>
-        <OpeningsPanel limit={3} />
+        <div class="grid g3">{homeVideos.map((v) => <VideoCard v={v} />)}</div>
+        <p style="margin-top:20px"><a href={config.youtube} rel="noopener" style="font-weight:700">Watch more on YouTube</a></p>
+      </div>
+    </section>
+  )}
+
+  {feed.length > 0 && (
+    <section class="band" id="feed">
+      <div class="wrap">
+        <p class="eyebrow">The feed</p>
+        <h2 style="margin-bottom:8px">Fresh from Sara, Dillon, and our Contributors</h2>
+        <p class="meta" style="margin-bottom:28px;font-size:17px">The newest reviews and stories, written by people who live here.</p>
+        <div class="grid g3" id="feed-grid">
+          {feed.map((x, i) => (
+            <a class={i >= 6 ? 'card pad feed-more hidden' : 'card pad'} href={href(x.r)} style="text-decoration:none">
+              {x.m && <img class="photo" style="height:150px;border-radius:8px;margin-bottom:14px" src={x.m.src} alt={x.m.alt} />}
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><span class="tag">Review</span>{stars(x.r.rating) > 0 && <span class="tag soft">{stars(x.r.rating)} out of 5</span>}{x.biz && x.biz.area && <span class="tag soft">{x.biz.area}</span>}</div>
+              <h4 style="margin-bottom:8px">{x.biz ? x.biz.name : x.r.title}</h4>
+              <p class="meta" style="font-size:15px;margin-bottom:12px">{x.text}</p>
+              <p class="meta" style="font-weight:700;color:var(--blue)">Read the review{x.r.reviewDate ? ', ' + dateText(x.r.reviewDate) : ''}</p>
+            </a>
+          ))}
+        </div>
+        <p style="margin-top:28px;display:flex;gap:18px;align-items:center;flex-wrap:wrap">{feed.length > 6 && <button class="btn line" id="feed-more-btn" type="button">Show more</button>}<a href={url('/food')} style="font-weight:700">See every place we have reviewed</a></p>
       </div>
     </section>
   )}
@@ -149,8 +161,31 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     </div>
   </section>
 
+  <section class="band" id="home-events">
+    <div class="wrap">
+      <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:16px;flex-wrap:wrap;gap:12px">
+        <div><p class="eyebrow">What is on</p><h2>Plan something fun</h2></div>
+        <a class="btn line" href={url('/things-to-do')}>See the full calendar</a>
+      </div>
+      <div class="tabs" id="ev-tabs" style="margin-bottom:22px"><button class="chip on" data-p="week" aria-pressed="true">This week</button>{events.length > 0 && <button class="chip" data-p="soon" aria-pressed="false">Coming up</button>}</div>
+      <div id="ev-week">
+        <p class="meta" id="hw-range" style="margin-bottom:20px">&nbsp;</p>
+        <div class="grid g4" id="hw-grid"></div>
+        <div class="card pad hidden" id="hw-empty"><b>Nothing listed for the rest of this week yet.</b><p class="meta" style="margin-top:4px">Browse everything on the calendar, or check back soon.</p></div>
+        <p class="meta" id="hw-ongoing" style="margin-top:18px"></p>
+      </div>
+      {events.length > 0 && (
+        <div id="ev-soon" class="hidden">
+          <div class="grid g4">
+            {events.map((e) => <a class="card pad" href={href(e)} style="text-decoration:none"><span class="tag">{eventDates(e)}</span><h4 style="margin:12px 0 6px">{e.title}</h4><p class="meta">{e.venue || e.profile}</p></a>)}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
   {places.length > 0 && (
-    <section class="band" id="home-hood">
+    <section class="band tint" id="home-hood">
       <div class="wrap">
         {spots.length > 0 && (
           <aside class="spot-wrap" aria-label="Neighborhood spotlight">
@@ -282,54 +317,39 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
       </div>
     </section>
   )}
-  <script is:inline>document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });</script>
-  {homeVideos.length > 0 && (
-    <section class="band tint" id="home-videos">
+
+  {hasNew && (
+    <section class="band" id="new-this-month">
       <div class="wrap">
         <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
-          <div><p class="eyebrow">Local videos</p><h2>Walk the neighborhood with us</h2></div>
-          <a class="btn line" href={url('/videos')}>See all videos</a>
+          <div><p class="eyebrow">New this month</p><h2>Openings and closings</h2></div>
+          <a class="btn line" href={url('/openings-and-closings')}>See openings and closings</a>
         </div>
-        <div class="grid g3">{homeVideos.map((v) => <VideoCard v={v} />)}</div>
-        <p style="margin-top:20px"><a href={config.youtube} rel="noopener" style="font-weight:700">Watch more on YouTube</a></p>
+        <OpeningsPanel limit={3} />
       </div>
     </section>
   )}
 
-  {feed.length > 0 && (
-    <section class="band" id="feed">
-      <div class="wrap">
-        <p class="eyebrow">The feed</p>
-        <h2 style="margin-bottom:8px">Fresh from Sara, Dillon, and our Contributors</h2>
-        <p class="meta" style="margin-bottom:28px;font-size:17px">The newest reviews and stories, written by people who live here.</p>
-        <div class="grid g3" id="feed-grid">
-          {feed.map((x, i) => (
-            <a class={i >= 6 ? 'card pad feed-more hidden' : 'card pad'} href={href(x.r)} style="text-decoration:none">
-              {x.m && <img class="photo" style="height:150px;border-radius:8px;margin-bottom:14px" src={x.m.src} alt={x.m.alt} />}
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><span class="tag">Review</span>{stars(x.r.rating) > 0 && <span class="tag soft">{stars(x.r.rating)} out of 5</span>}{x.biz && x.biz.area && <span class="tag soft">{x.biz.area}</span>}</div>
-              <h4 style="margin-bottom:8px">{x.biz ? x.biz.name : x.r.title}</h4>
-              <p class="meta" style="font-size:15px;margin-bottom:12px">{x.text}</p>
-              <p class="meta" style="font-weight:700;color:var(--blue)">Read the review{x.r.reviewDate ? ', ' + dateText(x.r.reviewDate) : ''}</p>
-            </a>
-          ))}
-        </div>
-        <p style="margin-top:28px;display:flex;gap:18px;align-items:center;flex-wrap:wrap">{feed.length > 6 && <button class="btn line" id="feed-more-btn" type="button">Show more</button>}<a href={url('/food')} style="font-weight:700">See every place we have reviewed</a></p>
-      </div>
-    </section>
-  )}
-
-  <section class="band tint" id="meet">
-    <div class="wrap" style="display:flex;gap:48px;align-items:center;flex-wrap:wrap">
-      <div style="flex:1 1 320px;max-width:460px"><div class="ph" style="height:340px;border-radius:12px">Photo of Sara and Dillon coming soon</div></div>
-      <div style="flex:1 1 380px">
-        <p class="eyebrow">Who we are</p>
-        <h2 style="margin-bottom:16px">Meet Sara and Dillon</h2>
-        <p style="font-size:18px;margin-bottom:14px">We started Tradition Local to help people feel connected to their neighborhood, community, and city.</p>
-        <p style="font-size:18px;margin-bottom:24px">Sara visits the places she writes about, then shares what she found, honestly and kindly. Dillon is a Realtor who loves these neighborhoods and answers questions personally.</p>
-        <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/about')}>Meet Sara and Dillon</a><a class="btn line" href={url('/ask-dillon')}>Ask Dillon</a></div>
-      </div>
-    </div>
-  </section>
+  <style is:global>
+    #meet.band { padding: 44px 0; }
+    .ms { display: flex; align-items: center; gap: 36px; }
+    .ms-av { display: flex; flex: none; }
+    .ms-av span { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 112px; height: 112px; border: 4px solid #fff; border-radius: 50%; background: #EFE3C2; color: var(--navy); font-family: var(--serif); font-weight: 700; font-size: 44px; }
+    .ms-av span + span { margin-left: -26px; }
+    .ms-txt { flex: 1; min-width: 0; }
+    .ms-txt h2 { margin: 6px 0 10px; }
+    .ms-txt p:last-child { max-width: 560px; margin: 0; font-size: 18px; }
+    .ms-btns { display: flex; flex: none; flex-direction: column; gap: 12px; }
+    @media (max-width: 760px) {
+      #meet.band { padding: 36px 0 40px; }
+      .ms { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .ms-av span { width: 76px; height: 76px; font-size: 30px; }
+      .ms-av span + span { margin-left: -18px; }
+      .ms-btns { width: 100%; }
+      .ms-btns .btn { width: 100%; }
+    }
+  </style>
+  <script is:inline>document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });</script>
 
   <VideoScript />
   <script is:inline define:vars={{ WK: weekData }}>
