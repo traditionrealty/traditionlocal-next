@@ -16,6 +16,7 @@ import '../styles/combo.css';
     var ul = document.createElement('ul'); ul.id = id + '-list'; ul.className = 'combo-list'; ul.setAttribute('role', 'listbox'); ul.hidden = true;
     wrap.appendChild(inp); wrap.appendChild(x); wrap.appendChild(ul);
     sel.parentNode.insertBefore(wrap, sel.nextSibling);
+    for (var p = wrap.parentElement; p && p !== document.body; p = p.parentElement) { var o = getComputedStyle(p); if (o.overflow === 'hidden' || o.overflowX === 'hidden' || o.overflowY === 'hidden' || o.overflow === 'clip') p.style.overflow = 'visible'; }
     sel.style.display = 'none'; sel.setAttribute('aria-hidden', 'true'); sel.tabIndex = -1;
     [].forEach.call(document.querySelectorAll('label[for="' + id + '"]'), function (l) { l.setAttribute('for', inp.id); });
     var act = -1, shown = [];
