@@ -55,6 +55,9 @@ const on = (v: string) => (v || '').toLowerCase() === 'active';
 
 const rawProfiles = readTable('profiles.csv');
 const rawContent = readTable('content.csv');
+// Events have their own file (data/events.csv). Older exports kept them in content.csv, so that still works when events.csv is missing.
+const rawEvents = readTable('events.csv');
+const contentRows = rawEvents.length ? [...rawContent.filter((r) => r.type !== 'Event'), ...rawEvents.map((r) => ({ ...r, type: 'Event' }))] : rawContent;
 
 export const profiles: Profile[] = rawProfiles.filter((r) => r.name).map((r) => ({
   slug: r.slug || slugify(r.name), name: r.name, type: r.type, area: r.area, summary: r.summary, description: r.description,
@@ -66,7 +69,7 @@ export const profiles: Profile[] = rawProfiles.filter((r) => r.name).map((r) => 
   published: (r.page_status || '').toLowerCase() === 'published',
 })).filter((p) => IS_PREVIEW || p.published);
 
-export const content: Content[] = rawContent.filter((r) => r.title).map((r) => ({
+export const content: Content[] = contentRows.filter((r) => r.title).map((r) => ({
   slug: r.slug || slugify(r.title), type: r.type, title: r.title, profile: r.profile, summary: r.summary, body: r.body, author: r.author,
   reviewDate: r.review_date, rating: r.rating, heroImage: r.hero_image, heroAlt: r.hero_alt, heroCredit: r.hero_credit, heroRights: r.hero_rights,
   gallery: list(r.gallery), starts: r.starts, ends: r.ends, eventLink: r.event_link, cost: r.cost, venue: r.venue_name, address: r.address,
