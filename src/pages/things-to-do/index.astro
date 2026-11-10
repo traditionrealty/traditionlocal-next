@@ -40,7 +40,7 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
   <section class="band tt-main" id="events">
     <div class="wrap">
       <div class="tt-bar" id="t-bar">
-        <div class="tt-seg" id="t-when" role="group" aria-label="When"><button type="button" data-w="weekend" aria-pressed="false">This weekend</button><button type="button" class="on" data-w="week" aria-pressed="true"><span class="l">Next 7 days</span><span class="s">7 days</span></button><button type="button" data-w="month" aria-pressed="false"><span class="l">Next 30 days</span><span class="s">30 days</span></button><button type="button" data-w="all" aria-pressed="false">All</button></div>
+        <div class="tt-seg" id="t-when" role="group" aria-label="When"><button type="button" data-w="today" aria-pressed="false">Today</button><button type="button" data-w="weekend" aria-pressed="false"><span class="l">This weekend</span><span class="s">Weekend</span></button><button type="button" class="on" data-w="week" aria-pressed="true"><span class="l">Next 7 days</span><span class="s">7 days</span></button><button type="button" data-w="month" aria-pressed="false"><span class="l">Next 30 days</span><span class="s">30 days</span></button><button type="button" data-w="all" aria-pressed="false">All</button></div>
         <div class="tt-sel"><label class="sr" for="t-group">Type of event</label><select id="t-group"><option value="">All types</option>{GROUPS.map((g) => <option>{g}</option>)}</select></div>
         <button type="button" class="tt-free" id="t-free" aria-pressed="false">Free</button>
         <button type="button" class="tt-opencal" id="cal-open" aria-haspopup="dialog">Calendar</button>
@@ -126,6 +126,7 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
       function passes(e) { return (!state.group || e.g === state.group) && (!state.free || e.fr); }
       function weekend() { var dow = today.getDay(), fri = dow === 6 ? addDays(today, -1) : dow === 0 ? addDays(today, -2) : addDays(today, 5 - dow); return [iso(fri), iso(addDays(fri, 2))]; }
       function whenOk(e, w) {
+        if (w === 'today') return e.s <= TODAY;
         if (w === 'weekend') { var r = weekend(), from = r[0] > TODAY ? r[0] : TODAY; return e.s <= r[1] && e.f >= from; }
         if (w === 'week') return e.s <= iso(addDays(today, 7));
         if (w === 'month') return e.s <= iso(addDays(today, 30));
@@ -144,7 +145,7 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
         return '<a class="tt-row" href="' + esc(e.u) + '"><span class="tt-d"><span class="tt-w">THROUGH</span><span class="tt-n">' + f.getDate() + '</span><span class="tt-m">' + SHORT[f.getMonth()] + yr + '</span></span><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc([e.v || 'Houston', e.g].join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
       }
       function emptyHtml() {
-        return '<div class="card pad tt-empty"><b>Nothing listed for that choice yet.</b><p class="meta" style="margin-top:4px">Try a longer window or another type of event.</p><p style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">' + (state.day ? '<button class="btn line sm" id="e-day" type="button">Show everything again</button>' : '') + (state.when !== 'all' && !state.day ? '<button class="btn line sm" id="e-all" type="button">See all upcoming</button>' : '') + (state.group || state.free ? '<button class="btn line sm" id="e-clear" type="button">Clear type and free</button>' : '') + '</p></div>';
+        return '<div class="card pad tt-empty"><b>Nothing listed for that choice yet.</b><p class="meta" style="margin-top:4px">Try a longer window or another type of event.</p><p style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">' + (state.day ? '<button class="btn line sm" id="e-day" type="button">Show everything again</button>' : '') + ((state.when === 'today' || state.when === 'weekend') && !state.day ? '<button class="btn line sm" id="e-week" type="button">Show the next 7 days</button>' : '') + (state.when !== 'all' && !state.day ? '<button class="btn line sm" id="e-all" type="button">See all upcoming</button>' : '') + (state.group || state.free ? '<button class="btn line sm" id="e-clear" type="button">Clear type and free</button>' : '') + '</p></div>';
       }
       function renderList() {
         var items = visible().sort(function (a, b) { var ka = keyOf(a), kb = keyOf(b); return ka < kb ? -1 : ka > kb ? 1 : (a.t < b.t ? -1 : a.t > b.t ? 1 : 0); });
@@ -207,6 +208,7 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
       $('t-list').addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b) return;
         if (b.id === 't-more') { var prev = $('t-list').querySelectorAll('.tt-row').length; state.shown += PAGE; renderList(); var rows = $('t-list').querySelectorAll('.tt-row'); if (rows[prev]) rows[prev].focus(); }
+        else if (b.id === 'e-week') { state.when = 'week'; state.day = null; state.fell = ''; all(); }
         else if (b.id === 'e-all') { state.when = 'all'; state.day = null; state.fell = ''; all(); }
         else if (b.id === 'e-clear') { state.group = ''; state.free = false; $('t-group').value = ''; all(); }
         else if (b.id === 'e-day') { state.day = null; all(); }
