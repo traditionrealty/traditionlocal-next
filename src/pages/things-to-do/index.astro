@@ -136,7 +136,7 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
       function keyOf(e) { return state.day ? state.day : (e.s < TODAY ? TODAY : e.s); }
       function dayOpen(k, c) {
         var d = parse(k), tag = k === TODAY ? 'Today' : k === TOMORROW ? 'Tomorrow' : '';
-        return '<div class="tt-day" role="group" aria-label="' + esc(DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate()) + '"><div class="tt-rail"><div class="tt-bd" aria-hidden="true"><span>' + DAYS[d.getDay()].slice(0, 3).toUpperCase() + '</span><b>' + d.getDate() + '</b><i>' + SHORT[d.getMonth()] + '</i></div></div><div class="tt-dc"><div class="tt-top"><span class="tt-lab">' + tag + '</span><span class="tt-cnt">' + c + (c === 1 ? ' event' : ' events') + '</span></div>';
+        return '<div class="tt-dg" role="group" aria-label="' + esc(DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate()) + '"><div class="tt-rail"><div class="tt-bd" aria-hidden="true"><span>' + DAYS[d.getDay()].slice(0, 3).toUpperCase() + '</span><b>' + d.getDate() + '</b><i>' + SHORT[d.getMonth()] + '</i></div></div><div class="tt-dc"><div class="tt-top"><span class="tt-lab">' + tag + '</span><span class="tt-cnt">' + c + (c === 1 ? ' event' : ' events') + '</span></div>';
       }
       function shortDate(k) { var d = parse(k); return SHORT[d.getMonth()] + ' ' + d.getDate(); }
       function row(e, k) {
