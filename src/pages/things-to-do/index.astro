@@ -134,11 +134,14 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
       }
       function visible() { return SHORTEV.filter(function (e) { return live(e) && passes(e) && (state.day ? (e.s <= state.day && state.day <= e.f) : whenOk(e, state.when)); }); }
       function keyOf(e) { return state.day ? state.day : (e.s < TODAY ? TODAY : e.s); }
-      function dayLabel(k) { var d = parse(k), full = DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate(); return k === TODAY ? 'Today, ' + full : k === TOMORROW ? 'Tomorrow, ' + full : full; }
+      function dayOpen(k, c) {
+        var d = parse(k), tag = k === TODAY ? 'Today' : k === TOMORROW ? 'Tomorrow' : '';
+        return '<div class="tt-day" role="group" aria-label="' + esc(DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate()) + '"><div class="tt-rail"><div class="tt-bd" aria-hidden="true"><span>' + DAYS[d.getDay()].slice(0, 3).toUpperCase() + '</span><b>' + d.getDate() + '</b><i>' + SHORT[d.getMonth()] + '</i></div></div><div class="tt-dc"><div class="tt-top"><span class="tt-lab">' + tag + '</span><span class="tt-cnt">' + c + (c === 1 ? ' event' : ' events') + '</span></div>';
+      }
       function shortDate(k) { var d = parse(k); return SHORT[d.getMonth()] + ' ' + d.getDate(); }
       function row(e, k) {
-        var d = parse(k), thr = e.f > k ? 'Through ' + shortDate(e.f) + '. ' : '';
-        return '<a class="tt-row" href="' + esc(e.u) + '"><span class="tt-d"><span class="tt-w">' + DAYS[d.getDay()].slice(0, 3).toUpperCase() + '</span><span class="tt-n">' + d.getDate() + '</span><span class="tt-m">' + SHORT[d.getMonth()] + '</span></span><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc(thr + [e.v || 'Houston', e.g].join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
+        var thr = e.f > k ? 'Through ' + shortDate(e.f) + '. ' : '';
+        return '<a class="tt-ev" href="' + esc(e.u) + '"><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc(thr + [e.v || 'Houston', e.g].join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
       }
       function ongRow(e) {
         var f = parse(e.f), yr = f.getFullYear() !== today.getFullYear() ? ' ' + f.getFullYear() : '';
@@ -149,8 +152,10 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
       }
       function renderList() {
         var items = visible().sort(function (a, b) { var ka = keyOf(a), kb = keyOf(b); return ka < kb ? -1 : ka > kb ? 1 : (a.t < b.t ? -1 : a.t > b.t ? 1 : 0); });
-        var n = items.length, html = '', last = '';
-        items.slice(0, state.shown).forEach(function (e) { var k = keyOf(e); if (k !== last) { html += '<h3 class="tt-dh">' + esc(dayLabel(k)) + '</h3>'; last = k; } html += row(e, k); });
+        var n = items.length, html = '', last = '', counts = {};
+        items.forEach(function (e) { var k = keyOf(e); counts[k] = (counts[k] || 0) + 1; });
+        items.slice(0, state.shown).forEach(function (e) { var k = keyOf(e); if (k !== last) { if (last) html += '</div></div>'; html += dayOpen(k, counts[k]); last = k; } html += row(e, k); });
+        if (last) html += '</div></div>';
         if (!n) html = emptyHtml();
         if (n > state.shown) html += '<p class="tt-more"><button class="btn line" id="t-more" type="button">Show ' + Math.min(PAGE, n - state.shown) + ' more</button></p>';
         $('t-list').innerHTML = html;
@@ -207,7 +212,7 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
       $('cal-next').addEventListener('click', function () { state.view = new Date(state.view.getFullYear(), state.view.getMonth() + 1, 1); drawCal(); });
       $('t-list').addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b) return;
-        if (b.id === 't-more') { var prev = $('t-list').querySelectorAll('.tt-row').length; state.shown += PAGE; renderList(); var rows = $('t-list').querySelectorAll('.tt-row'); if (rows[prev]) rows[prev].focus(); }
+        if (b.id === 't-more') { var prev = $('t-list').querySelectorAll('.tt-ev').length; state.shown += PAGE; renderList(); var rows = $('t-list').querySelectorAll('.tt-ev'); if (rows[prev]) rows[prev].focus(); }
         else if (b.id === 'e-week') { state.when = 'week'; state.day = null; state.fell = ''; all(); }
         else if (b.id === 'e-all') { state.when = 'all'; state.day = null; state.fell = ''; all(); }
         else if (b.id === 'e-clear') { state.group = ''; state.free = false; $('t-group').value = ''; all(); }
