@@ -68,6 +68,32 @@ function dateText(v) {
   if (Object.prototype.toString.call(v) === '[object Date]') return (v.getMonth() + 1) + '/' + v.getDate() + '/' + v.getFullYear();
   return String(v).trim();
 }
+var EVENT_COLUMNS = ['slug', 'title', 'profile', 'summary', 'body', 'author', 'hero_image', 'hero_alt', 'hero_credit', 'hero_rights', 'gallery', 'video',
+  'starts', 'ends', 'timezone', 'event_link', 'faqs', 'cost', 'venue_name', 'address', 'city', 'zip_code', 'event_type', 'start_time', 'end_time', 'tags',
+  'show_media', 'show_faq', 'page_status'];
+
+// Events have their own tab. Venue, address, times and cost come from their own columns.
+// Older rows that keep them as "key: value" lines in Editor notes still work.
+function toPublicEvents(rows, options) {
+  var production = options && options.mode === 'production';
+  var out = [];
+  rows.forEach(function (r) {
+    if (!String(r['Title'] || '').trim()) return;
+    if (production && (lower(r['Page']) !== 'published' || lower(r['Example']) === 'yes')) return;
+    var n = r['Editor notes'];
+    function pick(col, key) { return String(r[col] || '').trim() || noteValue(n, key); }
+    out.push({
+      type: 'Event', slug: r['Slug'] || slugify(r['Title']), title: r['Title'], profile: r['Profile'], summary: r['Summary'], body: r['Body'], author: r['Author'],
+      hero_image: r['Hero image'], hero_alt: r['Image alt text'], hero_credit: r['Media credit'], hero_rights: r['Media rights'], gallery: r['Gallery'], video: r['Video'],
+      starts: dateText(r['Starts']), ends: dateText(r['Ends']), timezone: r['Time zone'], event_link: r['Event link'], faqs: r['FAQs'],
+      cost: pick('Cost', 'cost'), venue_name: pick('Venue', 'venue_name'), address: pick('Address', 'address'), city: pick('City', 'city'),
+      zip_code: cleanZip(pick('Zip code', 'zip_code')), event_type: pick('Event type', 'event_type'), start_time: pick('Start time', 'start_time'),
+      end_time: pick('End time', 'end_time'), tags: pick('Tags', 'tags'), show_media: r['Media section'], show_faq: r['FAQ section'], page_status: r['Page']
+    });
+  });
+  return out;
+}
+
 function csvCell(v) {
   var s = (v === null || v === undefined) ? '' : String(v);
   return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
@@ -77,4 +103,4 @@ function toCSV(rows, columns) {
   rows.forEach(function (r) { lines.push(columns.map(function (c) { return csvCell(r[c]); }).join(',')); });
   return lines.join('\n') + '\n';
 }
-if (typeof module !== 'undefined') module.exports = { PROFILE_COLUMNS: PROFILE_COLUMNS, CONTENT_COLUMNS: CONTENT_COLUMNS, toPublicProfiles: toPublicProfiles, toPublicContent: toPublicContent, toCSV: toCSV, slugify: slugify };
+if (typeof module !== 'undefined') module.exports = { PROFILE_COLUMNS: PROFILE_COLUMNS, CONTENT_COLUMNS: CONTENT_COLUMNS, toPublicProfiles: toPublicProfiles, toPublicContent: toPublicContent, toPublicEvents: toPublicEvents, EVENT_COLUMNS: EVENT_COLUMNS, toCSV: toCSV, slugify: slugify };
