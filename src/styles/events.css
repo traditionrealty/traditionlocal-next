@@ -1,0 +1,74 @@
+/* Things to do: one filter bar, a day grouped list, and a calendar that follows you. Uses the shared control sizes from global.css. */
+.band.hero.tt-hero { padding: 56px 0 40px; }
+.band.tt-main { padding: 32px 0 64px; }
+.tt-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+.tt-seg { display: inline-flex; flex: none; height: var(--control-h); border: 1.5px solid var(--navy); border-radius: 999px; overflow: hidden; background: #fff; }
+.tt-seg button { border: 0; background: transparent; color: var(--navy); font: inherit; font-size: var(--fs-small); font-weight: 500; padding: 0 18px; cursor: pointer; white-space: nowrap; }
+.tt-seg button.on { background: var(--navy); color: #fff; }
+.tt-sel { flex: 0 1 230px; min-width: 190px; }
+.tt-sel select { width: 100%; }
+.tt-free, .tt-opencal { height: var(--control-h); padding: 0 20px; border-radius: 999px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer; }
+.tt-free.on { background: var(--navy); color: #fff; }
+.tt-opencal { display: none; }
+.tt-count { margin-left: auto; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--slate); }
+.tt-note { margin: 16px 0 0; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--slate); }
+.tt-strip { display: none; gap: 8px; overflow-x: auto; padding: 16px 0 4px; }
+.tt-st { flex: none; width: 58px; padding: 8px 0; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--navy); font: inherit; text-align: center; cursor: pointer; }
+.tt-st span { display: block; font-size: 11px; line-height: 16px; color: var(--slate); }
+.tt-st b { display: block; font-family: var(--serif); font-size: 20px; line-height: 26px; }
+.tt-st.sel { background: var(--navy); border-color: var(--navy); color: #fff; }
+.tt-st.sel span { color: #fff; }
+.tt-split { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 48px; align-items: start; padding-top: 8px; }
+.tt-dh { margin: 32px 0 0; padding-bottom: 8px; border-bottom: 2px solid var(--navy); font-family: var(--sans); font-size: 13px; line-height: 20px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--green); }
+.tt-dh:first-child { margin-top: 8px; }
+.tt-row { display: grid; grid-template-columns: 72px minmax(0, 1fr) 20px; gap: 0 20px; align-items: start; padding: 20px 8px; border-bottom: 1px solid var(--line); color: var(--navy); text-decoration: none; }
+.tt-row:hover { background: var(--ivory); }
+.tt-d { display: flex; flex-direction: column; align-items: center; line-height: 1; }
+.tt-w { font-size: 12px; font-weight: 700; letter-spacing: .12em; color: var(--green); }
+.tt-n { margin: 6px 0 2px; font-family: var(--serif); font-weight: 600; font-size: 30px; line-height: 1; }
+.tt-n.sm { margin: 8px 0 2px; font-size: 22px; }
+.tt-m { font-size: 12px; line-height: 16px; color: var(--slate); }
+.tt-t { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-family: var(--serif); font-weight: 600; font-size: 20px; line-height: 1.25; }
+.tt-mt { display: block; margin-top: 4px; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--slate); }
+.tt-go { width: 20px; height: 20px; margin-top: 12px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M7 4l6 6-6 6' fill='none' stroke='%231D1A6D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat center; }
+.tt-more { margin: 24px 0 0; }
+.tt-empty { margin-top: 24px; }
+.tt-cal { position: sticky; top: 104px; }
+.tt-cal-in { background: var(--ivory); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; }
+.tt-cal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.tt-cal-head h3 { font-size: 20px; line-height: 1.2; }
+.tt-cal-head button { width: 40px; height: 40px; padding: 0; border-radius: 999px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); font-size: 22px; line-height: 1; }
+.tt-cal-head button:disabled { opacity: .35; cursor: default; }
+.tt-dow, .tt-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.tt-dow span { padding-bottom: 4px; text-align: center; font-size: 12px; font-weight: 700; color: var(--slate); }
+.tt-day { position: relative; height: 38px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--navy); font: inherit; font-size: var(--fs-small); cursor: pointer; }
+.tt-day:hover:not(:disabled) { background: #fff; }
+.tt-day.has::after { content: ""; position: absolute; left: 50%; bottom: 5px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--gold); }
+.tt-day.today { background: var(--navy); color: #fff; }
+.tt-day.sel { background: #fff; outline: 2px solid var(--blue); outline-offset: -2px; font-weight: 700; }
+.tt-day.today.sel { background: var(--navy); }
+.tt-day:disabled { color: #b9b6ad; cursor: default; }
+.tt-legend { margin: 12px 0 0; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--slate); }
+.tt-dot { display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: var(--gold); }
+.tt-clear { margin: 8px 0 0; }
+.tt-sheet { display: none; width: 100%; margin-top: 16px; }
+@media (max-width: 760px) {
+  .band.hero.tt-hero { padding: 40px 0 28px; }
+  .band.tt-main { padding: 20px 0 48px; }
+  .tt-bar { gap: 10px; }
+  .tt-seg { flex: 1 1 100%; max-width: 100%; overflow-x: auto; }
+  .tt-seg button { flex: none; }
+  .tt-sel { flex: 1 1 0; min-width: 0; }
+  .tt-opencal { display: inline-flex; align-items: center; }
+  .tt-count { flex: 1 1 100%; margin-left: 0; }
+  .tt-strip { display: flex; }
+  .tt-split { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .tt-cal { position: fixed; inset: 0; z-index: 80; display: none; align-items: flex-end; background: rgba(29, 26, 109, .45); }
+  .tt-cal.open { display: flex; }
+  .tt-cal-in { width: 100%; max-height: 90vh; overflow-y: auto; border: 0; border-radius: 18px 18px 0 0; background: #fff; padding: 16px 16px 24px; }
+  .tt-day { height: 44px; }
+  .tt-sheet { display: inline-flex; }
+  .tt-row { grid-template-columns: 56px minmax(0, 1fr) 16px; gap: 0 14px; padding: 16px 0; }
+  .tt-n { font-size: 26px; }
+  .tt-t { font-size: 18px; }
+}
