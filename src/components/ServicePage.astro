@@ -22,7 +22,7 @@ const mail = `mailto:${config.contactEmail}?subject=${encodeURIComponent(subject
         <p class="eyebrow">How we can help</p><h2 style="margin-bottom:24px">What to expect</h2>
         <div class="grid g2" style="margin-bottom:40px">{help.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
         <p class="eyebrow">How it works</p><h2 style="margin-bottom:12px">Three simple steps</h2>
-        {steps.map((s, i) => <div class="row" style={i === 0 ? 'border-top:0' : ''}><span class="tag">{i + 1}</span><p style="flex:1;min-width:240px">{s}</p></div>)}
+        <ol class="wx" role="list">{steps.map((s, i) => <li><span class="wx-n" aria-hidden="true">{i + 1}</span><p>{s}</p></li>)}</ol>
       </div>
       <div class="side">
         <div class="card pad"><p class="eyebrow">Who this is for</p><ul style="padding-left:20px;margin:0;display:grid;gap:8px">{who.map((w) => <li>{w}</li>)}</ul></div>
