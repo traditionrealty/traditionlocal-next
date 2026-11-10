@@ -40,7 +40,7 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
   <section class="band tt-main" id="events">
     <div class="wrap">
       <div class="tt-bar" id="t-bar">
-        <div class="tt-seg" id="t-when" role="group" aria-label="When"><button type="button" data-w="weekend" aria-pressed="false">This weekend</button><button type="button" class="on" data-w="week" aria-pressed="true">Next 7 days</button><button type="button" data-w="month" aria-pressed="false">Next 30 days</button><button type="button" data-w="all" aria-pressed="false">All</button></div>
+        <div class="tt-seg" id="t-when" role="group" aria-label="When"><button type="button" data-w="weekend" aria-pressed="false">This weekend</button><button type="button" class="on" data-w="week" aria-pressed="true"><span class="l">Next 7 days</span><span class="s">7 days</span></button><button type="button" data-w="month" aria-pressed="false"><span class="l">Next 30 days</span><span class="s">30 days</span></button><button type="button" data-w="all" aria-pressed="false">All</button></div>
         <div class="tt-sel"><label class="sr" for="t-group">Type of event</label><select id="t-group"><option value="">All types</option>{GROUPS.map((g) => <option>{g}</option>)}</select></div>
         <button type="button" class="tt-free" id="t-free" aria-pressed="false">Free</button>
         <button type="button" class="tt-opencal" id="cal-open" aria-haspopup="dialog">Calendar</button>
@@ -140,8 +140,8 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
         return '<a class="tt-row" href="' + esc(e.u) + '"><span class="tt-d"><span class="tt-w">' + DAYS[d.getDay()].slice(0, 3).toUpperCase() + '</span><span class="tt-n">' + d.getDate() + '</span><span class="tt-m">' + SHORT[d.getMonth()] + '</span></span><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc(thr + [e.v || 'Houston', e.g].join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
       }
       function ongRow(e) {
-        var f = parse(e.f), yr = f.getFullYear() !== today.getFullYear() ? '<span class="tt-m">' + f.getFullYear() + '</span>' : '';
-        return '<a class="tt-row" href="' + esc(e.u) + '"><span class="tt-d"><span class="tt-w">THROUGH</span><span class="tt-n sm">' + shortDate(e.f) + '</span>' + yr + '</span><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc([e.v || 'Houston', e.g].join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
+        var f = parse(e.f), yr = f.getFullYear() !== today.getFullYear() ? ' ' + f.getFullYear() : '';
+        return '<a class="tt-row" href="' + esc(e.u) + '"><span class="tt-d"><span class="tt-w">THROUGH</span><span class="tt-n">' + f.getDate() + '</span><span class="tt-m">' + SHORT[f.getMonth()] + yr + '</span></span><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc([e.v || 'Houston', e.g].join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
       }
       function emptyHtml() {
         return '<div class="card pad tt-empty"><b>Nothing listed for that choice yet.</b><p class="meta" style="margin-top:4px">Try a longer window or another type of event.</p><p style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">' + (state.day ? '<button class="btn line sm" id="e-day" type="button">Show everything again</button>' : '') + (state.when !== 'all' && !state.day ? '<button class="btn line sm" id="e-all" type="button">See all upcoming</button>' : '') + (state.group || state.free ? '<button class="btn line sm" id="e-clear" type="button">Clear type and free</button>' : '') + '</p></div>';
