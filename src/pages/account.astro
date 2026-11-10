@@ -17,7 +17,7 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
     <p class="meta" style="margin-top:16px">Your choices are saved on this device. Sign in is coming, and we will move them to your account then.</p></div></section>
   <section class="band">
     <div class="wrap" style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
-      <nav aria-label="Account sections" style="flex:0 0 240px"><a class="menu" href="#areas">Your areas</a><a class="menu" href="#locally">Locally</a><a class="menu" href="#loop">In the Loop</a><a class="menu" href="#saved">Saved places</a><a class="menu" href="#privacy">Privacy and data</a></nav>
+      <nav aria-label="Account sections" style="flex:0 0 240px"><a class="menu" href="#areas">Your areas</a><a class="menu" href="#locally">Locally Plus</a><a class="menu" href="#loop">In the Loop</a><a class="menu" href="#saved">Saved places</a><a class="menu" href="#privacy">Privacy and data</a></nav>
       <div class="stack" style="flex:999 1 560px;min-width:0">
 
         <div class="panel" id="areas"><p class="eyebrow">Your areas</p><h2 style="font-size:32px;margin-bottom:8px">Where do you call home?</h2>
@@ -30,15 +30,15 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
           <div id="a-picks" style="margin-top:28px;padding:20px;border-radius:12px;background:var(--ivory)" hidden><p class="eyebrow" id="a-picks-h" style="margin-bottom:8px"></p><div id="a-picks-list"></div></div>
         </div>
 
-        <div class="panel" id="locally"><p class="eyebrow">Locally</p><h2 style="font-size:32px;margin-bottom:8px">Your neighborhood, in your inbox</h2>
-          <p class="meta" style="font-size:16px;margin-bottom:20px">Locally is a closer look at where you live, written for your area and the areas you follow. Separate from In the Loop.</p>
-          <div style="margin-bottom:24px"><button class="chip" id="l-on" aria-pressed="false">Locally is on</button></div>
+        <div class="panel" id="locally"><p class="eyebrow">Locally Plus</p><h2 style="font-size:32px;margin-bottom:8px">Your neighborhood, in your inbox</h2>
+          <p class="meta" style="font-size:16px;margin-bottom:20px">Locally Plus is a closer look at where you live, written for your area and the areas you follow. Separate from In the Loop.</p>
+          <div style="margin-bottom:24px"><button class="chip" id="l-on" aria-pressed="false">Locally Plus is on</button></div>
           <p style="font-size:13px;font-weight:700;margin-bottom:10px">What to include</p>
           <div class="chips" id="l-topics">{topics.map(([k, l]) => <button class="chip" data-k={k} aria-pressed="false">{l}</button>)}</div>
           <p style="font-size:13px;font-weight:700;margin:24px 0 10px">How often</p>
           <div class="chips" id="l-freq"><button class="chip" data-f="twice" aria-pressed="false">Twice a month</button><button class="chip" data-f="monthly" aria-pressed="false">Monthly</button></div>
-          <p class="meta" style="margin:20px 0 16px">We save these now. Locally emails start once sign in is connected.</p>
-          <a class="btn line sm" href={url('/locally')}>Open your Locally page</a>
+          <p class="meta" style="margin:20px 0 16px">We save these now. Locally Plus emails start once sign in is connected.</p>
+          <a class="btn line sm" href={url('/locally')}>Open your Locally Plus page</a>
         </div>
 
         <div class="panel" id="loop"><p class="eyebrow">In the Loop</p><h2 style="font-size:32px;margin-bottom:8px">Every Monday, the same for everyone</h2>
@@ -56,8 +56,8 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
 
         <div class="panel" id="privacy"><p class="eyebrow">Privacy and data</p><h2 style="font-size:32px;margin-bottom:8px">You are in control</h2>
           <p class="meta" style="font-size:16px;margin-bottom:12px">We never sell your email, and you can leave at any time.</p>
-          <div class="row"><div style="flex:1;min-width:240px"><b>Download what is saved on this device</b><br /><span class="meta">Your area, followed areas, Locally choices, and saved places, as a file.</span></div><button class="btn line sm" id="p-download" type="button">Download</button></div>
-          <div class="row"><div style="flex:1;min-width:240px"><b>Clear what is saved on this device</b><br /><span class="meta">Your area, followed areas, Locally choices, and saved places.</span></div><button class="btn line sm" id="p-clear" type="button">Clear</button></div></div>
+          <div class="row"><div style="flex:1;min-width:240px"><b>Download what is saved on this device</b><br /><span class="meta">Your area, followed areas, Locally Plus choices, and saved places, as a file.</span></div><button class="btn line sm" id="p-download" type="button">Download</button></div>
+          <div class="row"><div style="flex:1;min-width:240px"><b>Clear what is saved on this device</b><br /><span class="meta">Your area, followed areas, Locally Plus choices, and saved places.</span></div><button class="btn line sm" id="p-clear" type="button">Clear</button></div></div>
       </div>
     </div>
   </section>
@@ -81,7 +81,7 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
     $('a-add-btn').addEventListener('click', function () { var v = $('a-add').value; if (!v) return; var f = TLD.follows(); if (f.indexOf(v) < 0) f.push(v); TLD.setFollows(f); $('a-add').value = ''; follows(); });
     var pref = TLD.get('tl_locally', { on: true, topics: { food: true, things: true, openings: false, homes: true }, freq: 'twice' });
     function savePref() { TLD.set('tl_locally', pref); }
-    function drawLocally() { var on = $('l-on'); on.classList.toggle('on', pref.on); on.setAttribute('aria-pressed', pref.on); on.textContent = pref.on ? 'Locally is on' : 'Locally is off';
+    function drawLocally() { var on = $('l-on'); on.classList.toggle('on', pref.on); on.setAttribute('aria-pressed', pref.on); on.textContent = pref.on ? 'Locally Plus is on' : 'Locally Plus is off';
       document.querySelectorAll('#l-topics button').forEach(function (b) { var v = !!pref.topics[b.dataset.k]; b.classList.toggle('on', v); b.setAttribute('aria-pressed', v); });
       document.querySelectorAll('#l-freq button').forEach(function (b) { var v = pref.freq === b.dataset.f; b.classList.toggle('on', v); b.setAttribute('aria-pressed', v); }); }
     $('l-on').addEventListener('click', function () { pref.on = !pref.on; savePref(); drawLocally(); });
