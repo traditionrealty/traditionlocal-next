@@ -1,33 +1,34 @@
 ---
 import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
+import '../../styles/events.css';
 import { profiles, events, isClosed, href, eventDates, url } from '../../lib/data';
 import { venuePlace } from '../../lib/helpers';
 import { config } from '../../config';
 const today = new Date(); const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 const toDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
 const pad = (n: number) => String(n).padStart(2, '0');
-const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const iso = (d: Date) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 const dated = events().map((e) => ({ e, a: toDate(e.starts), b: toDate(e.ends || e.starts), place: venuePlace(e) })).filter((x) => x.a && x.b) as { e: any; a: Date; b: Date; place: any }[];
-const list = dated.filter((x) => x.b >= t0).sort((x, y) => +x.a - +y.a).map((x) => ({ ...x, s: +x.a, f: +x.b }));
-// every dated event, for the week view and the calendar (the browser decides what today is)
-const cal = dated.map((x) => ({ t: x.e.title, s: iso(x.a), f: iso(x.b), v: x.place ? x.place.name : (x.e.venue || x.e.profile || ''), k: x.e.eventType || '', u: href(x.e) }));
+const list = dated.filter((x) => x.b >= t0).sort((x, y) => +x.a - +y.a || x.e.title.localeCompare(y.e.title));
+// The sheet has many spellings for the same kind of event. These nine groups are what visitors choose from.
+const GROUPS = ['Music and nightlife', 'Arts and culture', 'Holidays and festivals', 'Family', 'Food and drink', 'Film', 'Sports and outdoors', 'Talks and classes', 'Community'];
+const MAP: Record<string, string> = { 'live music': GROUPS[0], 'nightlife': GROUPS[0], 'arts': GROUPS[1], 'gallery exhibits': GROUPS[1], 'museum exhibitions': GROUPS[1], 'museum exhibits': GROUPS[1], 'exhibit': GROUPS[1], 'exhibits': GROUPS[1], 'theater district': GROUPS[1], 'theatre & performing arts': GROUPS[1], 'theater': GROUPS[1], 'holiday': GROUPS[2], 'festivals': GROUPS[2], 'festival': GROUPS[2], 'kid-friendly': GROUPS[3], 'family': GROUPS[3], 'food & drink': GROUPS[4], 'shopping': GROUPS[4], 'film': GROUPS[5], 'sports & outdoors': GROUPS[6], 'sports': GROUPS[6], 'lectures and seminars': GROUPS[7], 'talks': GROUPS[7] };
+const groupOf = (t: string) => MAP[(t || '').trim().toLowerCase()] || GROUPS[8];
+const isFree = (e: any) => /^free$/i.test(e.eventType || '') || /^free/i.test(String(e.cost || '').trim()) || (e.tags || []).some((t: string) => /^free$/i.test(t));
+const EVENTS = list.map((x) => ({ t: x.e.title, u: href(x.e), s: iso(x.a), f: iso(x.b), v: x.place ? x.place.name : (x.e.venue || x.e.profile || ''), g: groupOf(x.e.eventType), fr: isFree(x.e) ? 1 : 0 }));
 // Events tagged Featured or Our pick in the sheet show up in Our picks. The section stays hidden when none are tagged.
 const picks = list.filter((x) => x.e.tags.some((t: string) => /^(featured|our picks?|picks?)$/i.test(t))).slice(0, 3);
-const kinds = [...new Set(list.map((x) => x.e.eventType).filter(Boolean))].sort();
 const places = profiles.filter((p) => p.type === 'Place' && !isClosed(p)).sort((a, b) => a.name.localeCompare(b.name));
 const placeAreas = [...new Set(places.map((p) => p.area).filter(Boolean))].sort();
 const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
-const DAY = 86400000;
 ---
 <Base title="Things to do" active="Things to do" description="Events, places, and weekend ideas, checked and sorted for you.">
-  <section class="band hero">
+  <section class="band hero tt-hero">
     <div class="wrap">
       <p class="eyebrow">Make a little time for local</p>
       <h1 style="margin-bottom:12px">Things to do in Houston</h1>
-      <p class="lead" style="margin-bottom:28px">Festivals, markets, music, and small neighborhood happenings, checked and sorted for you.</p>
-      <div class="tabs" id="t-when"><button class="chip on" data-w="all" aria-pressed="true">All upcoming</button><button class="chip" data-w="weekend" aria-pressed="false">This weekend</button><button class="chip" data-w="week" aria-pressed="false">Next 7 days</button><button class="chip" data-w="month" aria-pressed="false">Next 30 days</button></div>
-      {kinds.length > 0 && <div class="tabs" id="t-kind" style="margin-top:12px"><button class="chip on" data-k="" aria-pressed="true">Any kind</button>{kinds.map((k) => <button class="chip" data-k={k} aria-pressed="false">{k}</button>)}</div>}
+      <p class="lead" style="margin-bottom:0">Festivals, markets, music, and small neighborhood happenings, checked and sorted for you.</p>
     </div>
   </section>
 
@@ -36,32 +37,40 @@ const DAY = 86400000;
       <div class="grid g3">{picks.map((x) => <a class="card pad pick" href={href(x.e)} style="text-decoration:none"><span class="tag">{eventDates(x.e)}</span><h4 style="margin:12px 0 6px">{x.e.title}</h4><p class="meta">{x.place ? x.place.name : (x.e.venue || x.e.profile || 'Houston')}</p></a>)}</div></div></section>
   )}
 
-  <section class="band" id="this-week">
+  <section class="band tt-main" id="events">
     <div class="wrap">
-      <p class="eyebrow">This week</p>
-      <h2 style="margin-bottom:6px">Happening this week</h2>
-      <p class="meta" id="wk-range" style="margin-bottom:24px">&nbsp;</p>
-      <div class="grid g3" id="wk-grid"></div>
-      <div class="card pad hidden" id="wk-empty"><b>Nothing listed for the rest of this week yet.</b><p class="meta" style="margin-top:4px">Check the calendar below, or see everything coming up.</p></div>
-      <p class="meta" id="wk-ongoing" style="margin-top:20px"></p>
+      <div class="tt-bar" id="t-bar">
+        <div class="tt-seg" id="t-when" role="group" aria-label="When"><button type="button" data-w="weekend" aria-pressed="false">This weekend</button><button type="button" class="on" data-w="week" aria-pressed="true">Next 7 days</button><button type="button" data-w="month" aria-pressed="false">Next 30 days</button><button type="button" data-w="all" aria-pressed="false">All</button></div>
+        <div class="tt-sel"><label class="sr" for="t-group">Type of event</label><select id="t-group"><option value="">All types</option>{GROUPS.map((g) => <option>{g}</option>)}</select></div>
+        <button type="button" class="tt-free" id="t-free" aria-pressed="false">Free</button>
+        <button type="button" class="tt-opencal" id="cal-open" aria-haspopup="dialog">Calendar</button>
+        <span class="tt-count" id="t-count" aria-live="polite">&nbsp;</span>
+      </div>
+      <p class="tt-note hidden" id="t-note"></p>
+      <div class="tt-strip" id="t-strip" role="group" aria-label="Pick a day"></div>
+      <div class="tt-split">
+        <div id="t-list"></div>
+        <aside class="tt-cal" id="t-calbox" aria-label="Calendar">
+          <div class="tt-cal-in" id="t-calin">
+            <div class="tt-cal-head"><button type="button" id="cal-prev" aria-label="Previous month">&lsaquo;</button><h3 id="cal-title" aria-live="polite">&nbsp;</h3><button type="button" id="cal-next" aria-label="Next month">&rsaquo;</button></div>
+            <div class="tt-dow" aria-hidden="true"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+            <div class="tt-grid" id="cal-grid"></div>
+            <p class="tt-legend"><span class="tt-dot"></span>Days with events. Tap one to see just that day.</p>
+            <p class="tt-clear hidden" id="cal-clear"><button type="button" class="flink" id="day-clear">Show everything again</button></p>
+            <button type="button" class="btn tt-sheet" id="sheet-done">Done</button>
+          </div>
+        </aside>
+      </div>
+      <noscript><ul>{list.slice(0, 100).map((x) => <li><a href={href(x.e)}>{x.e.title}</a>, {eventDates(x.e)}</li>)}</ul></noscript>
     </div>
   </section>
 
-  <section class="band tint" id="calendar">
+  <section class="band tint hidden" id="ongoing">
     <div class="wrap">
-      <p class="eyebrow">Calendar</p>
-      <h2 style="margin-bottom:24px">Pick a day</h2>
-      <div class="cal">
-        <div class="cal-head">
-          <button class="btn line sm" id="cal-prev" type="button" aria-label="Previous month">&lsaquo; Previous</button>
-          <h3 id="cal-title" aria-live="polite" style="font-size:24px">&nbsp;</h3>
-          <button class="btn line sm" id="cal-next" type="button" aria-label="Next month">Next &rsaquo;</button>
-        </div>
-        <div class="cal-grid" id="cal-dow"><div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div><div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div></div>
-        <div class="cal-grid" id="cal-grid"></div>
-      </div>
-      <div class="card pad" id="cal-day" style="margin-top:20px" aria-live="polite"></div>
-      <div id="cal-ongoing" style="margin-top:20px"></div>
+      <p class="eyebrow">Ongoing</p><h2 style="margin-bottom:8px">Exhibits and tours you can catch any day</h2>
+      <p class="meta" id="ong-count" style="margin-bottom:12px"></p>
+      <div id="t-ong"></div>
+      <p style="margin-top:24px"><button class="btn line hidden" id="ong-more" type="button">Show all</button></p>
     </div>
   </section>
 
@@ -74,22 +83,6 @@ const DAY = 86400000;
         <button class="btn" type="submit" style="width:100%;margin-top:14px">Join In the Loop</button>
         <p class="meta" style="margin-top:10px">Free, and one click to leave.</p>
       </form>
-    </div>
-  </section>
-
-  <section class="band" id="coming-up">
-    <div class="wrap">
-      <p class="eyebrow">Events</p><h2 style="margin-bottom:8px">Coming up</h2><p class="meta" id="t-count" style="margin-bottom:12px">{list.length} events</p>
-      <div id="t-list">
-        {list.map((x) => (
-          <div class="row t-item" data-s={x.s} data-f={x.f} data-k={x.e.eventType}>
-            <span class="tag">{eventDates(x.e)}</span>
-            <div style="flex:1;min-width:240px"><a href={href(x.e)} style="font-size:18px;font-weight:700;text-decoration:none">{x.e.title}</a><br /><span class="meta">{x.place ? <a href={href(x.place)}>{x.place.name}</a> : (x.e.venue || x.e.profile || 'Houston')}{x.e.eventType && `, ${x.e.eventType}`}</span></div>
-            <a class="btn line sm" href={href(x.e)}>See details</a>
-          </div>
-        ))}
-      </div>
-      <div class="card pad hidden" id="t-empty" style="margin-top:8px"><b>Nothing listed for that choice yet.</b><p class="meta" style="margin-top:4px">Try another time or kind of event.</p></div>
     </div>
   </section>
 
@@ -108,107 +101,128 @@ const DAY = 86400000;
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
       <div><h4 style="margin-bottom:4px">Hosting something local?</h4><p>Tell us about your event, and we will share it with neighbors.</p></div>
-      <a class="btn" href={`mailto:traditionlocal@gmail.com?subject=${encodeURIComponent('List my event')}`}>List your event</a>
+      <a class="btn" href={'mailto:traditionlocal@gmail.com?subject=' + encodeURIComponent('List my event')}>List your event</a>
     </div>
   </section>
 
-  <style is:global>
-    .cal { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow); }
-    .cal-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 20px; background: var(--ivory); border-bottom: 1px solid var(--line); flex-wrap: wrap; }
-    .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
-    .cal-dow { padding: 8px; font-size: 12px; font-weight: 700; text-align: center; color: var(--slate); border-bottom: 1px solid var(--line); }
-    .cal-day { display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; min-height: 92px; padding: 6px; border: 0; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); background: #fff; text-align: left; font: inherit; color: var(--navy); cursor: pointer; min-width: 0; }
-    .cal-day:nth-child(7n) { border-right: 0; }
-    .cal-day:hover { background: var(--ivory); }
-    .cal-day.off { background: #FAF9F6; color: #A7A9B0; }
-    .cal-day.sel { outline: 3px solid var(--blue); outline-offset: -3px; }
-    .cal-day .n { display: inline-block; font-size: 13px; font-weight: 700; min-width: 24px; text-align: center; }
-    .cal-day.today .n { background: var(--navy); color: #fff; border-radius: 999px; }
-    .cal-day .ev { display: block; align-self: stretch; box-sizing: border-box; font-size: 11px; line-height: 1.3; margin-top: 3px; background: var(--butter); border-radius: 4px; padding: 1px 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .cal-day .more { display: block; font-size: 11px; color: var(--slate); margin-top: 2px; }
-    .cal-day .dot { display: none; width: 7px; height: 7px; border-radius: 999px; background: var(--gold); margin-top: 6px; }
-    @media (max-width: 640px) { .cal-day { min-height: 56px; padding: 4px; } .cal-day .ev, .cal-day .more { display: none; } .cal-day .dot.has { display: block; } }
-  </style>
-
   <script is:inline>document.querySelectorAll('.nl-return').forEach(function (el) { el.value = location.origin + location.pathname; });</script>
-  <script is:inline define:vars={{ DAY, EVENTS: cal }}>
+  <script is:inline define:vars={{ EVENTS }}>
     (function () {
       var $ = function (id) { return document.getElementById(id); };
-      var now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate()), t0 = today.getTime();
+      var DAY = 86400000, PAGE = 20, ONG = 5;
       var MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       var DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
       var SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      var kind = '', when = 'all', picked = null, view = new Date(today.getFullYear(), today.getMonth(), 1);
-      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
-      function parse(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
       function iso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+      function parse(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+      function addDays(d, n) { var x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); x.setDate(x.getDate() + n); return x; }
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+      var now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate()), TODAY = iso(today), TOMORROW = iso(addDays(today, 1));
+      var state = { when: 'week', group: '', free: false, day: null, shown: PAGE, ongAll: false, fell: '', view: new Date(today.getFullYear(), today.getMonth(), 1) };
       function span(e) { return Math.round((parse(e.f) - parse(e.s)) / DAY) + 1; }
-      function short(e) { return span(e) <= 14; }
-      function visible() { return EVENTS.filter(function (e) { return !kind || e.k === kind; }); }
-      function onDay(e, iso1) { return e.s <= iso1 && iso1 <= e.f; }
-      function dateLabel(e) { var a = parse(e.s), b = parse(e.f); var x = SHORT[a.getMonth()] + ' ' + a.getDate(); return e.s === e.f ? x : x + ' to ' + SHORT[b.getMonth()] + ' ' + b.getDate(); }
-      function card(e) { return '<a class="card pad" href="' + esc(e.u) + '" style="text-decoration:none"><span class="tag">' + esc(dateLabel(e)) + '</span><h4 style="margin:12px 0 6px">' + esc(e.t) + '</h4><p class="meta">' + esc([e.v, e.k].filter(Boolean).join(', ')) + '</p></a>'; }
-      function row(e) { return '<div class="row"><span class="tag">' + esc(dateLabel(e)) + '</span><div style="flex:1;min-width:220px"><a href="' + esc(e.u) + '" style="font-size:18px;font-weight:700;text-decoration:none">' + esc(e.t) + '</a><br><span class="meta">' + esc([e.v, e.k].filter(Boolean).join(', ')) + '</span></div><a class="btn line sm" href="' + esc(e.u) + '">See details</a></div>'; }
-
-      // this week: Monday through Sunday, from today on
-      function week() {
-        var dow = (today.getDay() + 6) % 7, mon = new Date(today); mon.setDate(today.getDate() - dow);
-        var sun = new Date(mon); sun.setDate(mon.getDate() + 6);
-        var from = iso(today), to = iso(sun);
-        $('wk-range').textContent = DAYS[mon.getDay()].slice(0, 3) + ' ' + SHORT[mon.getMonth()] + ' ' + mon.getDate() + ' to ' + DAYS[sun.getDay()].slice(0, 3) + ' ' + SHORT[sun.getMonth()] + ' ' + sun.getDate();
-        var hits = visible().filter(function (e) { return e.f >= from && e.s <= to; }).sort(function (a, b) { return a.s < b.s ? -1 : a.s > b.s ? 1 : 0; });
-        var now1 = hits.filter(short), ongoing = hits.filter(function (e) { return !short(e); });
-        $('wk-grid').innerHTML = now1.map(card).join('');
-        $('wk-empty').classList.toggle('hidden', now1.length > 0);
-        $('wk-ongoing').innerHTML = ongoing.length ? 'Also on all week: ' + ongoing.map(function (e) { return '<a href="' + esc(e.u) + '" style="font-weight:700">' + esc(e.t) + '</a>'; }).join(', ') + '.' : '';
+      var SHORTEV = EVENTS.filter(function (e) { return span(e) <= 14; }), LONGEV = EVENTS.filter(function (e) { return span(e) > 14; });
+      var lastEnd = SHORTEV.reduce(function (m, e) { return e.f > m ? e.f : m; }, TODAY), lastD = parse(lastEnd), MAXV = new Date(lastD.getFullYear(), lastD.getMonth(), 1), MINV = new Date(today.getFullYear(), today.getMonth(), 1);
+      function live(e) { return e.f >= TODAY; }
+      function passes(e) { return (!state.group || e.g === state.group) && (!state.free || e.fr); }
+      function weekend() { var dow = today.getDay(), fri = dow === 6 ? addDays(today, -1) : dow === 0 ? addDays(today, -2) : addDays(today, 5 - dow); return [iso(fri), iso(addDays(fri, 2))]; }
+      function whenOk(e, w) {
+        if (w === 'weekend') { var r = weekend(), from = r[0] > TODAY ? r[0] : TODAY; return e.s <= r[1] && e.f >= from; }
+        if (w === 'week') return e.s <= iso(addDays(today, 7));
+        if (w === 'month') return e.s <= iso(addDays(today, 30));
+        return true;
       }
-
-      // calendar
-      function eventsOn(iso1) { return visible().filter(function (e) { return onDay(e, iso1); }); }
+      function visible() { return SHORTEV.filter(function (e) { return live(e) && passes(e) && (state.day ? (e.s <= state.day && state.day <= e.f) : whenOk(e, state.when)); }); }
+      function keyOf(e) { return state.day ? state.day : (e.s < TODAY ? TODAY : e.s); }
+      function dayLabel(k) { var d = parse(k), full = DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate(); return k === TODAY ? 'Today, ' + full : k === TOMORROW ? 'Tomorrow, ' + full : full; }
+      function shortDate(k) { var d = parse(k); return SHORT[d.getMonth()] + ' ' + d.getDate(); }
+      function row(e, k) {
+        var d = parse(k), thr = e.f > k ? 'Through ' + shortDate(e.f) + '. ' : '';
+        return '<a class="tt-row" href="' + esc(e.u) + '"><span class="tt-d"><span class="tt-w">' + DAYS[d.getDay()].slice(0, 3).toUpperCase() + '</span><span class="tt-n">' + d.getDate() + '</span><span class="tt-m">' + SHORT[d.getMonth()] + '</span></span><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc(thr + [e.v || 'Houston', e.g].join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
+      }
+      function ongRow(e) {
+        var f = parse(e.f), yr = f.getFullYear() !== today.getFullYear() ? '<span class="tt-m">' + f.getFullYear() + '</span>' : '';
+        return '<a class="tt-row" href="' + esc(e.u) + '"><span class="tt-d"><span class="tt-w">THROUGH</span><span class="tt-n sm">' + shortDate(e.f) + '</span>' + yr + '</span><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc([e.v || 'Houston', e.g].join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
+      }
+      function emptyHtml() {
+        return '<div class="card pad tt-empty"><b>Nothing listed for that choice yet.</b><p class="meta" style="margin-top:4px">Try a longer window or another type of event.</p><p style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">' + (state.day ? '<button class="btn line sm" id="e-day" type="button">Show everything again</button>' : '') + (state.when !== 'all' && !state.day ? '<button class="btn line sm" id="e-all" type="button">See all upcoming</button>' : '') + (state.group || state.free ? '<button class="btn line sm" id="e-clear" type="button">Clear type and free</button>' : '') + '</p></div>';
+      }
+      function renderList() {
+        var items = visible().sort(function (a, b) { var ka = keyOf(a), kb = keyOf(b); return ka < kb ? -1 : ka > kb ? 1 : (a.t < b.t ? -1 : a.t > b.t ? 1 : 0); });
+        var n = items.length, html = '', last = '';
+        items.slice(0, state.shown).forEach(function (e) { var k = keyOf(e); if (k !== last) { html += '<h3 class="tt-dh">' + esc(dayLabel(k)) + '</h3>'; last = k; } html += row(e, k); });
+        if (!n) html = emptyHtml();
+        if (n > state.shown) html += '<p class="tt-more"><button class="btn line" id="t-more" type="button">Show ' + Math.min(PAGE, n - state.shown) + ' more</button></p>';
+        $('t-list').innerHTML = html;
+        $('t-count').textContent = n + (n === 1 ? ' event' : ' events');
+      }
+      function renderOng() {
+        var items = LONGEV.filter(function (e) { return live(e) && passes(e); }).sort(function (a, b) { return a.f < b.f ? -1 : a.f > b.f ? 1 : (a.t < b.t ? -1 : 1); });
+        var sec = $('ongoing'); sec.classList.toggle('hidden', !items.length); if (!items.length) return;
+        var show = state.ongAll ? items : items.slice(0, ONG);
+        $('t-ong').innerHTML = show.map(ongRow).join('');
+        $('ong-count').textContent = items.length + (items.length === 1 ? ' ongoing event' : ' ongoing events') + ', the ones ending soonest first.';
+        var more = $('ong-more'); more.classList.toggle('hidden', items.length <= ONG || state.ongAll); more.textContent = 'Show all ' + items.length;
+      }
+      function dayCount(k) { return SHORTEV.filter(function (e) { return live(e) && passes(e) && e.s <= k && k <= e.f; }).length; }
+      function label(k, c) { var d = parse(k); return DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + (c ? ', ' + c + (c === 1 ? ' event' : ' events') : ', no events'); }
       function drawCal() {
-        var y = view.getFullYear(), m = view.getMonth();
+        var y = state.view.getFullYear(), m = state.view.getMonth(), first = new Date(y, m, 1), dim = new Date(y, m + 1, 0).getDate(), html = '', i, d;
         $('cal-title').textContent = MONTHS[m] + ' ' + y;
-        var first = new Date(y, m, 1), start = new Date(first); start.setDate(1 - first.getDay());
-        var html = '';
-        for (var i = 0; i < 42; i++) {
-          var d = new Date(start); d.setDate(start.getDate() + i); var k = iso(d);
-          if (i >= 35 && d.getMonth() !== m) break;
-          var evs = eventsOn(k).filter(short), cls = 'cal-day' + (d.getMonth() !== m ? ' off' : '') + (d.getTime() === t0 ? ' today' : '') + (picked === k ? ' sel' : '');
-          var all = eventsOn(k).length;
-          html += '<button type="button" class="' + cls + '" data-d="' + k + '" aria-label="' + DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + (all ? ', ' + all + (all === 1 ? ' event' : ' events') : '') + '"><span class="n">' + d.getDate() + '</span>' +
-            evs.slice(0, 2).map(function (e) { return '<span class="ev">' + esc(e.t) + '</span>'; }).join('') + (evs.length > 2 ? '<span class="more">+' + (evs.length - 2) + ' more</span>' : '') + '<span class="dot' + (evs.length ? ' has' : '') + '"></span></button>';
+        for (i = 0; i < first.getDay(); i++) html += '<span></span>';
+        for (d = 1; d <= dim; d++) {
+          var k = iso(new Date(y, m, d)), c = dayCount(k), past = k < TODAY, on = state.day === k;
+          html += '<button type="button" class="tt-day' + (c ? ' has' : '') + (k === TODAY ? ' today' : '') + (on ? ' sel' : '') + '" data-d="' + k + '"' + (past ? ' disabled' : '') + ' aria-pressed="' + on + '" aria-label="' + label(k, c) + '">' + d + '</button>';
         }
         $('cal-grid').innerHTML = html;
-        // long running events that touch this month
-        var ms = iso(new Date(y, m, 1)), me = iso(new Date(y, m + 1, 0));
-        var og = visible().filter(function (e) { return !short(e) && e.f >= ms && e.s <= me; }).sort(function (a, b) { return a.s < b.s ? -1 : 1; });
-        $('cal-ongoing').innerHTML = og.length ? '<p class="eyebrow" style="margin-bottom:6px">On all month</p>' + og.map(row).join('') : '';
-        drawDay();
+        $('cal-prev').disabled = state.view <= MINV; $('cal-next').disabled = state.view >= MAXV;
+        $('cal-clear').classList.toggle('hidden', !state.day);
+        var n = state.day ? visible().length : 0;
+        $('sheet-done').textContent = state.day ? 'Show ' + n + (n === 1 ? ' event' : ' events') + ' on ' + shortDate(state.day) : 'Done';
       }
-      function drawDay() {
-        var box = $('cal-day');
-        if (!picked) { box.innerHTML = '<p class="meta">Choose a day to see what is on.</p>'; return; }
-        var d = parse(picked), evs = eventsOn(picked), one = evs.filter(short), long = evs.filter(function (e) { return !short(e); });
-        var body = one.length ? one.map(row).join('') : '<p class="meta">' + (long.length ? 'No single day events listed.' : 'Nothing listed for this day.') + '</p>';
-        if (long.length) body += '<p class="meta" style="margin-top:12px">Also on: ' + long.map(function (e) { return '<a href="' + esc(e.u) + '" style="font-weight:700">' + esc(e.t) + '</a>'; }).join(', ') + '.</p>';
-        box.innerHTML = '<h4 style="margin-bottom:6px">' + DAYS[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate() + '</h4>' + body;
+      function drawStrip() {
+        var html = '', i;
+        for (i = 0; i < 14; i++) { var d = addDays(today, i), k = iso(d), c = dayCount(k), on = state.day === k; html += '<button type="button" class="tt-st' + (on ? ' sel' : '') + '" data-d="' + k + '" aria-pressed="' + on + '" aria-label="' + label(k, c) + '"><span>' + (i === 0 ? 'Today' : DAYS[d.getDay()].slice(0, 3)) + '</span><b>' + d.getDate() + '</b><span>' + (c || 'none') + '</span></button>'; }
+        $('t-strip').innerHTML = html;
       }
-      $('cal-prev').addEventListener('click', function () { view = new Date(view.getFullYear(), view.getMonth() - 1, 1); drawCal(); });
-      $('cal-next').addEventListener('click', function () { view = new Date(view.getFullYear(), view.getMonth() + 1, 1); drawCal(); });
-      $('cal-grid').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; picked = b.dataset.d; var d = parse(picked); if (d.getMonth() !== view.getMonth()) view = new Date(d.getFullYear(), d.getMonth(), 1); drawCal(); });
-
-      // the list below, with the same filters as before
-      function run() {
-        var items = document.querySelectorAll('.t-item'), n = 0, r = weekendRange();
-        items.forEach(function (i) { var s = +i.dataset.s, f = +i.dataset.f, ok = true;
-          if (when === 'weekend') ok = s <= r[1] && f >= Math.max(r[0], t0); else if (when === 'week') ok = s <= t0 + 7 * DAY; else if (when === 'month') ok = s <= t0 + 30 * DAY;
-          if (kind && i.dataset.k !== kind) ok = false; i.classList.toggle('hidden', !ok); if (ok) n++; });
-        $('t-count').textContent = n + (n === 1 ? ' event' : ' events'); $('t-empty').classList.toggle('hidden', n > 0);
+      function syncBar() {
+        [].forEach.call($('t-when').children, function (b) { var on = !state.day && b.dataset.w === state.when; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+        $('t-free').classList.toggle('on', state.free); $('t-free').setAttribute('aria-pressed', state.free ? 'true' : 'false');
+        var note = $('t-note');
+        if (state.fell) { note.textContent = state.fell === 'month' ? 'Nothing starts in the next 7 days, so this shows the next 30.' : 'Nothing starts in the next 30 days, so this shows everything coming up.'; note.classList.remove('hidden'); } else note.classList.add('hidden');
       }
-      function weekendRange() { var d = new Date(t0), dow = d.getDay(); var fri = dow === 6 ? t0 - DAY : dow === 0 ? t0 - 2 * DAY : t0 + (5 - dow) * DAY; return [fri, fri + 2 * DAY]; }
-      function wire(id, key) { var el = $(id); if (!el) return; el.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; if (key === 'w') when = b.dataset.w; else kind = b.dataset.k;
-        [].forEach.call(el.children, function (c) { c.classList.toggle('on', c === b); c.setAttribute('aria-pressed', c === b ? 'true' : 'false'); }); run(); week(); drawCal(); }); }
-      wire('t-when', 'w'); wire('t-kind', 'k'); run(); week(); drawCal();
+      function all() { renderList(); renderOng(); drawCal(); drawStrip(); syncBar(); }
+      function pickDay(k) {
+        state.day = state.day === k ? null : k; state.shown = PAGE; state.fell = '';
+        if (state.day) { var d = parse(k); state.view = new Date(d.getFullYear(), d.getMonth(), 1); }
+        all();
+      }
+      $('t-when').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; state.when = b.dataset.w; state.day = null; state.shown = PAGE; state.fell = ''; all(); });
+      $('t-group').addEventListener('change', function () { state.group = this.value; state.shown = PAGE; all(); });
+      $('t-free').addEventListener('click', function () { state.free = !state.free; state.shown = PAGE; all(); });
+      $('cal-grid').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b && !b.disabled) pickDay(b.dataset.d); });
+      $('t-strip').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) pickDay(b.dataset.d); });
+      $('day-clear').addEventListener('click', function () { state.day = null; all(); });
+      $('cal-prev').addEventListener('click', function () { state.view = new Date(state.view.getFullYear(), state.view.getMonth() - 1, 1); drawCal(); });
+      $('cal-next').addEventListener('click', function () { state.view = new Date(state.view.getFullYear(), state.view.getMonth() + 1, 1); drawCal(); });
+      $('t-list').addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return;
+        if (b.id === 't-more') { var prev = $('t-list').querySelectorAll('.tt-row').length; state.shown += PAGE; renderList(); var rows = $('t-list').querySelectorAll('.tt-row'); if (rows[prev]) rows[prev].focus(); }
+        else if (b.id === 'e-all') { state.when = 'all'; state.day = null; state.fell = ''; all(); }
+        else if (b.id === 'e-clear') { state.group = ''; state.free = false; $('t-group').value = ''; all(); }
+        else if (b.id === 'e-day') { state.day = null; all(); }
+      });
+      $('ong-more').addEventListener('click', function () { state.ongAll = true; renderOng(); });
+      // phone: the calendar opens as a sheet
+      var box = $('t-calbox'), opener = $('cal-open');
+      function openSheet() { box.classList.add('open'); $('t-calin').setAttribute('role', 'dialog'); $('t-calin').setAttribute('aria-modal', 'true'); document.body.style.overflow = 'hidden'; var f = box.querySelector('.tt-day:not(:disabled)'); if (f) f.focus(); }
+      function closeSheet() { box.classList.remove('open'); $('t-calin').removeAttribute('role'); $('t-calin').removeAttribute('aria-modal'); document.body.style.overflow = ''; opener.focus(); }
+      opener.addEventListener('click', openSheet);
+      $('sheet-done').addEventListener('click', closeSheet);
+      box.addEventListener('click', function (e) { if (e.target === box && box.classList.contains('open')) closeSheet(); });
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && box.classList.contains('open')) closeSheet(); });
+      // a quiet week falls back to the next 30 days, then to everything
+      if (!visible().length) { state.when = 'month'; state.fell = 'month'; if (!visible().length) { state.when = 'all'; state.fell = 'all'; if (!visible().length) { state.when = 'week'; state.fell = ''; } } }
+      all();
       var pa = $('p-area'), pf = $('p-find'), pm = $('p-more'), pc = $('p-count'), pitems = [].slice.call(document.querySelectorAll('.p-item')), shown = 12, STEP = 12;
       function pRender() {
         var q = (pf.value || '').toLowerCase().trim().split(/\s+/).filter(Boolean), match = [];
