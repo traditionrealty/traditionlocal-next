@@ -5,6 +5,7 @@
 .tt-seg { display: inline-flex; flex: none; height: var(--control-h); border: 1.5px solid var(--navy); border-radius: 999px; overflow: hidden; background: #fff; }
 .tt-seg button { border: 0; background: transparent; color: var(--navy); font: inherit; font-size: var(--fs-small); font-weight: 500; padding: 0 18px; cursor: pointer; white-space: nowrap; }
 .tt-seg button.on { background: var(--navy); color: #fff; }
+.tt-seg .s { display: none; }
 .tt-sel { flex: 0 1 230px; min-width: 190px; }
 .tt-sel select { width: 100%; }
 .tt-free, .tt-opencal { height: var(--control-h); padding: 0 20px; border-radius: 999px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); font: inherit; font-size: var(--fs-small); font-weight: 500; cursor: pointer; }
@@ -57,7 +58,9 @@
   .band.tt-main { padding: 20px 0 48px; }
   .tt-bar { gap: 10px; }
   .tt-seg { flex: 1 1 100%; max-width: 100%; overflow-x: auto; }
-  .tt-seg button { flex: none; }
+  .tt-seg button { flex: none; padding: 0 14px; }
+  .tt-seg .l { display: none; }
+  .tt-seg .s { display: inline; }
   .tt-sel { flex: 1 1 0; min-width: 0; }
   .tt-opencal { display: inline-flex; align-items: center; }
   .tt-count { flex: 1 1 100%; margin-left: 0; }
