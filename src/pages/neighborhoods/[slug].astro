@@ -46,14 +46,14 @@ const label = p.type === 'City' ? 'City guide' : p.type === 'Area' ? 'Area guide
   <section class="band" style="padding-top:0">
     <div class="wrap">
       <div class="card pad pick" style="padding:32px;max-width:760px">
-        <p class="eyebrow">Locally for {p.name}</p>
+        <p class="eyebrow">Locally Plus for {p.name}</p>
         <h3 style="margin-bottom:8px">A closer look at where you live.</h3>
-        <p class="meta" style="margin-bottom:20px;font-size:16px">Your neighborhood, in your inbox. For now, signing up joins In the Loop, and Locally for {p.name} follows when it opens.</p>
+        <p class="meta" style="margin-bottom:20px;font-size:16px">Your neighborhood, in your inbox. For now, signing up joins In the Loop, and Locally Plus for {p.name} follows when it opens.</p>
         <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
           <div style="flex:1;min-width:220px"><label class="sr" for="loc-email">Your email</label><input id="loc-email" name="email" type="email" required placeholder="name@email.com" /></div>
           <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
           <input type="hidden" name="return" class="nl-return" />
-          <button class="btn" type="submit">Get Locally</button>
+          <button class="btn" type="submit">Get Locally Plus</button>
         </form>
       </div>
     </div>
