@@ -164,7 +164,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
   <section class="band" id="home-events">
     <div class="wrap">
       <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:16px;flex-wrap:wrap;gap:12px">
-        <div><p class="eyebrow">What is on</p><h2>Plan something fun</h2></div>
+        <div><p class="eyebrow">What's Happening</p><h2>Plan something fun</h2></div>
         <a class="btn line" href={url('/things-to-do')}>See the full calendar</a>
       </div>
       <div class="tabs" id="ev-tabs" style="margin-bottom:22px"><button class="chip on" data-p="week" aria-pressed="true">This week</button>{events.length > 0 && <button class="chip" data-p="soon" aria-pressed="false">Coming up</button>}</div>
@@ -172,7 +172,10 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
         <p class="meta" id="hw-range" style="margin-bottom:20px">&nbsp;</p>
         <div class="grid g4" id="hw-grid"></div>
         <div class="card pad hidden" id="hw-empty"><b>Nothing listed for the rest of this week yet.</b><p class="meta" style="margin-top:4px">Browse everything on the calendar, or check back soon.</p></div>
-        <p class="meta" id="hw-ongoing" style="margin-top:18px"></p>
+        <div class="wo hidden" id="hw-ongoing">
+          <div class="wo-head"><div><span class="wo-lab">On all week</span><span class="wo-sub" id="wo-sub"></span></div><a class="wo-all" href={url('/things-to-do/#ongoing')}>See all ongoing</a></div>
+          <div class="wo-grid" id="wo-grid"></div>
+        </div>
       </div>
       {events.length > 0 && (
         <div id="ev-soon" class="hidden">
@@ -184,27 +187,27 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     </div>
   </section>
 
-  {places.length > 0 && (
-    <section class="band tint" id="home-hood">
+  {spots.length > 0 && (
+    <section class="band tint" id="home-spotlight">
       <div class="wrap">
-        {spots.length > 0 && (
-          <aside class="spot-wrap" aria-label="Neighborhood spotlight">
-            {spots.map((s, i) => (
-              <a class={i === 0 ? 'card spot-card' : 'card spot-card hidden'} href={s.link} rel={s.external ? 'noopener' : undefined}>
-                <div class="spot-main">
-                  <p class="eyebrow">Neighborhood spotlight</p>
-                  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px"><span class="tag">{s.label}</span>{s.region && <span class="tag soft">{s.region}</span>}{s.date && <span class="tag soft">{s.date}</span>}</div>
-                  <h3>{s.title}</h3>
-                  <p class="meta" style="font-size:16px;margin:8px 0 10px">{s.summary}</p>
-                  {s.bestFor && <p class="meta" style="margin-bottom:4px"><b>Best for:</b> {s.bestFor}</p>}
-                  {s.homes && <p class="meta" style="margin-bottom:4px"><b>Typical homes:</b> {s.homes}</p>}
-                  {(s.places > 0 || s.subs > 0) && <p class="meta"><b>{s.places}</b> places reviewed, <b>{s.subs}</b> subdivisions</p>}
-                </div>
+        <aside class="spot-wrap" aria-label="Neighborhood spotlight">
+          {spots.map((s, i) => (
+            <a class={i === 0 ? 'spot-card' : 'spot-card hidden'} href={s.link} rel={s.external ? 'noopener' : undefined}>
+              <div class="spot-head">
+                <p class="eyebrow">Neighborhood spotlight</p>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"><span class="tag">{s.label}</span>{s.region && <span class="tag soft">{s.region}</span>}{s.date && <span class="tag soft">{s.date}</span>}</div>
+                <h2 class="spot-title">{s.title}</h2>
+                <p class="spot-sum">{s.summary}</p>
+              </div>
+              <div class="spot-facts">
+                {s.bestFor && <p class="meta"><b>Best for:</b> {s.bestFor}</p>}
+                {s.homes && <p class="meta"><b>Typical homes:</b> {s.homes}</p>}
+                {(s.places > 0 || s.subs > 0) && <p class="meta"><b>{s.places}</b> places reviewed, <b>{s.subs}</b> subdivisions</p>}
                 <span class="btn spot-btn">{s.cta}</span>
-              </a>
-            ))}
-          </aside>
-        )}
+              </div>
+            </a>
+          ))}
+        </aside>
         <script is:inline>
           (function () {
             var cards = document.querySelectorAll('.spot-card');
@@ -213,11 +216,18 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
             [].forEach.call(cards, function (c, k) { c.classList.toggle('hidden', k !== pick); });
           })();
         </script>
+      </div>
+    </section>
+  )}
+
+  {places.length > 0 && (
+    <section class="band" id="home-hood">
+      <div class="wrap">
         <div class="hood-pick">
           <div>
-            <p class="eyebrow">Neighborhood guides</p>
+            <p class="eyebrow">Locally Plus</p>
             <h2 style="margin-bottom:12px">Where do you call home?</h2>
-            <p style="font-size:17px;margin-bottom:18px">Search for your neighborhood, or start with a popular one.</p>
+            <p style="font-size:17px;margin-bottom:18px">Pick your neighborhood, and Locally Plus brings you curated food picks, things to do, and more nearby.</p>
             <div class="hp-search">
               <label class="sr" for="hp-q">Search neighborhoods</label>
               <input id="hp-q" type="search" role="combobox" aria-expanded="false" aria-controls="hp-list" aria-autocomplete="list" autocomplete="off" placeholder={'Search ' + hoodCount + ' neighborhoods'} />
@@ -230,7 +240,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
             <div id="hp-empty">
               <p class="eyebrow">Your area</p>
               <h3 style="margin-bottom:8px">Pick a neighborhood</h3>
-              <p class="meta" style="font-size:16px">Search above or tap a popular area. We will show what is good there, and you can get its picks with Locally Plus.</p>
+              <p class="meta" style="font-size:16px">Search or tap a popular area, and we will show you what is good there.</p>
             </div>
             <div id="hp-detail" class="hidden">
               <p class="eyebrow">Your area</p>
@@ -319,7 +329,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
   )}
 
   {hasNew && (
-    <section class="band" id="new-this-month">
+    <section class="band tint" id="new-this-month">
       <div class="wrap">
         <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
           <div><p class="eyebrow">New this month</p><h2>Openings and closings</h2></div>
@@ -335,6 +345,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     .ms { display: flex; align-items: center; gap: 36px; }
     .ms-av { display: flex; flex: none; }
     .ms-av span { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; width: 112px; height: 112px; border: 4px solid #fff; border-radius: 50%; background: #EFE3C2; color: var(--navy); font-family: var(--serif); font-weight: 700; font-size: 44px; }
+    .ms-av span:first-child { position: relative; z-index: 1; }
     .ms-av span + span { margin-left: -26px; }
     .ms-txt { flex: 1; min-width: 0; }
     .ms-txt h2 { margin: 6px 0 10px; }
@@ -348,6 +359,18 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
       .ms-btns { width: 100%; }
       .ms-btns .btn { width: 100%; }
     }
+    .wo { margin-top: 24px; padding: 20px 24px; border-radius: var(--radius); background: var(--ivory); }
+    .wo-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 6px; }
+    .wo-lab { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--green); }
+    .wo-sub { margin-left: 12px; font-size: var(--fs-small); color: var(--slate); }
+    .wo-all { font-weight: 700; color: var(--blue); text-decoration: none; }
+    .wo-all:hover { text-decoration: underline; }
+    .wo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+    .wo-row { display: block; padding: 12px 0; border-top: 1px solid #EAE3D2; color: var(--navy); text-decoration: none; }
+    .wo-row:hover .wo-t { text-decoration: underline; }
+    .wo-t { display: block; font-family: var(--serif); font-weight: 600; font-size: 17px; line-height: 1.25; }
+    .wo-m { display: block; margin-top: 2px; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--slate); }
+    @media (max-width: 760px) { .wo { padding: 18px 20px; } .wo-sub { display: block; margin: 2px 0 0; } .wo-grid { grid-template-columns: 1fr; } .wo-row:nth-child(n+4) { display: none; } }
   </style>
   <script is:inline>document.querySelectorAll('.nl-return').forEach(function (r) { r.value = location.origin + location.pathname; });</script>
 
@@ -378,7 +401,12 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
       if (!soon) tabs.classList.add('hidden');
       tabs.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.p); });
       if (shortOnes.length === 0 && soon) show('soon');
-      document.getElementById('hw-ongoing').innerHTML = longOnes.length ? 'Also on all week: ' + longOnes.slice(0, 4).map(function (e) { return '<a href="' + esc(e.u) + '" style="font-weight:700">' + esc(e.t) + '</a>'; }).join(', ') + '.' : '';
+      if (longOnes.length) {
+        var soonest = longOnes.slice().sort(function (a, b) { return a.f < b.f ? -1 : a.f > b.f ? 1 : (a.t < b.t ? -1 : 1); }).slice(0, 4), n = longOnes.length;
+        document.getElementById('wo-sub').textContent = n === 1 ? '1 exhibit, tour, or long running event' : n + ' exhibits, tours, and long running events';
+        document.getElementById('wo-grid').innerHTML = soonest.map(function (e) { var q = e.f.split('-'), f = new Date(+q[0], +q[1] - 1, +q[2]); return '<a class="wo-row" href="' + esc(e.u) + '"><span class="wo-t">' + esc(e.t) + '</span><span class="wo-m">' + esc('Through ' + SH[f.getMonth()] + ' ' + f.getDate() + (e.v ? ', ' + e.v : '')) + '</span></a>'; }).join('');
+        document.getElementById('hw-ongoing').classList.remove('hidden');
+      }
     })();
   </script>
   <script is:inline define:vars={{ FOOD: foodIdx, FOODURL: url('/food') }}>
@@ -421,13 +449,17 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     .tile:hover, .tile:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
   </style>
   <style is:global>
-    .spot-wrap { margin-bottom: 56px; }
-    .spot-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 28px; align-items: center; padding: 28px 32px; text-decoration: none; color: inherit; background: var(--ivory); border-color: var(--gold); transition: transform .18s, box-shadow .18s; }
-    .spot-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
+    .spot-wrap { margin: 0; }
+    .spot-card { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 56px; align-items: center; color: inherit; text-decoration: none; }
     .spot-card.hidden { display: none !important; }
-    .spot-card h3 { margin-top: 4px; }
-    .spot-btn { white-space: nowrap; }
-    @media (max-width: 760px) { .spot-card { grid-template-columns: 1fr; gap: 18px; padding: 22px; } .spot-btn { justify-self: start; } }
+    .spot-head .eyebrow { margin-bottom: 10px; }
+    .spot-title { margin: 0 0 12px; font-size: 48px; line-height: 1.05; }
+    .spot-sum { margin: 0; font-size: 19px; line-height: 1.5; color: var(--slate); }
+    .spot-facts { padding-left: 40px; border-left: 2px solid var(--gold); }
+    .spot-facts .meta { margin: 0 0 8px; font-size: 16px; }
+    .spot-btn { margin-top: 12px; white-space: nowrap; }
+    .spot-card:hover .spot-title { text-decoration: underline; }
+    @media (max-width: 760px) { .spot-card { grid-template-columns: 1fr; gap: 20px; } .spot-title { font-size: 36px; } .spot-facts { padding: 18px 0 0; border-left: 0; border-top: 2px solid var(--gold); } .spot-btn { width: 100%; justify-content: center; box-sizing: border-box; } }
     .hood-pick { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: start; }
     @media (max-width: 860px) { .hood-pick { grid-template-columns: 1fr; gap: 28px; } }
     .hp-search { position: relative; }
@@ -435,7 +467,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     .hp-opt { display: block; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; border-radius: 8px; background: none; font: inherit; font-size: 16px; color: var(--navy); text-align: left; cursor: pointer; }
     .hp-opt small { margin-left: 8px; color: var(--slate); font-size: 13px; }
     .hp-opt:hover, .hp-opt[aria-selected="true"] { background: var(--ivory); }
-    .hp-card { padding: 28px; }
+    .hp-card { padding: 28px; background: var(--ivory); box-shadow: none; }
     .hp-places { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 6px; }
     .hp-places li { display: flex; justify-content: space-between; gap: 12px; font-size: 15px; }
     .hp-form { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line); }
