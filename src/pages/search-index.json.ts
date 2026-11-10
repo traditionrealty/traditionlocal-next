@@ -39,7 +39,7 @@ const pages: [string, string, string][] = [
   ['Local Directory', '/local-directory', 'Providers we know and trust'],
   ['Meet Sara and Dillon', '/about', 'About Tradition Local'],
   ['How we review places', '/how-we-review', 'Our ratings and promises'],
-  ['Account', '/account', 'Your saved places, followed areas, and Locally choices'],
+  ['Account', '/account', 'Your saved places, followed areas, and Locally Plus choices'],
   ['Contact', '/contact', 'Say hello'],
   ['Privacy', '/privacy', 'How we handle your information'],
   ['Texas real estate disclosures', '/disclosures', 'Required Texas notices'],
