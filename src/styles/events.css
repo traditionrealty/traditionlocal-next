@@ -50,7 +50,7 @@
 .tt-day.today.sel { background: var(--navy); }
 .tt-day:disabled { color: #b9b6ad; cursor: default; }
 .tt-legend { margin: 12px 0 0; font-size: var(--fs-small); line-height: var(--lh-small); color: var(--slate); }
-.tt-legend strong { display: block; margin-top: 6px; text-align: center; font-size: 17px; font-weight: 700; white-space: nowrap; }
+.tt-legend .tt-sub { display: block; margin-bottom: 6px; text-align: center; font-size: 12px; font-style: italic; white-space: nowrap; }
 .tt-dot { display: inline-block; width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: var(--gold); }
 .tt-clear { margin: 8px 0 0; }
 .tt-sheet { display: none; width: 100%; margin-top: 16px; }
