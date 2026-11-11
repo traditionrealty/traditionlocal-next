@@ -32,11 +32,11 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
   where: x.place ? x.place.name : (x.e.venue || x.e.profile || ''), cost: x.e.cost || '',
 }));
 ---
-<Base title="Things to do" active="Things to do" description="Events, places, and weekend ideas, checked and sorted for you.">
+<Base title="Things to Do" active="Things to Do" description="Events, places, and weekend ideas, checked and sorted for you.">
   <section class="band hero tt-hero">
     <div class="wrap">
       <p class="eyebrow">Make a little time for local</p>
-      <h1 style="margin-bottom:12px">Things to do in Houston</h1>
+      <h1 style="margin-bottom:12px">Things to Do in Houston</h1>
       <p class="lead" style="margin-bottom:0">Festivals, markets, music, and small neighborhood happenings, checked and sorted for you.</p>
     </div>
   </section>
@@ -77,7 +77,7 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
   )}
 
   {picks.length > 0 && (
-    <section class="band tint" id="our-picks"><div class="wrap"><p class="eyebrow">Our picks</p><h2 style="margin-bottom:28px">Worth planning around</h2>
+    <section class="band tint" id="our-picks"><div class="wrap"><p class="eyebrow">Our picks</p><h2 style="margin-bottom:28px">Worth Planning Around</h2>
       <div class="grid g3">{picks.map((x) => <a class="card pad pick" href={href(x.e)} style="text-decoration:none"><span class="tag">{eventDates(x.e)}</span><h4 style="margin:12px 0 6px">{x.e.title}</h4><p class="meta">{x.place ? x.place.name : (x.e.venue || x.e.profile || 'Houston')}</p></a>)}</div></div></section>
   )}
 
@@ -111,7 +111,7 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
 
   <section class="band tint hidden" id="ongoing">
     <div class="wrap">
-      <p class="eyebrow">Ongoing</p><h2 style="margin-bottom:8px">Exhibits and tours you can catch any day</h2>
+      <p class="eyebrow">Ongoing</p><h2 style="margin-bottom:8px">Exhibits and Tours You Can Catch Any Day</h2>
       <p class="meta" id="ong-count" style="margin-bottom:12px"></p>
       <div id="t-ong"></div>
       <p style="margin-top:24px"><button class="btn line hidden" id="ong-more" type="button">Show all</button></p>
@@ -120,7 +120,7 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
 
   <section class="band navy" id="loop-signup">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
-      <div style="max-width:560px"><p class="eyebrow">In the Loop</p><h2 style="color:#fff;margin-bottom:10px">Start your week in the loop.</h2><p style="font-size:18px;color:#fff">Every Monday: a short, useful list of what is worth doing and the best new places to eat.</p></div>
+      <div style="max-width:560px"><p class="eyebrow">In the Loop</p><h2 style="color:#fff;margin-bottom:10px">Start Your Week In the Loop.</h2><p style="font-size:18px;color:#fff">Every Monday: a short, useful list of what is worth doing and the best new places to eat.</p></div>
       <form class="card pad" action={config.newsletterAction} method="post" style="flex:1;min-width:300px;max-width:460px">
         <label for="tl-email">Your email</label><input id="tl-email" name="email" type="email" required placeholder="name@email.com" />
         <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" class="nl-return" />
@@ -132,7 +132,7 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
 
   <section class="band tint" id="places">
     <div class="wrap">
-      <p class="eyebrow">Places to visit</p><h2 style="margin-bottom:16px">Worth a trip any day</h2>
+      <p class="eyebrow">Places to visit</p><h2 style="margin-bottom:16px">Worth a Trip Any Day</h2>
       <div class="card pad search" style="margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap;max-width:760px"><div style="flex:2;min-width:220px"><label for="p-find">Find a place</label><input id="p-find" type="search" placeholder="Try park, market, or a name" autocomplete="off" /></div><div style="flex:1;min-width:200px"><label for="p-area">Area</label><select id="p-area"><option value="">All of Greater Houston</option>{placeAreas.map((a) => <option>{a}</option>)}</select></div></div>
       <p class="meta" id="p-count" style="margin-bottom:16px" aria-live="polite"></p>
       <div class="grid g3" id="p-grid">
@@ -144,7 +144,7 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
 
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
-      <div><h4 style="margin-bottom:4px">Hosting something local?</h4><p>Tell us about your event, and we will share it with neighbors.</p></div>
+      <div><h4 style="margin-bottom:4px">Hosting Something Local?</h4><p>Tell us about your event, and we will share it with neighbors.</p></div>
       <a class="btn" href={'mailto:traditionlocal@gmail.com?subject=' + encodeURIComponent('List my event')}>List your event</a>
     </div>
   </section>
