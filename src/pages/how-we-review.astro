@@ -36,21 +36,21 @@ const suggest = 'mailto:traditionlocal@gmail.com?subject=Suggest%20a%20place';
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">How we review places</p>
-      <h1 style="margin-bottom:16px;max-width:900px">Honest, Kind, and Useful.</h1>
+      <h1 style="margin-bottom:16px;max-width:900px">Honest, Kind, and Useful</h1>
       <p class="lead" style="max-width:720px">Every review starts with a visit. We tell you what we tried, what stood out, and who it might suit, so you can decide for yourself.</p>
     </div>
   </section>
 
   <section class="band">
     <div class="wrap">
-      <p class="eyebrow">What goes into a review</p><h2 style="margin-bottom:28px">More Than a Number.</h2>
+      <p class="eyebrow">What goes into a review</p><h2 style="margin-bottom:28px">More Than a Number</h2>
       <div class="grid g3">{tried.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
     </div>
   </section>
 
   <section class="band tint" id="ratings">
     <div class="wrap">
-      <p class="eyebrow">Our ratings</p><h2 style="margin-bottom:8px">What the Numbers Mean.</h2>
+      <p class="eyebrow">Our ratings</p><h2 style="margin-bottom:8px">What the Numbers Mean</h2>
       <p class="meta" style="font-size:17px;margin-bottom:28px;max-width:720px">Ratings are out of five. They are our own take on our most recent visit, never a score for every item on the menu.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:20px">
         {scale.map(([n, d]) => (
@@ -74,21 +74,21 @@ const suggest = 'mailto:traditionlocal@gmail.com?subject=Suggest%20a%20place';
 
   <section class="band tint">
     <div class="wrap" style="display:flex;gap:40px;align-items:center;flex-wrap:wrap;justify-content:space-between">
-      <div style="max-width:700px"><p class="eyebrow">Whose voice you are reading</p><h2 style="margin-bottom:12px">Written by People Who Live Here.</h2><p style="font-size:18px">Reviews come from Sara, Dillon, and our contributors. Sara visits the places she writes about, then shares what she found, honestly and kindly.</p></div>
+      <div style="max-width:700px"><p class="eyebrow">Whose voice you are reading</p><h2 style="margin-bottom:12px">Written by People Who Live Here</h2><p style="font-size:18px">Reviews come from Sara, Dillon, and our contributors. Sara visits the places she writes about, then shares what she found, honestly and kindly.</p></div>
       <a class="btn line" href={url('/about')}>Meet Sara and Dillon</a>
     </div>
   </section>
 
   <section class="band">
     <div class="wrap" style="max-width:860px">
-      <p class="eyebrow">A few questions</p><h2 style="margin-bottom:24px">Good to Know.</h2>
+      <p class="eyebrow">A few questions</p><h2 style="margin-bottom:24px">Good to Know</h2>
       {faqs.map(([q, a]) => <details class="card pad" style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:700;font-size:18px">{q}</summary><p style="margin-top:12px;font-size:17px">{a}</p></details>)}
     </div>
   </section>
 
   <section class="band tint">
     <div class="wrap">
-      <p class="eyebrow">Browse by rating</p><h2 style="margin-bottom:8px">Start With What You Trust.</h2>
+      <p class="eyebrow">Browse by rating</p><h2 style="margin-bottom:8px">Start With What You Trust</h2>
       <p class="meta" style="margin-bottom:24px;font-size:17px">{rated.length} places reviewed so far.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <a class="btn line" href={url('/food') + '?rating=5'}>5 out of 5 ({atLeast(5)})</a>
