@@ -2,8 +2,10 @@ name: Deploy the live site
 
 # Updates traditionlocal.com. Every change on main (a sheet publish or a code edit) rebuilds the live version.
 # It stops by itself, and publishes nothing, if the site would be mostly empty or still marked as a draft.
-# The push trigger below is switched on at launch. Until then this only runs when started by hand.
+# It runs on every push to main, and can also be started by hand.
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
