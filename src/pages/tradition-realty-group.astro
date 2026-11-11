@@ -25,7 +25,7 @@ const principles = [
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Tradition Realty Group</p>
-      <h1 style="margin-bottom:16px;max-width:900px">Real Estate, With a Neighbor's Point of View.</h1>
+      <h1 style="margin-bottom:16px;max-width:900px">Real Estate, With a Neighbor's Point of View</h1>
       <p class="lead" style="margin-bottom:28px;max-width:760px">Tradition Realty Group is Dillon Loren's real estate business, started in 2016. It is where the neighborhood knowledge on Tradition Local meets the work of helping someone move.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line" href="tel:+12817266969">Call (281) 726 6969</a></div>
     </div>
@@ -51,7 +51,7 @@ const principles = [
 
   <section class="band tint" id="listings">
     <div class="wrap">
-      <p class="eyebrow">{listings.length > 0 ? 'Featured listings' : 'Find a home'}</p><h2 style="margin-bottom:12px">{listings.length > 0 ? 'Homes Worth a Look.' : 'Looking for Your Next Home?'}</h2>
+      <p class="eyebrow">{listings.length > 0 ? 'Featured listings' : 'Find a home'}</p><h2 style="margin-bottom:12px">{listings.length > 0 ? 'Homes Worth a Look' : 'Looking for Your Next Home?'}</h2>
       {listings.length > 0 ? (
         <>
           <p class="meta" style="font-size:17px;margin-bottom:28px;max-width:720px">A few of Dillon's own listings. Tap one for the full details and photos.</p>
@@ -83,7 +83,7 @@ const principles = [
   {feed.length > 0 && (
     <section class="band" id="re-feed">
       <div class="wrap">
-        <p class="eyebrow">Real estate feed</p><h2 style="margin-bottom:12px">What Is Happening in Houston Real Estate.</h2>
+        <p class="eyebrow">Real estate feed</p><h2 style="margin-bottom:12px">What Is Happening in Houston Real Estate</h2>
         <p class="meta" style="font-size:17px;margin-bottom:24px;max-width:720px">Market updates, news, and videos from Dillon. Check back often.</p>
         {feedHasPosts && feedHasVideos && <div class="tabs" id="rf-tabs" style="margin-bottom:24px"><button class="chip on" data-k="" aria-pressed="true">All</button><button class="chip" data-k="update" aria-pressed="false">Updates</button><button class="chip" data-k="video" aria-pressed="false">Videos</button></div>}
         <div class="grid g3" id="rf-grid">
@@ -109,7 +109,7 @@ const principles = [
 
   <section class="band">
     <div class="wrap">
-      <p class="eyebrow">How we work</p><h2 style="margin-bottom:28px">Calm, Clear, and Personal.</h2>
+      <p class="eyebrow">How we work</p><h2 style="margin-bottom:28px">Calm, Clear, and Personal</h2>
       <div class="grid g3">{principles.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
     </div>
   </section>
