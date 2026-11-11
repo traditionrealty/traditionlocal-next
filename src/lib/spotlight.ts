@@ -1,6 +1,6 @@
 // The neighborhood spotlight on the home page.
 // 1. A row in data/spotlight.csv wins: a guide (slug) or an article (link and title). The newest date comes first.
-// 2. With no rows, the spotlight rotates weekly through the neighborhood guides.
+// 2. With no rows, the home page holds 12 guides and shows a different one on each page load, never the same one twice in a row in a session.
 import { readTable, href, url } from './data';
 import { areaPages, foodIn, subsIn } from './helpers';
 
