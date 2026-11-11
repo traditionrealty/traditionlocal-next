@@ -28,11 +28,11 @@ const status = isClosed(p) ? (/temporar/i.test(p.status) ? 'Temporarily closed' 
     <div class="wrap split">
       <div class="main">
         {events.length > 0 && <><p class="eyebrow">What is happening here</p><h2 style="margin-bottom:12px">Events at {p.name}</h2>{events.map((e) => <div class="row"><span class="tag">{eventDates(e)}</span><div style="flex:1;min-width:220px"><b style="font-size:18px">{e.title}</b></div><a class="btn line sm" href={href(e)}>See the event</a></div>)}</>}
-        {p.description && <><p class="eyebrow" style="margin-top:40px">About</p><h2 style="margin-bottom:20px">What to know</h2><p style="font-size:18px">{p.description}</p></>}
+        {p.description && <><p class="eyebrow" style="margin-top:40px">About</p><h2 style="margin-bottom:20px">What to Know</h2><p style="font-size:18px">{p.description}</p></>}
         {p.area && p.show.newsletter && (
           <div class="card pad pick" style="margin-top:40px;padding:32px">
             <p class="eyebrow">Locally Plus for {p.area}</p>
-            <h3 style="margin-bottom:8px">More like this, from your neighborhood.</h3>
+            <h3 style="margin-bottom:8px">More Like This, From Your Neighborhood.</h3>
             <p class="meta" style="margin-bottom:20px;font-size:16px">A closer look at where you live. For now, signing up joins In the Loop, and Locally Plus for {p.area} follows when it opens.</p>
             <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
               <div style="flex:1;min-width:220px"><label class="sr" for="loc-email">Your email</label><input id="loc-email" name="email" type="email" required placeholder="name@email.com" /></div>
@@ -43,7 +43,7 @@ const status = isClosed(p) ? (/temporar/i.test(p.status) ? 'Temporarily closed' 
           </div>
         )}
       </div>
-      <div class="side"><div class="card pad"><h3 style="margin-bottom:20px">Good to know</h3>
+      <div class="side"><div class="card pad"><h3 style="margin-bottom:20px">Good to Know</h3>
         {p.area && <p class="fact"><span>Area</span><b>{area ? <a href={href(area)}>{p.area}</a> : p.area}</b></p>}
         {p.address && <p class="fact"><span>Address</span><b>{p.address}{p.postalCity && `, ${p.postalCity}`}</b></p>}
         {p.phone && <p class="fact"><span>Phone</span><b>{p.phone}</b></p>}
