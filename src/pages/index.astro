@@ -24,7 +24,9 @@ const wkDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec
 const wkIso = (d: Date) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 const weekData = allEvents().map((e) => { const a = wkDate(e.starts), b = wkDate(e.ends || e.starts), pl = venuePlace(e); return a && b ? { t: e.title, s: wkIso(a), f: wkIso(b), v: pl ? pl.name : (e.venue || e.profile || ''), u: href(e) } : null; }).filter(Boolean);
 const areas = [...new Set(businesses().map((b) => b.area).filter(Boolean))].sort();
-const picks = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) => ({ b, r: reviewsFor(b.name).sort((x, y) => stars(y.rating) - stars(x.rating))[0] })).filter((x) => x.r && stars(x.r.rating) >= 4)
+// A place counts as closed when its status says so, or when its photo is the Permanently closed notice (the status column is often still Unknown).
+const looksClosed = (b: any) => isClosed(b) || /permanently closed|closed notice|temporarily closed/i.test((b && b.heroAlt) || '');
+const picks = businesses().filter((b) => isFood(b) && !looksClosed(b)).map((b) => ({ b, r: reviewsFor(b.name).sort((x, y) => stars(y.rating) - stars(x.rating))[0] })).filter((x) => x.r && stars(x.r.rating) >= 4)
   .sort((x, y) => stars(y.r.rating) - stars(x.r.rating)).slice(0, 4);
 const places = ofType('Neighborhood', 'City').filter((p) => p.show.living).slice(0, 8);
 const POPULAR = ['Bellaire', 'Cypress', 'Energy Corridor', 'Galleria', 'The Heights', 'Katy', 'Memorial Villages', 'Oak Forest', 'Spring Branch', 'Sugar Land'];
@@ -33,7 +35,7 @@ const hoodCount = areaPages().length;
 const ts = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? +new Date(+m[3], +m[1] - 1, +m[2]) : 0; };
 const snippet = (r: any) => { const t = (r.summary || r.body || '').replace(/\s+/g, ' ').trim(); return t.length > 150 ? t.slice(0, 150).replace(/\s+\S*$/, '') + '...' : t; };
 const written = liveReviews().filter((r) => snippet(r));
-const reviewPool = (written.length >= 6 ? written : liveReviews()).slice().sort((a, b) => ts(b.reviewDate) - ts(a.reviewDate));
+const reviewPool = (written.length >= 6 ? written : liveReviews()).filter((r) => !looksClosed(byName(r.profile))).slice().sort((a, b) => ts(b.reviewDate) - ts(a.reviewDate));
 // Articles and guides from the Content tab join the feed: one after every two reviews. Guides first.
 const postPool = posts().filter((p) => snippet(p)).sort((a, b) => (b.type === 'Guide' ? 1 : 0) - (a.type === 'Guide' ? 1 : 0)).slice(0, 6);
 const feedPool: any[] = [];
