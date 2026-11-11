@@ -23,13 +23,13 @@ const names = areas.map((a) => a.n).sort();
     </div>
   </section>
   <section class="band" id="lc-choose">
-    <div class="wrap"><div class="card pad" style="max-width:520px"><h3 style="margin-bottom:8px">Choose your area</h3><p class="meta" style="margin-bottom:16px">Pick where you call home, and your picks appear here.</p>
+    <div class="wrap"><div class="card pad" style="max-width:520px"><h3 style="margin-bottom:8px">Choose Your Area</h3><p class="meta" style="margin-bottom:16px">Pick where you call home, and your picks appear here.</p>
       <label class="sr" for="lc-pick">Your area</label><select id="lc-pick" data-combo><option value="">Choose an area</option>{names.map((n) => <option>{n}</option>)}</select></div></div>
   </section>
   <div id="lc-body" class="hidden"></div>
   <section class="band tint">
     <div class="wrap">
-      <p class="eyebrow">Following</p><h2 style="margin-bottom:8px">The places you follow</h2>
+      <p class="eyebrow">Following</p><h2 style="margin-bottom:8px">The Places You Follow</h2>
       <p class="meta" style="margin-bottom:20px">Locally Plus covers your home area and the areas you follow. <a href={url('/account#locally')} style="font-weight:700">Change what you get in your account</a>.</p>
       <div id="lc-follow"></div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px;max-width:520px"><div style="flex:1;min-width:220px"><label class="sr" for="lc-add">Follow another area</label><select id="lc-add" data-combo><option value="">Follow another area</option>{names.map((n) => <option>{n}</option>)}</select></div><button class="btn line sm" id="lc-add-btn" type="button">Follow</button></div>
