@@ -9,23 +9,23 @@ import VideoScript from '../components/VideoScript.astro';
 import { feed, feedHasPosts, feedHasVideos } from '../lib/realestate';
 const help = [
   ['Relocation', 'Moving to Houston? Start with the neighborhood, then sort out the details.', '/relocation'],
-  ['Apartment locating', 'Tell us what matters, and we will help you narrow the list of rentals.', '/apartments'],
-  ['New builds', 'Newer and master planned communities to compare side by side.', '/new-builds'],
-  ['Commercial real estate', 'Buying, selling, or leasing space for a business.', '/commercial'],
-  ['International clients', 'Moving to or buying in Houston from another country.', '/international'],
-  ['Find your fit', 'Not sure where to live yet? Answer a few questions and explore.', '/find-your-fit'],
+  ['Apartment Locating', 'Tell us what matters, and we will help you narrow the list of rentals.', '/apartments'],
+  ['New Builds', 'Newer and master planned communities to compare side by side.', '/new-builds'],
+  ['Commercial Real Estate', 'Buying, selling, or leasing space for a business.', '/commercial'],
+  ['International Clients', 'Moving to or buying in Houston from another country.', '/international'],
+  ['Find Your Fit', 'Not sure where to live yet? Answer a few questions and explore.', '/find-your-fit'],
 ];
 const principles = [
-  ['Neighborhood first', 'We start with where you want to live and how you want to live there, not with a list of homes.'],
-  ['A clear process', 'You always know what happens next, and why. Good moves feel calm because the steps are clear.'],
-  ['No pressure', 'Questions are always welcome, at any stage, whether you are ready this month or next year.'],
+  ['Neighborhood First', 'We start with where you want to live and how you want to live there, not with a list of homes.'],
+  ['A Clear Process', 'You always know what happens next, and why. Good moves feel calm because the steps are clear.'],
+  ['No Pressure', 'Questions are always welcome, at any stage, whether you are ready this month or next year.'],
 ];
 ---
 <Base title="Tradition Realty Group" active="" description="Dillon Loren's real estate business. Neighborhood knowledge from Tradition Local, applied to your move.">
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Tradition Realty Group</p>
-      <h1 style="margin-bottom:16px;max-width:900px">Real estate, with a neighbor's point of view.</h1>
+      <h1 style="margin-bottom:16px;max-width:900px">Real Estate, With a Neighbor's Point of View.</h1>
       <p class="lead" style="margin-bottom:28px;max-width:760px">Tradition Realty Group is Dillon Loren's real estate business, started in 2016. It is where the neighborhood knowledge on Tradition Local meets the work of helping someone move.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line" href="tel:+12817266969">Call (281) 726 6969</a></div>
     </div>
@@ -34,7 +34,7 @@ const principles = [
   <section class="band">
     <div class="wrap split">
       <div class="main">
-        <p class="eyebrow">How it connects</p><h2 style="margin-bottom:16px">Tradition Local first. Real estate when you are ready.</h2>
+        <p class="eyebrow">How it connects</p><h2 style="margin-bottom:16px">Tradition Local First. Real Estate When You Are Ready.</h2>
         <p style="font-size:18px;margin-bottom:14px">Tradition Local is where we get to know Houston together: honest reviews, neighborhood guides, and things to do. There is no sales pitch in any of it.</p>
         <p style="font-size:18px">Tradition Realty Group is for the day you decide to move, rent, buy, or sell. By then you already know the neighborhoods, so the conversation starts a few steps ahead.</p>
       </div>
@@ -51,7 +51,7 @@ const principles = [
 
   <section class="band tint" id="listings">
     <div class="wrap">
-      <p class="eyebrow">{listings.length > 0 ? 'Featured listings' : 'Find a home'}</p><h2 style="margin-bottom:12px">{listings.length > 0 ? 'Homes worth a look.' : 'Looking for your next home?'}</h2>
+      <p class="eyebrow">{listings.length > 0 ? 'Featured listings' : 'Find a home'}</p><h2 style="margin-bottom:12px">{listings.length > 0 ? 'Homes Worth a Look.' : 'Looking for Your Next Home?'}</h2>
       {listings.length > 0 ? (
         <>
           <p class="meta" style="font-size:17px;margin-bottom:28px;max-width:720px">A few of Dillon's own listings. Tap one for the full details and photos.</p>
@@ -83,7 +83,7 @@ const principles = [
   {feed.length > 0 && (
     <section class="band" id="re-feed">
       <div class="wrap">
-        <p class="eyebrow">Real estate feed</p><h2 style="margin-bottom:12px">What is happening in Houston real estate.</h2>
+        <p class="eyebrow">Real estate feed</p><h2 style="margin-bottom:12px">What Is Happening in Houston Real Estate.</h2>
         <p class="meta" style="font-size:17px;margin-bottom:24px;max-width:720px">Market updates, news, and videos from Dillon. Check back often.</p>
         {feedHasPosts && feedHasVideos && <div class="tabs" id="rf-tabs" style="margin-bottom:24px"><button class="chip on" data-k="" aria-pressed="true">All</button><button class="chip" data-k="update" aria-pressed="false">Updates</button><button class="chip" data-k="video" aria-pressed="false">Videos</button></div>}
         <div class="grid g3" id="rf-grid">
@@ -109,14 +109,14 @@ const principles = [
 
   <section class="band">
     <div class="wrap">
-      <p class="eyebrow">How we work</p><h2 style="margin-bottom:28px">Calm, clear, and personal.</h2>
+      <p class="eyebrow">How we work</p><h2 style="margin-bottom:28px">Calm, Clear, and Personal.</h2>
       <div class="grid g3">{principles.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
     </div>
   </section>
 
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
-      <div style="max-width:700px"><h3 style="margin-bottom:8px">Thinking about a move?</h3><p style="font-size:17px">Tell Dillon what you are looking for. He will reply personally, with no pressure.</p></div>
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Thinking About a Move?</h3><p style="font-size:17px">Tell Dillon what you are looking for. He will reply personally, with no pressure.</p></div>
       <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line" href="https://traditionrealtygroup.kw.com/" rel="noopener">Explore Listings For Sale</a></div>
     </div>
   </section>
