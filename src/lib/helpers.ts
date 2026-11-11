@@ -63,3 +63,7 @@ export function cuisineRegion(p: Profile): string {
 export const venuePlace = (e: Content) => { const k = norm(e.profile || e.venue); return k ? profiles.find((p) => p.type === 'Place' && norm(p.name) === k) : undefined; };
 export const eventsAtPlace = (pl: Profile) => content.filter((c) => c.type === 'Event' && (norm(c.profile) === norm(pl.name) || (c.venue && norm(c.venue.split(',')[0]) === norm(pl.name))));
 export const REGIONS = ['Central', 'West', 'North', 'South', 'East', 'Suburbs', 'Coast'];
+
+// Times are stored as 24 hour HH:MM. People read 12 hour times, so "19:30" shows as "7:30 PM". Anything that is not HH:MM is shown as written.
+export const to12 = (t: string) => { const m = /^(\d{1,2}):(\d{2})$/.exec((t || '').trim()); if (!m) return (t || '').trim(); const h = +m[1]; return ((h % 12) || 12) + ':' + m[2] + ' ' + (h < 12 ? 'AM' : 'PM'); };
+export const timeRange = (a: string, b: string) => [a, b].filter(Boolean).map(to12).join(' to ');
