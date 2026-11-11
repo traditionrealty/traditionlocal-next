@@ -212,7 +212,11 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
           (function () {
             var cards = document.querySelectorAll('.spot-card');
             if (cards.length < 2) return;
-            var pick = Math.floor(Date.now() / 604800000) % cards.length;
+            var last = -1;
+            try { last = parseInt(sessionStorage.getItem('spotLast'), 10); if (isNaN(last)) last = -1; } catch (e) {}
+            var pick = Math.floor(Math.random() * cards.length);
+            if (pick === last) pick = (pick + 1 + Math.floor(Math.random() * (cards.length - 1))) % cards.length;
+            try { sessionStorage.setItem('spotLast', String(pick)); } catch (e) {}
             [].forEach.call(cards, function (c, k) { c.classList.toggle('hidden', k !== pick); });
           })();
         </script>
