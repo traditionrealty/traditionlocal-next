@@ -6,7 +6,7 @@ import { config } from '../config';
 import SearchBox from '../components/SearchBox.astro';
 interface Props { title: string; description?: string; active?: string; sub?: string; noindex?: boolean; }
 const { title, description = 'Honest reviews, weekend plans, and neighborhood guides from people who live here.', active = '', sub = '', noindex = false } = Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site || 'https://www.traditionlocal.com').href;
+const canonical = new URL(Astro.url.pathname, Astro.site || 'https://traditionlocal.com').href;
 const main = [['Food', '/food'], ['Neighborhoods', '/neighborhoods'], ['Things to Do', '/things-to-do']];
 const more: [string, [string, string, string][]][] = [
   ['Stay In the Loop', [['Newsletters', '/newsletters', 'In the Loop and Locally Plus'], ['Videos', '/videos', 'Walks, coffee runs, and reviews']]],
