@@ -42,7 +42,7 @@ const loc = e.address && where && e.address.toLowerCase().indexOf(where.toLowerC
       {e.tags.length > 0 && <div class="chips" style="margin-top:20px">{e.tags.map((t) => <span class="chip">{t}</span>)}</div>}
       {rsvp && (
         <div class="card pad" id="rsvp" data-starts={e.starts} data-ends={e.ends || e.starts} style="padding:32px;margin-top:40px;max-width:760px">
-          <p class="eyebrow">RSVP</p><h3 style="margin-bottom:8px">Save Your Spot.</h3>
+          <p class="eyebrow">RSVP</p><h3 style="margin-bottom:8px">Save Your Spot</h3>
           {e.starts ? (
             <>
               <p class="meta" id="rsvp-intro" style="margin-bottom:20px;font-size:16px">A Tradition Local event. Tell us who is coming and we will send a confirmation.</p>
@@ -68,7 +68,7 @@ const loc = e.address && where && e.address.toLowerCase().indexOf(where.toLowerC
         </div>
       )}
       <div class="card pad pick" style="padding:32px;margin-top:40px;max-width:760px">
-        <p class="eyebrow">In the Loop</p><h3 style="margin-bottom:8px">Do Not Miss the Next One.</h3>
+        <p class="eyebrow">In the Loop</p><h3 style="margin-bottom:8px">Do Not Miss the Next One</h3>
         <p class="meta" style="margin-bottom:20px;font-size:16px">Every Monday: three local finds, the weekend list, and what just opened.</p>
         <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
           <div style="flex:1;min-width:220px"><label class="sr" for="ev-email">Your email</label><input id="ev-email" name="email" type="email" required placeholder="name@email.com" /></div>
