@@ -59,6 +59,9 @@ const rawContent = readTable('content.csv');
 const rawEvents = readTable('events.csv');
 const contentRows = rawEvents.length ? [...rawContent.filter((r) => r.type !== 'Event'), ...rawEvents.map((r) => ({ ...r, type: 'Event' }))] : rawContent;
 
+// The sheet can send dates as 2026-04-26 or as 4/26/2026. The pages read month/day/year, so convert once, here.
+const usDate = (s: string) => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(s || '').trim()); return m ? (+m[2]) + '/' + (+m[3]) + '/' + m[1] : s; };
+
 export const profiles: Profile[] = rawProfiles.filter((r) => r.name).map((r) => ({
   slug: r.slug || slugify(r.name), name: r.name, type: r.type, area: r.area, summary: r.summary, description: r.description,
   status: r.status, address: r.address, website: r.website, phone: r.phone, postalCity: r.postal_city,
@@ -72,7 +75,7 @@ export const profiles: Profile[] = rawProfiles.filter((r) => r.name).map((r) => 
 export const content: Content[] = contentRows.filter((r) => r.title).map((r) => ({
   slug: r.slug || slugify(r.title), type: r.type, title: r.title, profile: r.profile, summary: r.summary, body: r.body, author: r.author,
   reviewDate: r.review_date, rating: r.rating, heroImage: r.hero_image, heroAlt: r.hero_alt, heroCredit: r.hero_credit, heroRights: r.hero_rights,
-  gallery: list(r.gallery), starts: r.starts, ends: r.ends, eventLink: r.event_link, cost: r.cost, venue: r.venue_name, address: r.address,
+  gallery: list(r.gallery), starts: usDate(r.starts), ends: usDate(r.ends), eventLink: r.event_link, cost: r.cost, venue: r.venue_name, address: r.address,
   city: r.city, zip: r.zip_code, eventType: r.event_type, startTime: r.start_time, endTime: r.end_time, tags: list(r.tags), faqs: faqs(r.faqs),
   published: (r.page_status || '').toLowerCase() === 'published', showMedia: on(r.show_media),
 })).filter((c) => IS_PREVIEW || c.published);
