@@ -133,15 +133,18 @@ let driveMap: Record<string, string> = {};
 try { driveMap = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'data', 'image-map.json'), 'utf-8')); } catch { /* no copied Drive photos yet */ }
 const driveId = (s: string) => ((s || '').match(/\/d\/([A-Za-z0-9_-]{20,})/) || (s || '').match(/[?&]id=([A-Za-z0-9_-]{20,})/) || [])[1] || '';
 const embeddable = (s: string) => /^\//.test(s) || /^https:\/\/[^/]*wikimedia\.org/.test(s);
+// The shared "Permanently closed" graphic. A permanently closed place with no photo of its own shows it. Places with any image keep theirs.
+const CLOSED_IMAGE = fs.existsSync(path.join(IMG_ROOT, 'drive', '1pI_VdVVlUyWvmhpF9S_RMPVhL4XC4MCd.jpg')) ? url('/images/drive/1pI_VdVVlUyWvmhpF9S_RMPVhL4XC4MCd.jpg') : '';
 // Swap a Drive link for its copied version when there is one.
 const copied = (s: string) => driveMap[driveId(s)] || s;
 
 // Media: only show images that are approved (or any in preview). Drive links cannot be embedded, so a Drive photo
 // shows only once it has been copied into the site (by the map or by a photo folder named after the page).
-export function media(e: { heroImage: string; heroAlt: string; heroCredit: string; heroRights: string; slug?: string }) {
+export function media(e: { heroImage: string; heroAlt: string; heroCredit: string; heroRights: string; slug?: string; status?: string; name?: string }) {
   let src = copied(e.heroImage || '');
   if ((!src || !embeddable(src)) && e.slug && folderPhotos.has(e.slug)) src = folderPhotos.get(e.slug)![0];
   const approved = e.heroRights.toLowerCase() === 'approved';
+  if (!src && CLOSED_IMAGE && isClosed(e) && !/temporar/i.test(e.status || '') && !(e.heroImage || '').trim()) return { src: CLOSED_IMAGE, alt: 'Permanently closed notice' + (e.name ? ' for ' + e.name : ''), credit: '', needsReview: false };
   if (!src || !embeddable(src) || (!approved && !IS_PREVIEW)) return null;
   return { src: /^\//.test(src) ? url(src) : src, alt: e.heroAlt || '', credit: e.heroCredit || '', needsReview: !approved };
 }
