@@ -24,13 +24,13 @@ const eats = foodIn(p.area).map((b) => ({ b, r: topRating(b.name) })).sort((x, y
   <section class="band">
     <div class="wrap split">
       <div class="main">
-        <p class="eyebrow">About</p><h2 style="margin-bottom:20px">What to know about {p.name}</h2>
+        <p class="eyebrow">About</p><h2 style="margin-bottom:20px">What to Know About {p.name}</h2>
         <p style="font-size:18px;margin-bottom:24px">{p.summary || 'We are still building this profile.'}</p>
         <p class="meta">Prices and school details are being reviewed, so we leave them out for now. Ask Dillon for the latest.</p>
         {p.area && p.show.newsletter && (
           <div class="card pad pick" style="margin-top:32px;padding:32px">
             <p class="eyebrow">Locally Plus for {p.area}</p>
-            <h3 style="margin-bottom:8px">More like this, from your neighborhood.</h3>
+            <h3 style="margin-bottom:8px">More Like This, From Your Neighborhood.</h3>
             <p class="meta" style="margin-bottom:20px;font-size:16px">A closer look at where you live. For now, signing up joins In the Loop, and Locally Plus for {p.area} follows when it opens.</p>
             <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
               <div style="flex:1;min-width:220px"><label class="sr" for="loc-email">Your email</label><input id="loc-email" name="email" type="email" required placeholder="name@email.com" /></div>
@@ -41,15 +41,15 @@ const eats = foodIn(p.area).map((b) => ({ b, r: topRating(b.name) })).sort((x, y
           </div>
         )}
       </div>
-      <div class="side"><div class="card pad"><h3 style="margin-bottom:20px">Good to know</h3>
+      <div class="side"><div class="card pad"><h3 style="margin-bottom:20px">Good to Know</h3>
         {p.area && <p class="fact"><span>Area</span><b>{p.area}</b></p>}
         {p.postalCity && <p class="fact"><span>City</span><b>{p.postalCity}</b></p>}
         {p.zips && <p class="fact"><span>Zip code</span><b>{p.zips}</b></p>}
       </div></div>
     </div>
   </section>
-  {sibs.length > 0 && <section class="band tint"><div class="wrap"><p class="eyebrow">Around {p.area}</p><h2 style="margin-bottom:28px">More subdivisions nearby</h2><div class="chips">{sibs.map((s) => <a class="chip" href={href(s)}>{s.name}</a>)}</div></div></section>}
-  {eats.length > 0 && <section class="band"><div class="wrap"><p class="eyebrow">Eat nearby</p><h2 style="margin-bottom:28px">Places we love around {p.area}</h2><div class="grid g3">{eats.map(({ b, r }) => <a class="card pad" href={href(b)} style="text-decoration:none">{r > 0 && <span class="tag">{r} out of 5</span>}<h4 style="margin:12px 0 4px">{b.name}</h4><p class="meta">{category(b)}</p></a>)}</div></div></section>}
+  {sibs.length > 0 && <section class="band tint"><div class="wrap"><p class="eyebrow">Around {p.area}</p><h2 style="margin-bottom:28px">More Subdivisions Nearby</h2><div class="chips">{sibs.map((s) => <a class="chip" href={href(s)}>{s.name}</a>)}</div></div></section>}
+  {eats.length > 0 && <section class="band"><div class="wrap"><p class="eyebrow">Eat nearby</p><h2 style="margin-bottom:28px">Places We Love Around {p.area}</h2><div class="grid g3">{eats.map(({ b, r }) => <a class="card pad" href={href(b)} style="text-decoration:none">{r > 0 && <span class="tag">{r} out of 5</span>}<h4 style="margin:12px 0 4px">{b.name}</h4><p class="meta">{category(b)}</p></a>)}</div></div></section>}
   <Prefs />
   <script is:inline define:vars={{ NAME: p.area || '' }}>
     (function () {
