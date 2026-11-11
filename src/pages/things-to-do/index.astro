@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
 import '../../styles/events.css';
 import { profiles, events, isClosed, href, eventDates, url } from '../../lib/data';
-import { venuePlace } from '../../lib/helpers';
+import { venuePlace, timeRange } from '../../lib/helpers';
 import { config } from '../../config';
 import { hostsRsvp } from '../../lib/rsvp';
 const today = new Date(); const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
@@ -17,7 +17,7 @@ const GROUPS = ['Music and nightlife', 'Arts and culture', 'Holidays and festiva
 const MAP: Record<string, string> = { 'live music': GROUPS[0], 'nightlife': GROUPS[0], 'arts': GROUPS[1], 'gallery exhibits': GROUPS[1], 'museum exhibitions': GROUPS[1], 'museum exhibits': GROUPS[1], 'exhibit': GROUPS[1], 'exhibits': GROUPS[1], 'theater district': GROUPS[1], 'theatre & performing arts': GROUPS[1], 'theater': GROUPS[1], 'holiday': GROUPS[2], 'festivals': GROUPS[2], 'festival': GROUPS[2], 'kid-friendly': GROUPS[3], 'family': GROUPS[3], 'food & drink': GROUPS[4], 'shopping': GROUPS[4], 'film': GROUPS[5], 'sports & outdoors': GROUPS[6], 'sports': GROUPS[6], 'lectures and seminars': GROUPS[7], 'talks': GROUPS[7] };
 const groupOf = (t: string) => MAP[(t || '').trim().toLowerCase()] || GROUPS[8];
 const isFree = (e: any) => /^free$/i.test(e.eventType || '') || /^free/i.test(String(e.cost || '').trim()) || (e.tags || []).some((t: string) => /^free$/i.test(t));
-const EVENTS = list.map((x) => ({ t: x.e.title, u: href(x.e), s: iso(x.a), f: iso(x.b), v: x.place ? x.place.name : (x.e.venue || x.e.profile || ''), g: groupOf(x.e.eventType), fr: isFree(x.e) ? 1 : 0 }));
+const EVENTS = list.map((x) => ({ t: x.e.title, u: href(x.e), s: iso(x.a), f: iso(x.b), v: x.place ? x.place.name : (x.e.venue || x.e.profile || ''), g: groupOf(x.e.eventType), fr: isFree(x.e) ? 1 : 0, tm: +x.a === +x.b ? timeRange(x.e.startTime, x.e.endTime) : '' }));
 // Events tagged Featured or Our pick in the sheet show up in Our picks. The section stays hidden when none are tagged.
 const picks = list.filter((x) => x.e.tags.some((t: string) => /^(featured|our picks?|picks?)$/i.test(t))).slice(0, 3);
 const places = profiles.filter((p) => p.type === 'Place' && !isClosed(p)).sort((a, b) => a.name.localeCompare(b.name));
@@ -25,11 +25,10 @@ const placeAreas = [...new Set(places.map((p) => p.area).filter(Boolean))].sort(
 const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
 // Featured event: Tradition Local's own events (the ones that take RSVPs). The page holds the next few, and the visitor's browser shows the first one that has not happened yet.
 const cleanTitle = (t: string) => t.replace(/\s*\[[^\]]*\]\s*$/, '');
-const to12 = (t: string) => { const m = /^(\d{1,2}):(\d{2})$/.exec((t || '').trim()); if (!m) return (t || '').trim(); const h = +m[1]; return ((h % 12) || 12) + ':' + m[2] + ' ' + (h < 12 ? 'AM' : 'PM'); };
 const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
   href: href(x.e) + '#rsvp', end: iso(x.b), title: cleanTitle(x.e.title), summary: clip(x.e.summary, 170), tag: eventDates(x.e),
   when: +x.a === +x.b ? x.a.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : eventDates(x.e),
-  time: [x.e.startTime, x.e.endTime].filter(Boolean).map(to12).join(' to '),
+  time: timeRange(x.e.startTime, x.e.endTime),
   where: x.place ? x.place.name : (x.e.venue || x.e.profile || ''), cost: x.e.cost || '',
 }));
 ---
@@ -186,7 +185,7 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
       function shortDate(k) { var d = parse(k); return SHORT[d.getMonth()] + ' ' + d.getDate(); }
       function row(e, k) {
         var thr = e.f > k ? 'Through ' + shortDate(e.f) + '. ' : '';
-        return '<a class="tt-ev" href="' + esc(e.u) + '"><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc(thr + [e.v || 'Houston', e.g].join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
+        return '<a class="tt-ev" href="' + esc(e.u) + '"><span class="tt-b"><span class="tt-t">' + esc(e.t) + '</span><span class="tt-mt">' + esc(thr + [e.tm, e.v || 'Houston', e.g].filter(Boolean).join(', ')) + '</span></span><span class="tt-go" aria-hidden="true"></span></a>';
       }
       function ongRow(e) {
         var f = parse(e.f), yr = f.getFullYear() !== today.getFullYear() ? ' ' + f.getFullYear() : '';
