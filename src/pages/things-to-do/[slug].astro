@@ -11,7 +11,7 @@ const m = media(p), area = byName(p.area), events = eventsAtPlace(p), near = pla
 const web = p.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 const status = isClosed(p) ? (/temporar/i.test(p.status) ? 'Temporarily closed' : 'Closed') : p.status === 'Open' ? 'Open' : 'Status not confirmed';
 ---
-<Base title={p.name} description={p.summary} active="Things to do">
+<Base title={p.name} description={p.summary} active="Things to Do">
   <section class="band hero">
     <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
       <div style="grid-column:span 7">
