@@ -11,7 +11,7 @@ const areas = areaPages().map((p) => p.name).sort();
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Newsletters</p>
-      <h1 style="margin-bottom:16px;max-width:860px">Two ways to stay in the loop.</h1>
+      <h1 style="margin-bottom:16px;max-width:860px">Two Ways to Stay In the Loop.</h1>
       <p class="lead">One email address, two editions. Pick one or both, and leave any time.</p>
       <p class="msg-ok hidden" id="nl-flash" role="status" style="margin-top:16px"></p>
     </div>
@@ -24,7 +24,7 @@ const areas = areaPages().map((p) => p.name).sort();
           <div class="card pad"><span class="tag">For your area</span><h3 style="margin:14px 0 8px">Locally Plus</h3><p style="margin-bottom:12px">A closer look at where you live, written for your neighborhood and the areas you follow.</p><ul style="padding-left:20px;margin:0 0 12px;display:grid;gap:6px"><li>Food and drink to try nearby</li><li>Things to do coming up near you</li><li>New openings in your area</li><li>Neighborhoods and homes</li></ul><p class="meta">Separate from In the Loop.</p></div>
         </div>
         <form class="panel" id="nl-form" action={config.newsletterAction} method="post">
-          <h2 style="font-size:32px;margin-bottom:20px">Sign up</h2>
+          <h2 style="font-size:32px;margin-bottom:20px">Sign Up</h2>
           <div id="nl-email-wrap" style="max-width:460px;margin-bottom:20px"><label for="nl-email">Your email</label><input id="nl-email" name="email" type="email" required placeholder="name@email.com" autocomplete="email" /></div>
           <p class="meta hidden" id="nl-as" style="margin-bottom:20px"></p>
           <p style="font-size:13px;font-weight:700;margin-bottom:10px">Which editions?</p>
@@ -48,7 +48,7 @@ const areas = areaPages().map((p) => p.name).sort();
   {issues.length > 0 && (
     <section class="band tint" id="past-issues">
       <div class="wrap">
-        <p class="eyebrow">Past issues</p><h2 style="margin-bottom:12px">See what lands in your inbox.</h2>
+        <p class="eyebrow">Past issues</p><h2 style="margin-bottom:12px">See What Lands in Your Inbox.</h2>
         <p class="meta" style="font-size:17px;margin-bottom:28px;max-width:720px">Read a recent issue of In the Loop before you join.</p>
         <div class="grid g2">
           {issues.map((s, i) => (
