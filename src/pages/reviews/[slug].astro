@@ -42,7 +42,7 @@ const more = biz ? reviewsFor(biz.name).filter((x) => x.slug !== r.slug) : [];
     </div>
   </section>
   {more.length > 0 && (
-    <section class="band tint"><div class="wrap"><p class="eyebrow">Keep going</p><h2 style="margin-bottom:28px">More from {biz?.name}</h2>
+    <section class="band tint"><div class="wrap"><p class="eyebrow">Keep going</p><h2 style="margin-bottom:28px">More From {biz?.name}</h2>
       <div class="grid g3">{more.map((x) => <a class="card pad" href={href(x)} style="text-decoration:none"><span class="tag">{stars(x.rating)} out of 5</span><h4 style="margin-top:12px">{x.title}</h4></a>)}</div></div></section>
   )}
 </Base>
