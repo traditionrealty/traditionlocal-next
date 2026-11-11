@@ -61,7 +61,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
   <section class="band" id="home-explore">
     <div class="wrap">
       <p class="eyebrow">Start exploring</p>
-      <h2 style="margin-bottom:28px">Find Your Way Around.</h2>
+      <h2 style="margin-bottom:28px">Find Your Way Around</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px">
         {tiles.map((t) => (
           <a class="card pad tile" href={url(t.path)} style="text-decoration:none">
@@ -144,7 +144,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
       <div style="grid-column:span 6">
         <p class="eyebrow">In the Loop</p>
-        <h2 style="color:#fff;margin-bottom:16px">The Best of Houston, Once a Week.</h2>
+        <h2 style="color:#fff;margin-bottom:16px">The Best of Houston, Once a Week</h2>
         <p style="font-size:19px;color:#fff;max-width:480px">Every Monday: food we trust, weekend plans, and what just opened. Free, friendly, and written by people who live here.</p>
         <p style="margin-top:14px"><a href={url('/how-we-review')} style="color:var(--butter);font-weight:700">How we review places</a></p>
       </div>
