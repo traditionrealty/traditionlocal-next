@@ -12,15 +12,15 @@ const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a:
   .concat(areaPages().map((p) => ({ s: 'n:' + p.slug, n: p.name, a: '', c: p.region ? 'Neighborhood, ' + p.region : 'Neighborhood', r: 0, u: href(p), x: 0 })));
 const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openings', 'New openings'], ['homes', 'Neighborhoods and homes']];
 ---
-<Base title="Your account" description="Your area, the places you follow, and what you receive." noindex>
-  <section class="band hero"><div class="wrap"><p class="eyebrow">Your account</p><h1 style="margin-bottom:12px">Account and settings</h1><p class="lead">Choose your area, follow the places you care about, and decide what you receive.</p>
+<Base title="Your Account" description="Your area, the places you follow, and what you receive." noindex>
+  <section class="band hero"><div class="wrap"><p class="eyebrow">Your account</p><h1 style="margin-bottom:12px">Account and Settings</h1><p class="lead">Choose your area, follow the places you care about, and decide what you receive.</p>
     <p class="meta" style="margin-top:16px">Your choices are saved on this device. Sign in is coming, and we will move them to your account then.</p></div></section>
   <section class="band">
     <div class="wrap" style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
       <nav aria-label="Account sections" style="flex:0 0 240px"><a class="menu" href="#areas">Your areas</a><a class="menu" href="#locally">Locally Plus</a><a class="menu" href="#loop">In the Loop</a><a class="menu" href="#saved">Saved places</a><a class="menu" href="#privacy">Privacy and data</a></nav>
       <div class="stack" style="flex:999 1 560px;min-width:0">
 
-        <div class="panel" id="areas"><p class="eyebrow">Your areas</p><h2 style="font-size:32px;margin-bottom:8px">Where do you call home?</h2>
+        <div class="panel" id="areas"><p class="eyebrow">Your areas</p><h2 style="font-size:32px;margin-bottom:8px">Where Do You Call Home?</h2>
           <p class="meta" style="font-size:16px;margin-bottom:20px">We use this for your local picks and to open Food on your area first.</p>
           <div style="max-width:380px"><label for="a-home">Your area</label><select id="a-home" data-combo><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}<option value="__other">Other (type your area or ZIP code)</option></select></div>
           <div id="a-other-wrap" hidden style="max-width:380px;margin-top:12px"><label for="a-other">Your area or ZIP code</label><input id="a-other" type="text" placeholder="Try Cypress or 77449" /></div>
@@ -30,7 +30,7 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
           <div id="a-picks" style="margin-top:28px;padding:20px;border-radius:12px;background:var(--ivory)" hidden><p class="eyebrow" id="a-picks-h" style="margin-bottom:8px"></p><div id="a-picks-list"></div></div>
         </div>
 
-        <div class="panel" id="locally"><p class="eyebrow">Locally Plus</p><h2 style="font-size:32px;margin-bottom:8px">Your neighborhood, in your inbox</h2>
+        <div class="panel" id="locally"><p class="eyebrow">Locally Plus</p><h2 style="font-size:32px;margin-bottom:8px">Your Neighborhood, in Your Inbox</h2>
           <p class="meta" style="font-size:16px;margin-bottom:20px">Locally Plus is a closer look at where you live, written for your area and the areas you follow. Separate from In the Loop.</p>
           <div style="margin-bottom:24px"><button class="chip" id="l-on" aria-pressed="false">Locally Plus is on</button></div>
           <p style="font-size:13px;font-weight:700;margin-bottom:10px">What to include</p>
@@ -41,7 +41,7 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
           <a class="btn line sm" href={url('/locally')}>Open your Locally Plus page</a>
         </div>
 
-        <div class="panel" id="loop"><p class="eyebrow">In the Loop</p><h2 style="font-size:32px;margin-bottom:8px">Every Monday, the same for everyone</h2>
+        <div class="panel" id="loop"><p class="eyebrow">In the Loop</p><h2 style="font-size:32px;margin-bottom:8px">Every Monday, the Same for Everyone</h2>
           <p class="meta" style="font-size:16px;margin-bottom:20px">Food we trust, what is happening, and what just opened. It is not tailored to your area.</p>
           <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap;max-width:560px">
             <div style="flex:1;min-width:240px"><label class="sr" for="loop-email">Your email</label><input id="loop-email" name="email" type="email" required placeholder="name@email.com" /></div>
@@ -50,11 +50,11 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
           </form>
         </div>
 
-        <div class="panel" id="saved"><p class="eyebrow">Saved places</p><h2 style="font-size:32px;margin-bottom:8px">Your list</h2>
+        <div class="panel" id="saved"><p class="eyebrow">Saved places</p><h2 style="font-size:32px;margin-bottom:8px">Your List</h2>
           <p class="meta" style="font-size:16px;margin-bottom:12px">Places you saved on Food, ready whenever you are.</p>
           <div id="s-list"></div><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:16px"><button class="btn line sm" id="s-mail" type="button">Email my list</button><a href={url('/food')} style="font-weight:700">Find more places</a></div></div>
 
-        <div class="panel" id="privacy"><p class="eyebrow">Privacy and data</p><h2 style="font-size:32px;margin-bottom:8px">You are in control</h2>
+        <div class="panel" id="privacy"><p class="eyebrow">Privacy and data</p><h2 style="font-size:32px;margin-bottom:8px">You Are in Control</h2>
           <p class="meta" style="font-size:16px;margin-bottom:12px">We never sell your email, and you can leave at any time.</p>
           <div class="row"><div style="flex:1;min-width:240px"><b>Download what is saved on this device</b><br /><span class="meta">Your area, followed areas, Locally Plus choices, and saved places, as a file.</span></div><button class="btn line sm" id="p-download" type="button">Download</button></div>
           <div class="row"><div style="flex:1;min-width:240px"><b>Clear what is saved on this device</b><br /><span class="meta">Your area, followed areas, Locally Plus choices, and saved places.</span></div><button class="btn line sm" id="p-clear" type="button">Clear</button></div></div>
