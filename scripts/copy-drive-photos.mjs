@@ -33,16 +33,17 @@ const ids = (s) => [...(s || '').matchAll(/(?:\/d\/|[?&]id=)([A-Za-z0-9_-]{20,})
 
 // 1. Which photos are wanted: Approved rows on published pages, hero and gallery.
 const wanted = new Map(); // id -> first row name that uses it
-for (const file of ['profiles.csv', 'content.csv', 'events.csv']) {
+for (const file of ['profiles.csv', 'content.csv', 'events.csv', 'site_images.csv']) {
   const p = path.join('data', file);
   if (!fs.existsSync(p)) continue;
   const R = parseCSV(fs.readFileSync(p, 'utf-8').replace(/^\uFEFF/, ''));
   const h = R[0], ix = (k) => h.indexOf(k);
-  const nameCol = ix('name') >= 0 ? ix('name') : ix('title');
+  const site = file === 'site_images.csv'; // the Site Images tab: slot, image, alt, credit, rights
+  const nameCol = site ? ix('slot') : (ix('name') >= 0 ? ix('name') : ix('title'));
   for (const r of R.slice(1)) {
-    if ((r[ix('page_status')] || '').toLowerCase() !== 'published') continue;
-    if ((r[ix('hero_rights')] || '').toLowerCase() !== 'approved') continue;
-    for (const id of [...ids(r[ix('hero_image')]), ...ids(r[ix('gallery')])]) if (!wanted.has(id)) wanted.set(id, r[nameCol] || file);
+    if (!site && (r[ix('page_status')] || '').toLowerCase() !== 'published') continue;
+    if ((r[ix(site ? 'rights' : 'hero_rights')] || '').toLowerCase() !== 'approved') continue;
+    for (const id of [...ids(r[ix(site ? 'image' : 'hero_image')]), ...ids(r[ix('gallery')])]) if (!wanted.has(id)) wanted.set(id, r[nameCol] || file);
   }
 }
 let map = {};
@@ -79,7 +80,7 @@ const results = { ok: [], noAccess: [], notImage: [], tooBig: [], failed: [] };
 async function one(id, tok, sharp) {
   const label = `${wanted.get(id)} (${id})`;
   try {
-    const mr = MOCK ? { status: 200, json: async () => ({ mimeType: 'image/jpeg', size: '1000' }) } : await api(`https://www.googleapis.com/drive/v3/files/${id}?fields=mimeType,size,name&supportsAllDrives=true`, tok);
+    const mr = MOCK ? { status: 200, json: async () => ({ mimeType: 'image/jpeg', size: '1000' }) } : await api(`https://www.googleapis.com/drive/v3/files/${id}?fields=mimeType,size,name,thumbnailLink&supportsAllDrives=true`, tok);
     if (mr.status === 404 || mr.status === 403) return results.noAccess.push(label);
     if (mr.status !== 200) return results.failed.push(label + ' meta ' + mr.status);
     const meta = await mr.json();
@@ -90,7 +91,13 @@ async function one(id, tok, sharp) {
     if (dr.status !== 200) return results.failed.push(label + ' download ' + dr.status);
     const buf = Buffer.from(await dr.arrayBuffer());
     fs.mkdirSync(OUT_DIR, { recursive: true });
-    await sharp(buf).rotate().resize({ width: 1600, withoutEnlargement: true }).jpeg({ quality: 78, mozjpeg: true }).toFile(path.join(OUT_DIR, id + '.jpg'));
+    const shrink = (b) => sharp(b).rotate().resize({ width: 1600, withoutEnlargement: true }).jpeg({ quality: 78, mozjpeg: true }).toFile(path.join(OUT_DIR, id + '.jpg'));
+    try { await shrink(buf); } catch (e) {
+      if (!meta.thumbnailLink) throw e; // e.g. iPhone HEIC: use the JPEG preview Drive makes
+      const tr = MOCK ? { status: 200, arrayBuffer: async () => (await sharp({ create: { width: 1600, height: 1000, channels: 3, background: '#26a' } }).jpeg().toBuffer()) } : await api(meta.thumbnailLink.replace(/=s\d+$/, '=s1600'), tok);
+      if (tr.status !== 200) throw new Error('preview ' + tr.status);
+      await shrink(Buffer.from(await tr.arrayBuffer()));
+    }
     map[id] = `/images/drive/${id}.jpg`;
     results.ok.push(label);
   } catch (e) { results.failed.push(label + ' ' + String(e.message).slice(0, 80)); }
