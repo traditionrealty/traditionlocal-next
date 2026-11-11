@@ -1,0 +1,51 @@
+name: Deploy the live site
+
+# Updates traditionlocal.com. Every change on main (a sheet publish or a code edit) rebuilds the live version.
+# It stops by itself, and publishes nothing, if the site would be mostly empty or still marked as a draft.
+# The push trigger below is switched on at launch. Until then this only runs when started by hand.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund
+      - name: Build the live version
+        run: npm run build
+        env:
+          SITE_URL: https://traditionlocal.com
+          BASE_PATH: /
+          SITE_MODE: production
+      - name: Safety checks
+        run: |
+          URLS=$(grep -c '<loc>' dist/sitemap.xml || true)
+          if [ "$URLS" -lt 600 ]; then echo "Only $URLS real pages would go live, below the safety stop of 600. Nothing was published."; exit 1; fi
+          if grep -q 'noindex, nofollow' dist/index.html; then echo "The home page still blocks Google. Nothing was published."; exit 1; fi
+          if grep -q 'Draft preview' dist/index.html; then echo "The draft banner is still on the home page. Nothing was published."; exit 1; fi
+          echo "traditionlocal.com" > dist/CNAME
+          echo "Live site ready: $URLS real pages." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: dist }
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
