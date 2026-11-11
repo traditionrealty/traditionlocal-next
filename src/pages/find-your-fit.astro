@@ -10,11 +10,11 @@ const regions = [...REGIONS.filter((r) => found.includes(r)), ...found.filter((r
 const priorities = [['food', 'Food and coffee nearby'], ['parks', 'Parks and space'], ['schools', 'Good schools'], ['commute', 'A shorter commute'], ['quiet', 'Quiet streets'], ['walk', 'Walkable and lively'], ['newer', 'Newer homes'], ['value', 'Value for the money']];
 const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], ['newbuild', 'New construction'], ['acreage', 'Acreage or country living']];
 ---
-<Base title="Find your fit" active="More" sub="makeithome" description="Answer a few questions to see which Houston neighborhoods match what you love.">
+<Base title="Find Your Fit" active="More" sub="makeithome" description="Answer a few questions to see which Houston neighborhoods match what you love.">
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Find your fit</p>
-      <h1 style="margin-bottom:16px;max-width:880px">Which neighborhood fits your life?</h1>
+      <h1 style="margin-bottom:16px;max-width:880px">Which Neighborhood Fits Your Life?</h1>
       <p class="lead">Answer three quick questions. We will suggest areas from our neighborhood guides, and you can take it from there.</p>
     </div>
   </section>
@@ -31,14 +31,14 @@ const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], 
           <div class="fit-foot"><p class="fit-status" id="fit-status" aria-live="polite">Choose what matters to you, and your matches appear below.</p><button class="btn line" type="reset" id="fit-reset">Start over</button></div>
         </form>
         <div id="fit-results" class="hidden" style="margin-top:40px">
-          <p class="eyebrow">Your matches</p><h2 style="margin-bottom:8px">Neighborhoods to explore</h2>
+          <p class="eyebrow">Your matches</p><h2 style="margin-bottom:8px">Neighborhoods to Explore</h2>
           <p class="meta" id="fit-note" style="margin-bottom:24px"></p>
           <div class="grid g2" id="fit-grid"></div>
           <p class="fit-more hidden" id="fit-more-wrap"><button class="btn line" id="fit-more" type="button">Show 6 more matches</button></p>
           <div class="card pad hidden" id="fit-none"><b>We did not find a close match for that mix.</b><p class="meta" style="margin-top:4px">Try fewer choices, or ask Dillon and he will suggest a few areas.</p></div>
           <div class="card pad pick hidden" id="fit-locally" style="margin-top:24px;padding:32px">
             <p class="eyebrow">Keep exploring <span id="fit-locally-name"></span></p>
-            <h3 style="margin-bottom:8px">Locally Plus, for where you might land.</h3>
+            <h3 style="margin-bottom:8px">Locally Plus, for Where You Might Land.</h3>
             <p class="meta" style="margin-bottom:20px;font-size:16px">For now, signing up joins In the Loop, and Locally Plus for your top match follows when it opens.</p>
             <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
               <div style="flex:1;min-width:220px"><label class="sr" for="fit-email">Your email</label><input id="fit-email" name="email" type="email" required placeholder="name@email.com" /></div>
