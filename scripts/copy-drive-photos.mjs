@@ -54,6 +54,7 @@ console.log(`Approved Drive photos wanted: ${wanted.size}. Already copied: ${wan
 const b64 = (b) => Buffer.from(b).toString('base64url');
 async function token() {
   if (MOCK) return 'mock';
+  if (process.env.GDRIVE_ACCESS_TOKEN) return process.env.GDRIVE_ACCESS_TOKEN; // keyless sign in, set up by the workflow
   const key = JSON.parse(process.env.GDRIVE_SA_KEY || '{}');
   if (!key.client_email || !key.private_key) throw new Error('GDRIVE_SA_KEY is missing or is not the service account JSON.');
   const now = Math.floor(Date.now() / 1000);
