@@ -13,7 +13,7 @@ const top = reviews[0];
 const area = byName(b.area);
 const nearby = inArea(b.area, 'Business').filter((x) => x.slug !== b.slug && !isClosed(x)).slice(0, 3);
 const hasFacts = b.address || b.phone || b.website;
-const status = isClosed(b) ? (/temporar/i.test(b.status) ? 'Temporarily closed' : 'Closed') : b.status === 'Open' ? 'Open' : 'Status not confirmed';
+const status = isClosed(b) ? (/temporar/i.test(b.status) ? 'Temporarily closed' : /permanent/i.test(b.status) ? 'Permanently closed' : 'Closed') : b.status === 'Open' ? 'Open' : /coming soon/i.test(b.status) ? 'Coming soon' : 'Status not confirmed';
 const web = b.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 ---
 <Base title={isClosed(b) ? b.name + ' (closed)' : b.name} description={isClosed(b) ? 'Closed. ' + (b.summary || '') : b.summary} active="Food">
