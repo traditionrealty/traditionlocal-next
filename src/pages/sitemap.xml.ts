@@ -3,7 +3,7 @@ import { businesses, reviews, profiles, events, byName, isClosed, href, url, IS_
 import { areaPages } from '../lib/helpers';
 import { issues } from '../lib/issues';
 
-const fixed = ['/', '/food', '/neighborhoods', '/things-to-do', '/videos', '/openings-and-closings', '/newsletters', '/make-it-home', '/find-your-fit', '/new-builds', '/relocation', '/apartments', '/commercial', '/international', '/tradition-realty-group', '/ask-dillon', '/local-directory', '/about', '/how-we-review', '/contact', '/privacy', '/disclosures'];
+const fixed = ['/', '/food', '/neighborhoods', '/things-to-do', '/videos', '/openings-and-closings', '/newsletters', '/make-it-home', '/find-your-fit', '/new-builds', '/relocation', '/apartments', '/commercial', '/international', '/off-market', '/tradition-realty-group', '/ask-dillon', '/local-directory', '/about', '/how-we-review', '/contact', '/privacy', '/disclosures'];
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export function GET({ site }: { site?: URL }) {
