@@ -1,8 +1,7 @@
 name: Deploy preview to GitHub Pages
 
+# Manual only. Drafts are built in the traditionlocal-drafts repo, so a push here can never replace the live site.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
