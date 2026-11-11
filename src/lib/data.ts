@@ -17,7 +17,7 @@ export type Content = {
   author: string; reviewDate: string; rating: string; heroImage: string; heroAlt: string; heroCredit: string;
   heroRights: string; gallery: string[]; starts: string; ends: string; eventLink: string; cost: string;
   venue: string; address: string; city: string; zip: string; eventType: string; startTime: string; endTime: string; tags: string[];
-  faqs: { q: string; a: string }[]; published: boolean; showMedia: boolean;
+  faqs: { q: string; a: string }[]; published: boolean; showMedia: boolean; saraPick: boolean;
 };
 
 // preview shows drafts and media that still needs review. production shows only what is approved.
@@ -78,6 +78,8 @@ export const content: Content[] = contentRows.filter((r) => r.title).map((r) => 
   gallery: list(r.gallery), starts: usDate(r.starts), ends: usDate(r.ends), eventLink: r.event_link, cost: r.cost, venue: r.venue_name, address: r.address,
   city: r.city, zip: r.zip_code, eventType: r.event_type, startTime: r.start_time, endTime: r.end_time, tags: list(r.tags), faqs: faqs(r.faqs),
   published: (r.page_status || '').toLowerCase() === 'published', showMedia: on(r.show_media),
+  // The "Sara's pick" checkbox in the Content tab. A ticked box arrives as TRUE.
+  saraPick: /^(true|yes|x|1)$/i.test((r.sara_pick || '').trim()),
 })).filter((c) => IS_PREVIEW || c.published);
 
 export const byName = (name: string) => profiles.find((p) => p.name === name);
