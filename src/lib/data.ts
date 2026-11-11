@@ -151,6 +151,14 @@ export function galleryMedia(e: { gallery: string[]; heroRights: string; heroAlt
   return list.map((s) => ({ src: /^\//.test(s) ? url(s) : s, alt: e.heroAlt || '', credit: e.heroCredit || '' }));
 }
 
+// Site wide pictures from the "Site Images" tab (data/site_images.csv): the home hero and the About portraits.
+// They follow the same Approved rule as every other photo.
+const siteRows = readTable('site_images.csv');
+export function siteImage(slot: string) {
+  const r = siteRows.find((x) => (x.slot || '').toLowerCase() === slot);
+  return r ? media({ heroImage: r.image || '', heroAlt: r.alt || '', heroCredit: r.credit || '', heroRights: r.rights || '' }) : null;
+}
+
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 function toDate(s: string): Date | null {
   const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); if (m) return new Date(+m[3], +m[1] - 1, +m[2]);
