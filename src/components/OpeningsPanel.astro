@@ -3,9 +3,9 @@ import { openingsOf, whenText, profileHref } from '../lib/openings';
 import { url } from '../lib/data';
 const { limit = 3 } = Astro.props;
 const groups = [
-  { id: 'now-open', title: 'Now open', rows: openingsOf('open') },
-  { id: 'places-to-watch', title: 'Places to watch', rows: openingsOf('watch') },
-  { id: 'recently-closed', title: 'Recently closed', rows: openingsOf('closed') },
+  { id: 'now-open', title: 'Now Open', rows: openingsOf('open') },
+  { id: 'places-to-watch', title: 'Places to Watch', rows: openingsOf('watch') },
+  { id: 'recently-closed', title: 'Recently Closed', rows: openingsOf('closed') },
 ].filter((g) => g.rows.length > 0);
 ---
 {groups.length > 0 && (
