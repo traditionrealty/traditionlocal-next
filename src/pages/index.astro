@@ -16,7 +16,7 @@ const tiles = [
   { n: areaPages().length, unit: 'neighborhood guides', title: 'Neighborhoods', blurb: 'Find the part of Houston that fits your life.', cta: 'Explore areas', path: '/neighborhoods' },
   { n: upcomingEvents(999).length, unit: 'coming up', title: 'Things to do', blurb: 'Festivals, markets, and weekend plans.', cta: 'See the calendar', path: '/things-to-do' },
   { n: videos.length, unit: 'walks and reviews', title: 'Videos', blurb: 'Watch the neighborhood before you go.', cta: 'Watch now', path: '/videos' },
-  { n: 6, unit: 'ways we can help', title: 'Make it home', blurb: 'Moving, renting, or buying? Start with the neighborhood.', cta: 'Start here', path: '/make-it-home' },
+  { n: 8, unit: 'ways we can help', title: 'Make it home', blurb: 'Buying, investing, or renting? Start with the neighborhood.', cta: 'Start here', path: '/make-it-home' },
 ];
 const hasNew = openingsOf('open').length + openingsOf('watch').length + openingsOf('closed').length > 0;
 const wkDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
