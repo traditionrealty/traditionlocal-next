@@ -8,25 +8,25 @@ import { apartments } from '../lib/apartments';
 const areas = [...new Set(apartments.map((a) => a.area).filter(Boolean))].sort();
 const mail = 'mailto:' + config.contactEmail + '?subject=Apartment%20locating';
 const help = [
-  ['Matched to your life', 'Your commute, budget, pets, and the feel of the neighborhood all shape the shortlist.'],
-  ['Neighborhood context', 'Our guides show what is nearby, from coffee and groceries to parks and things to do.'],
-  ['Tours made easier', 'A short list means fewer afternoons spent driving around.'],
-  ['A person to ask', 'Not sure where to start? Ask, and we will point you the right way.'],
+  ['Matched to Your Life', 'Your commute, budget, pets, and the feel of the neighborhood all shape the shortlist.'],
+  ['Neighborhood Context', 'Our guides show what is nearby, from coffee and groceries to parks and things to do.'],
+  ['Tours Made Easier', 'A short list means fewer afternoons spent driving around.'],
+  ['A Person to Ask', 'Not sure where to start? Ask, and we will point you the right way.'],
 ];
 const steps = ['Share your budget, move date, and what you must have.', 'We suggest areas and places worth a look.', 'You tour, compare, and decide with a local on your side.'];
 ---
-<Base title="Apartment locating" active="More" sub="makeithome" description="Help finding the right apartment in Houston.">
+<Base title="Apartment Locating" active="More" sub="makeithome" description="Help finding the right apartment in Houston.">
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Apartment locating</p>
-      <h1 style="margin-bottom:16px;max-width:880px">Apartment communities to compare.</h1>
+      <h1 style="margin-bottom:16px;max-width:880px">Apartment Communities to Compare.</h1>
       <p class="lead" style="margin-bottom:28px">Finding a rental in a big city takes time. Browse apartment communities below, then tell Dillon what matters and he will help you narrow the list.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon about apartments</a><a class="btn line" href={url('/find-your-fit')}>Find your fit</a></div>
     </div>
   </section>
   <section class="band">
     <div class="wrap">
-      <p class="eyebrow">Apartments</p><h2 style="margin-bottom:16px">Where to rent around Houston</h2>
+      <p class="eyebrow">Apartments</p><h2 style="margin-bottom:16px">Where to Rent Around Houston</h2>
       {apartments.length > 0 ? (
         <>
           <div class="fbar" id="ap-bar">
@@ -62,7 +62,7 @@ const steps = ['Share your budget, move date, and what you must have.', 'We sugg
         </>
       ) : (
         <div class="card pad pick" style="max-width:820px">
-          <p class="eyebrow">Coming soon</p><h3 style="margin-bottom:8px">Our apartment list is on the way.</h3>
+          <p class="eyebrow">Coming soon</p><h3 style="margin-bottom:8px">Our Apartment List Is on the Way.</h3>
           <p class="meta" style="font-size:17px;margin-bottom:18px">Until then, tell Dillon your budget, your move date, and what you must have, and he will help you narrow the rentals.</p>
           <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line" href={mail}>Email Dillon</a></div>
         </div>
@@ -71,20 +71,20 @@ const steps = ['Share your budget, move date, and what you must have.', 'We sugg
   </section>
   <section class="band tint">
     <div class="wrap">
-      <p class="eyebrow">How we can help</p><h2 style="margin-bottom:28px">What to expect</h2>
+      <p class="eyebrow">How we can help</p><h2 style="margin-bottom:28px">What to Expect</h2>
       <div class="grid g2">{help.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
     </div>
   </section>
   <section class="band">
     <div class="wrap">
-      <p class="eyebrow">How it works</p><h2 style="margin-bottom:28px">Three simple steps</h2>
+      <p class="eyebrow">How it works</p><h2 style="margin-bottom:28px">Three Simple Steps</h2>
       <div class="grid g3">{steps.map((s, i) => <div class="card pad"><span class="tag">{i + 1}</span><p style="margin-top:12px">{s}</p></div>)}</div>
       <p class="meta" style="font-size:16px;margin-top:24px;max-width:760px">Great for renters new to Houston, anyone moving on a short timeline, and people who want to know the neighborhood before they sign.</p>
     </div>
   </section>
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
-      <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious about a community?</h3><p style="font-size:17px">Tell Dillon your budget, your move date, and what you must have. He will reply personally, with no pressure.</p></div>
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious About a Community?</h3><p style="font-size:17px">Tell Dillon your budget, your move date, and what you must have. He will reply personally, with no pressure.</p></div>
       <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line" href={mail}>Email Dillon</a></div>
     </div>
   </section>
