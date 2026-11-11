@@ -12,11 +12,11 @@ import { spots, rotating } from '../lib/spotlight';
 const events = upcomingEvents(5);
 const homeVideos = videos.slice(0, 3);
 const tiles = [
-  { n: businesses().filter((b) => !isClosed(b) && isFood(b) && topRating(b.name) > 0).length, unit: 'places reviewed', title: 'Where to eat', blurb: 'Honest reviews, sorted by what you are craving.', cta: 'Browse food', path: '/food' },
+  { n: businesses().filter((b) => !isClosed(b) && isFood(b) && topRating(b.name) > 0).length, unit: 'places reviewed', title: 'Where to Eat', blurb: 'Honest reviews, sorted by what you are craving.', cta: 'Browse food', path: '/food' },
   { n: areaPages().length, unit: 'neighborhood guides', title: 'Neighborhoods', blurb: 'Find the part of Houston that fits your life.', cta: 'Explore areas', path: '/neighborhoods' },
-  { n: upcomingEvents(999).length, unit: 'coming up', title: 'Things to do', blurb: 'Festivals, markets, and weekend plans.', cta: 'See the calendar', path: '/things-to-do' },
+  { n: upcomingEvents(999).length, unit: 'coming up', title: 'Things to Do', blurb: 'Festivals, markets, and weekend plans.', cta: 'See the calendar', path: '/things-to-do' },
   { n: videos.length, unit: 'walks and reviews', title: 'Videos', blurb: 'Watch the neighborhood before you go.', cta: 'Watch now', path: '/videos' },
-  { n: 8, unit: 'ways we can help', title: 'Make it home', blurb: 'Buying, investing, or renting? Start with the neighborhood.', cta: 'Start here', path: '/make-it-home' },
+  { n: 8, unit: 'ways we can help', title: 'Make It Home', blurb: 'Buying, investing, or renting? Start with the neighborhood.', cta: 'Start here', path: '/make-it-home' },
 ];
 const hasNew = openingsOf('open').length + openingsOf('watch').length + openingsOf('closed').length > 0;
 const wkDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
@@ -41,7 +41,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
       <div style="grid-column:span 7">
         <p class="eyebrow">Houston, with a local perspective</p>
-        <h1 style="margin-bottom:20px">Where should we go?</h1>
+        <h1 style="margin-bottom:20px">Where Should We Go?</h1>
         <p class="lead" style="margin-bottom:28px">Honest reviews, weekend plans, and neighborhood guides from people who live here. Tell us what you're in the mood for.</p>
         <form class="card" id="finder" method="get" action={url('/food')} style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end">
           <div><label for="h-area">Area</label><select id="h-area" name="area"><option value="">Anywhere</option>{areas.map((a) => <option>{a}</option>)}</select></div>
@@ -61,7 +61,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
   <section class="band" id="home-explore">
     <div class="wrap">
       <p class="eyebrow">Start exploring</p>
-      <h2 style="margin-bottom:28px">Find your way around.</h2>
+      <h2 style="margin-bottom:28px">Find Your Way Around.</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px">
         {tiles.map((t) => (
           <a class="card pad tile" href={url(t.path)} style="text-decoration:none">
@@ -80,7 +80,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     <section class="band tint" id="home-picks">
       <div class="wrap">
         <p class="eyebrow">Sara's Picks</p>
-        <h2 style="margin-bottom:28px">Places we love, and why</h2>
+        <h2 style="margin-bottom:28px">Places We Love, and Why</h2>
         <div class="grid g4">
           {picks.map(({ b, r }) => { const m = media(b); return (
             <a class="card" href={href(b)} style="text-decoration:none">
@@ -109,7 +109,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     <section class="band tint" id="home-videos">
       <div class="wrap">
         <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
-          <div><p class="eyebrow">Local videos</p><h2>Walk the neighborhood with us</h2></div>
+          <div><p class="eyebrow">Local videos</p><h2>Walk the Neighborhood With Us</h2></div>
           <a class="btn line" href={url('/videos')}>See all videos</a>
         </div>
         <div class="grid g3">{homeVideos.map((v) => <VideoCard v={v} />)}</div>
@@ -122,7 +122,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     <section class="band" id="feed">
       <div class="wrap">
         <p class="eyebrow">The feed</p>
-        <h2 style="margin-bottom:8px">Fresh from Sara, Dillon, and our Contributors</h2>
+        <h2 style="margin-bottom:8px">Fresh From Sara, Dillon, and Our Contributors</h2>
         <p class="meta" style="margin-bottom:28px;font-size:17px">The newest reviews and stories, written by people who live here.</p>
         <div class="grid g3" id="feed-grid">
           {feed.map((x, i) => (
@@ -144,7 +144,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
       <div style="grid-column:span 6">
         <p class="eyebrow">In the Loop</p>
-        <h2 style="color:#fff;margin-bottom:16px">The best of Houston, once a week.</h2>
+        <h2 style="color:#fff;margin-bottom:16px">The Best of Houston, Once a Week.</h2>
         <p style="font-size:19px;color:#fff;max-width:480px">Every Monday: food we trust, weekend plans, and what just opened. Free, friendly, and written by people who live here.</p>
         <p style="margin-top:14px"><a href={url('/how-we-review')} style="color:var(--butter);font-weight:700">How we review places</a></p>
       </div>
@@ -164,7 +164,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
   <section class="band" id="home-events">
     <div class="wrap">
       <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:16px;flex-wrap:wrap;gap:12px">
-        <div><p class="eyebrow">What's Happening</p><h2>Plan something fun</h2></div>
+        <div><p class="eyebrow">What's Happening</p><h2>Plan Something Fun</h2></div>
         <a class="btn line" href={url('/things-to-do')}>See the full calendar</a>
       </div>
       <div class="tabs" id="ev-tabs" style="margin-bottom:22px"><button class="chip on" data-p="week" aria-pressed="true">This week</button>{events.length > 0 && <button class="chip" data-p="soon" aria-pressed="false">Coming up</button>}</div>
@@ -230,7 +230,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
         <div class="hood-pick">
           <div>
             <p class="eyebrow">Locally Plus</p>
-            <h2 style="margin-bottom:12px">Where do you call home?</h2>
+            <h2 style="margin-bottom:12px">Where Do You Call Home?</h2>
             <p style="font-size:17px;margin-bottom:18px">Pick your neighborhood, and Locally Plus brings you curated food picks, things to do, and more nearby.</p>
             <div class="hp-search">
               <label class="sr" for="hp-q">Search neighborhoods</label>
@@ -243,7 +243,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
           <div class="card hp-card" id="hp-card" aria-live="polite">
             <div id="hp-empty">
               <p class="eyebrow">Your area</p>
-              <h3 style="margin-bottom:8px">Pick a neighborhood</h3>
+              <h3 style="margin-bottom:8px">Pick a Neighborhood</h3>
               <p class="meta" style="font-size:16px">Search or tap a popular area, and we will show you what is good there.</p>
             </div>
             <div id="hp-detail" class="hidden">
@@ -336,7 +336,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     <section class="band tint" id="new-this-month">
       <div class="wrap">
         <div style="display:flex;justify-content:space-between;align-items:end;margin-bottom:28px;flex-wrap:wrap;gap:12px">
-          <div><p class="eyebrow">New this month</p><h2>Openings and closings</h2></div>
+          <div><p class="eyebrow">New this month</p><h2>Openings and Closings</h2></div>
           <a class="btn line" href={url('/openings-and-closings')}>See openings and closings</a>
         </div>
         <OpeningsPanel limit={3} />
