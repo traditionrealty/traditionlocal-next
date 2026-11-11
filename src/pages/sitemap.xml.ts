@@ -7,7 +7,7 @@ const fixed = ['/', '/food', '/neighborhoods', '/things-to-do', '/videos', '/ope
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export function GET({ site }: { site?: URL }) {
-  const origin = site || new URL('https://www.traditionlocal.com');
+  const origin = site || new URL('https://traditionlocal.com');
   const out = new Set<string>();
   const add = (p: string) => out.add(p.endsWith('/') ? p : p + '/');
   if (!IS_PREVIEW) {
