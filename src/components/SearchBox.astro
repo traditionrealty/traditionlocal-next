@@ -8,7 +8,7 @@ const gated = !!config.searchMembersOnly;
   <div class="srch-box">
     {gated ? (
       <div style="padding:8px 6px">
-        <h3 style="margin-bottom:8px">Search is for members.</h3>
+        <h3 style="margin-bottom:8px">Search Is for Members.</h3>
         <p class="meta" style="margin-bottom:16px">Sign in to search places, neighborhoods, events, and videos.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn" href={url('/account')}>Sign in</a><button class="btn line" type="button" data-close="1">Close</button></div>
       </div>
@@ -54,7 +54,7 @@ const gated = !!config.searchMembersOnly;
   (function () {
     var idx = null, loading = null, active = -1, opener = null;
     var LABEL = { food: 'Where to eat', biz: 'Local business', closed: 'Closed', review: 'Review', thing: 'Things to do', area: 'Neighborhood', sub: 'Subdivision', event: 'Event', video: 'Video', opening: 'Openings', page: 'Page' };
-    var GROUPS = { page: 'Pages', food: 'Places to eat', biz: 'Other places we reviewed', review: 'Reviews', area: 'Neighborhoods', sub: 'Subdivisions', thing: 'Things to do', event: 'Events', video: 'Videos', opening: 'Openings and closings', closed: 'Closed places (no longer open)' };
+    var GROUPS = { page: 'Pages', food: 'Places to Eat', biz: 'Other Places We Reviewed', review: 'Reviews', area: 'Neighborhoods', sub: 'Subdivisions', thing: 'Things to Do', event: 'Events', video: 'Videos', opening: 'Openings and Closings', closed: 'Closed Places (No Longer Open)' };
     var ORDER = ['page', 'food', 'biz', 'review', 'area', 'sub', 'thing', 'event', 'video', 'opening', 'closed'];
     var BOOST = { page: 6, food: 5, biz: 2, area: 4, thing: 3, event: 3, sub: 1, review: 1, video: 0, opening: 0, closed: -4 };
     var box = document.getElementById('srch'), input = document.getElementById('srch-q'), out = document.getElementById('srch-out');
@@ -85,7 +85,7 @@ const gated = !!config.searchMembersOnly;
     function item(e) { return '<a class="srch-item" role="option" href="' + esc(e.u) + '"><span class="tag ' + (e.k === 'closed' ? 'closed' : 'soft') + '">' + esc(LABEL[e.k] || '') + '</span><b>' + esc(e.t) + '</b>' + (e.s ? '<span class="meta">' + esc(e.s) + '</span>' : '') + '</a>'; }
     function items() { return out ? [].slice.call(out.querySelectorAll('.srch-item')) : []; }
     function setActive(n) { var list = items(); if (!list.length) { active = -1; return; } active = (n + list.length) % list.length; list.forEach(function (a, i) { a.classList.toggle('on', i === active); a.setAttribute('aria-selected', i === active ? 'true' : 'false'); }); list[active].scrollIntoView({ block: 'nearest' }); }
-    function suggestions() { return '<p class="meta" style="padding:10px 10px 4px">Try a place, a neighborhood, or something you are craving. Or jump straight in:</p>' + [['Where to eat', '/food'], ['Neighborhoods', '/neighborhoods'], ['Things to do', '/things-to-do'], ['Videos', '/videos']].map(function (p) { return item({ k: 'page', t: p[0], u: INDEX.replace('/search-index.json', p[1]), s: '' }); }).join(''); }
+    function suggestions() { return '<p class="meta" style="padding:10px 10px 4px">Try a place, a neighborhood, or something you are craving. Or jump straight in:</p>' + [['Where to Eat', '/food'], ['Neighborhoods', '/neighborhoods'], ['Things to Do', '/things-to-do'], ['Videos', '/videos']].map(function (p) { return item({ k: 'page', t: p[0], u: INDEX.replace('/search-index.json', p[1]), s: '' }); }).join(''); }
     function render() {
       if (!out) return;
       var q = input.value;
