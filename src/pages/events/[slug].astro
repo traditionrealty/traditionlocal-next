@@ -32,7 +32,7 @@ const loc = e.address && where && e.address.toLowerCase().indexOf(where.toLowerC
   </section>
   <section class="band">
     <div class="wrap">
-      <p class="eyebrow">The details</p><h2 style="margin-bottom:28px">Plan your visit</h2>
+      <p class="eyebrow">The details</p><h2 style="margin-bottom:28px">Plan Your Visit</h2>
       <div class="grid g3">
         <div class="card pad"><p class="eyebrow">When</p><p style="font-size:20px;font-weight:700">{dates}</p>{(e.startTime || e.endTime) && <p class="meta" style="margin-top:6px">{timeRange(e.startTime, e.endTime)}</p>}</div>
         <div class="card pad"><p class="eyebrow">Where</p>{where ? <p style="font-size:20px;font-weight:700">{place ? <a href={href(place)}>{place.name}</a> : where}</p> : <p class="meta">Location coming soon.</p>}{e.address && <p class="meta" style="margin-top:6px">{e.address}</p>}</div>
@@ -42,7 +42,7 @@ const loc = e.address && where && e.address.toLowerCase().indexOf(where.toLowerC
       {e.tags.length > 0 && <div class="chips" style="margin-top:20px">{e.tags.map((t) => <span class="chip">{t}</span>)}</div>}
       {rsvp && (
         <div class="card pad" id="rsvp" data-starts={e.starts} data-ends={e.ends || e.starts} style="padding:32px;margin-top:40px;max-width:760px">
-          <p class="eyebrow">RSVP</p><h3 style="margin-bottom:8px">Save your spot.</h3>
+          <p class="eyebrow">RSVP</p><h3 style="margin-bottom:8px">Save Your Spot.</h3>
           {e.starts ? (
             <>
               <p class="meta" id="rsvp-intro" style="margin-bottom:20px;font-size:16px">A Tradition Local event. Tell us who is coming and we will send a confirmation.</p>
@@ -68,7 +68,7 @@ const loc = e.address && where && e.address.toLowerCase().indexOf(where.toLowerC
         </div>
       )}
       <div class="card pad pick" style="padding:32px;margin-top:40px;max-width:760px">
-        <p class="eyebrow">In the Loop</p><h3 style="margin-bottom:8px">Do not miss the next one.</h3>
+        <p class="eyebrow">In the Loop</p><h3 style="margin-bottom:8px">Do Not Miss the Next One.</h3>
         <p class="meta" style="margin-bottom:20px;font-size:16px">Every Monday: three local finds, the weekend list, and what just opened.</p>
         <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
           <div style="flex:1;min-width:220px"><label class="sr" for="ev-email">Your email</label><input id="ev-email" name="email" type="email" required placeholder="name@email.com" /></div>
@@ -79,7 +79,7 @@ const loc = e.address && where && e.address.toLowerCase().indexOf(where.toLowerC
     </div>
   </section>
   {more.length > 0 && (
-    <section class="band tint"><div class="wrap"><p class="eyebrow">Keep going</p><h2 style="margin-bottom:28px">More to do</h2>
+    <section class="band tint"><div class="wrap"><p class="eyebrow">Keep going</p><h2 style="margin-bottom:28px">More to Do</h2>
       <div class="grid g3">{more.map((x) => <a class="card pad" href={href(x)} style="text-decoration:none"><span class="tag">{eventDates(x)}</span><h4 style="margin:12px 0 6px">{x.title}</h4><p class="meta">{x.venue || x.profile || 'Houston'}</p></a>)}</div></div></section>
   )}
   <script is:inline define:vars={{ T: e.title, S: e.starts, E: e.ends || e.starts, W: where, L: e.eventLink }}>
