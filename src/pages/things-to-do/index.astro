@@ -5,6 +5,7 @@ import '../../styles/events.css';
 import { profiles, events, isClosed, href, eventDates, url } from '../../lib/data';
 import { venuePlace } from '../../lib/helpers';
 import { config } from '../../config';
+import { hostsRsvp } from '../../lib/rsvp';
 const today = new Date(); const t0 = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 const toDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -22,6 +23,15 @@ const picks = list.filter((x) => x.e.tags.some((t: string) => /^(featured|our pi
 const places = profiles.filter((p) => p.type === 'Place' && !isClosed(p)).sort((a, b) => a.name.localeCompare(b.name));
 const placeAreas = [...new Set(places.map((p) => p.area).filter(Boolean))].sort();
 const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
+// Featured event: Tradition Local's own events (the ones that take RSVPs). The page holds the next few, and the visitor's browser shows the first one that has not happened yet.
+const cleanTitle = (t: string) => t.replace(/\s*\[[^\]]*\]\s*$/, '');
+const to12 = (t: string) => { const m = /^(\d{1,2}):(\d{2})$/.exec((t || '').trim()); if (!m) return (t || '').trim(); const h = +m[1]; return ((h % 12) || 12) + ':' + m[2] + ' ' + (h < 12 ? 'AM' : 'PM'); };
+const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
+  href: href(x.e) + '#rsvp', end: iso(x.b), title: cleanTitle(x.e.title), summary: clip(x.e.summary, 170), tag: eventDates(x.e),
+  when: +x.a === +x.b ? x.a.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : eventDates(x.e),
+  time: [x.e.startTime, x.e.endTime].filter(Boolean).map(to12).join(' to '),
+  where: x.place ? x.place.name : (x.e.venue || x.e.profile || ''), cost: x.e.cost || '',
+}));
 ---
 <Base title="Things to do" active="Things to do" description="Events, places, and weekend ideas, checked and sorted for you.">
   <section class="band hero tt-hero">
@@ -31,6 +41,41 @@ const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' '
       <p class="lead" style="margin-bottom:0">Festivals, markets, music, and small neighborhood happenings, checked and sorted for you.</p>
     </div>
   </section>
+
+  {features.length > 0 && (
+    <section class="band tt-ft-band" id="tl-feature">
+      <div class="wrap">
+        {features.map((f, i) => (
+          <a class="card pick tt-ft" href={f.href} data-end={f.end} style={i > 0 ? 'display:none' : undefined}>
+            <div class="tt-ft-head">
+              <p class="eyebrow">Featured event</p>
+              <div class="tt-ft-tags"><span class="tag">Tradition Local event</span><span class="tag soft">{f.tag}</span></div>
+              <h2 class="tt-ft-title">{f.title}</h2>
+              {f.summary && <p class="tt-ft-sum">{f.summary}</p>}
+            </div>
+            <div class="tt-ft-facts">
+              <p class="meta"><b>When:</b> {f.when}{f.time ? ', ' + f.time : ''}</p>
+              {f.where && <p class="meta"><b>Where:</b> {f.where}</p>}
+              {f.cost && <p class="meta"><b>Cost:</b> {f.cost}</p>}
+              <span class="btn tt-ft-btn">Save your spot</span>
+            </div>
+          </a>
+        ))}
+        <script is:inline>
+          (function () {
+            var sec = document.getElementById('tl-feature'); if (!sec) return;
+            var d = new Date(), today = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+            var shown = false;
+            [].forEach.call(sec.querySelectorAll('.tt-ft'), function (c) {
+              var ok = !shown && c.getAttribute('data-end') >= today;
+              c.style.display = ok ? '' : 'none'; if (ok) shown = true;
+            });
+            if (!shown) sec.style.display = 'none';
+          })();
+        </script>
+      </div>
+    </section>
+  )}
 
   {picks.length > 0 && (
     <section class="band tint" id="our-picks"><div class="wrap"><p class="eyebrow">Our picks</p><h2 style="margin-bottom:28px">Worth planning around</h2>
