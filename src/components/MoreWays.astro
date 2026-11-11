@@ -4,10 +4,10 @@ const { cards, cols = 'g3', tint = false } = Astro.props;
 ---
 <section class={tint ? 'band tint' : 'band'}>
   <div class="wrap">
-    <p class="eyebrow">More ways we can help</p><h2 style="margin-bottom:28px">Whatever your move looks like.</h2>
+    <p class="eyebrow">More ways we can help</p><h2 style="margin-bottom:28px">Whatever Your Move Looks Like.</h2>
     <div class={'grid ' + cols}>{cards.map(([t, d, p]) => <a class="card pad" href={url(p)} style="text-decoration:none"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></a>)}</div>
     <div class="card pad pick" style="margin-top:20px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
-      <div style="max-width:720px"><p class="eyebrow" style="margin-bottom:6px">Beyond Houston</p><h4 style="margin-bottom:8px;font-size:24px">Our worldwide network</h4><p class="meta" style="font-size:17px">Looking outside Houston? Tap our network to find real estate across the United States and in other countries.</p></div>
+      <div style="max-width:720px"><p class="eyebrow" style="margin-bottom:6px">Beyond Houston</p><h4 style="margin-bottom:8px;font-size:24px">Our Worldwide Network</h4><p class="meta" style="font-size:17px">Looking outside Houston? Tap our network to find real estate across the United States and in other countries.</p></div>
       <a class="btn" href={url('/ask-dillon')}>Ask Dillon</a>
     </div>
   </div>
