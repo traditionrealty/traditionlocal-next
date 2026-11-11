@@ -13,16 +13,16 @@ const socials = [
 ];
 const ways = [
   ['Ask Dillon', 'Questions about a neighborhood, a move, or renting or buying in Houston.', 'Ask Dillon', url('/ask-dillon')],
-  ['Suggest a place', 'Know a spot we should visit and review? Tell us about it.', 'Suggest a place', '?reason=place#message'],
-  ['List an event', 'Hosting something local? We would love to share it with neighbors.', 'List your event', '?reason=event#message'],
-  ['Partnerships and press', 'Working on something together, or writing about Houston? Say hello.', 'Send a message', '?reason=partner#message'],
+  ['Suggest a Place', 'Know a spot we should visit and review? Tell us about it.', 'Suggest a place', '?reason=place#message'],
+  ['List an Event', 'Hosting something local? We would love to share it with neighbors.', 'List your event', '?reason=event#message'],
+  ['Partnerships and Press', 'Working on something together, or writing about Houston? Say hello.', 'Send a message', '?reason=partner#message'],
 ];
 ---
 <Base title="Contact" active="" description="Questions, ideas, or a place we should know about? Get in touch.">
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Contact</p>
-      <h1 style="margin-bottom:16px;max-width:900px">Say hello.</h1>
+      <h1 style="margin-bottom:16px;max-width:900px">Say Hello.</h1>
       <p class="lead" style="max-width:720px">Questions, ideas, or a place we should know about? We read every message.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px"><a class="btn" href={mail('Hello from the website')}>Email {config.contactEmail}</a></div>
     </div>
@@ -30,7 +30,7 @@ const ways = [
 
   <section class="band">
     <div class="wrap">
-      <p class="eyebrow">How can we help?</p><h2 style="margin-bottom:28px">Pick what fits.</h2>
+      <p class="eyebrow">How can we help?</p><h2 style="margin-bottom:28px">Pick What Fits.</h2>
       <div class="grid g2">
         {ways.map(([t, d, label, link]) => (
           <div class="card pad"><h3 style="margin-bottom:8px">{t}</h3><p class="meta" style="font-size:16px;margin-bottom:18px">{d}</p><a class="btn line" href={link}>{label}</a></div>
@@ -41,9 +41,9 @@ const ways = [
 
   <section class="band tint" id="message">
     <div class="wrap" style="max-width:860px">
-      <p class="eyebrow">Send a message</p><h2 style="margin-bottom:12px">We read every one.</h2>
+      <p class="eyebrow">Send a message</p><h2 style="margin-bottom:12px">We Read Every One.</h2>
       <p class="meta" style="font-size:17px;margin-bottom:24px">Tell us what is on your mind and we will reply by email.</p>
-      <div class="panel" id="ct-thanks" hidden style="border-color:var(--gold)"><p class="eyebrow">Thank you</p><h3 id="ct-title" style="margin-bottom:10px">Your message is in.</h3><p style="font-size:17px">We read every message and will reply soon.</p></div>
+      <div class="panel" id="ct-thanks" hidden style="border-color:var(--gold)"><p class="eyebrow">Thank you</p><h3 id="ct-title" style="margin-bottom:10px">Your Message Is In.</h3><p style="font-size:17px">We read every message and will reply soon.</p></div>
       <form class="panel" id="ct-form" novalidate data-endpoint={config.formsAction + '/contact'} data-contact={config.contactEmail}>
         <div class="grid g2" style="margin-bottom:20px">
           <div><label for="ct-reason">What is this about?</label><select id="ct-reason"><option value="question">A question</option><option value="place">Suggest a place</option><option value="event">List an event</option><option value="partner">Partnerships or press</option><option value="other">Something else</option></select></div>
@@ -64,7 +64,7 @@ const ways = [
 
   <section class="band" id="follow">
     <div class="wrap">
-      <p class="eyebrow">Follow Tradition Local</p><h2 style="margin-bottom:12px">Find us online.</h2>
+      <p class="eyebrow">Follow Tradition Local</p><h2 style="margin-bottom:12px">Find Us Online.</h2>
       <p class="meta" style="font-size:17px;margin-bottom:28px;max-width:720px">New places, local finds, and events, wherever you like to scroll.</p>
       <div class="soc">
         {socials.map(([name, link, handle]) => (
