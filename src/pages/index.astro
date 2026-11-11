@@ -26,9 +26,13 @@ const weekData = allEvents().map((e) => { const a = wkDate(e.starts), b = wkDate
 const areas = [...new Set(businesses().map((b) => b.area).filter(Boolean))].sort();
 // A place counts as closed when its status says so, or when its photo is the Permanently closed notice (the status column is often still Unknown).
 const looksClosed = (b: any) => isClosed(b) || /permanently closed|closed notice|temporarily closed/i.test((b && b.heroAlt) || '');
-// Sara's Picks only features places confirmed Open in the sheet (Business status = Open), so an Unknown place can never slip in.
-const picks = businesses().filter((b) => isFood(b) && !looksClosed(b) && /^open/i.test(b.status || '')).map((b) => ({ b, r: reviewsFor(b.name).sort((x, y) => stars(y.rating) - stars(x.rating))[0] })).filter((x) => x.r && stars(x.r.rating) >= 4)
-  .sort((x, y) => stars(y.r.rating) - stars(x.r.rating)).slice(0, 4);
+// Sara's Picks. Reviews ticked "Sara's pick" in the Content tab come first, in sheet order, as long as the place is not closed.
+// Any open slots fill automatically with places confirmed Open (Business status = Open) that have a review of 4 stars or higher.
+const autoPicks = businesses().filter((b) => isFood(b) && !looksClosed(b) && /^open/i.test(b.status || '')).map((b) => ({ b, r: reviewsFor(b.name).sort((x, y) => stars(y.rating) - stars(x.rating))[0] })).filter((x) => x.r && stars(x.r.rating) >= 4)
+  .sort((x, y) => stars(y.r.rating) - stars(x.r.rating));
+const curatedPicks = liveReviews().filter((r) => r.saraPick).map((r) => ({ b: byName(r.profile), r })).filter((x: any) => x.b && !looksClosed(x.b))
+  .filter((x: any, i: number, a: any[]) => a.findIndex((y: any) => y.b.name === x.b.name) === i);
+const picks: any[] = [...curatedPicks, ...autoPicks.filter((a) => !curatedPicks.some((c: any) => c.b.name === a.b.name))].slice(0, 4);
 const places = ofType('Neighborhood', 'City').filter((p) => p.show.living).slice(0, 8);
 const POPULAR = ['Bellaire', 'Cypress', 'Energy Corridor', 'Galleria', 'The Heights', 'Katy', 'Memorial Villages', 'Oak Forest', 'Spring Branch', 'Sugar Land'];
 const popular = POPULAR.map((n) => areaPages().find((p) => p.name === n)).filter(Boolean);
