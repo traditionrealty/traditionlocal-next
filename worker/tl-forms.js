@@ -12,7 +12,7 @@
 //   SUPABASE_URL     Text. Your Supabase project address.
 //   SUPABASE_KEY     Text. Your Supabase publishable key.
 //   SIGNUP_URL       Text. https://tl-newsletter-signup.bold-bush-f938.workers.dev
-//   SITE_URL         Text. https://www.traditionlocal.com
+//   SITE_URL         Text. https://traditionlocal.com
 // Run supabase/requests.sql once in Supabase, so requests have a place to be saved.
 
 const MAX_BODY = 20000;
@@ -54,7 +54,7 @@ async function ask(d, env, ctx, headers) {
   const html = table([['Name', first], ['Email', email], ['Areas', areas.join(', ')], ['Topics', topics.join(', ')], ['Address', address], ['Note', note], ['Also wants In the Loop', wantsLoop ? 'Yes' : 'No']]);
   const done = await Promise.allSettled([save(env, row), send(env, { from: env.FROM, to: env.ASK_TO, reply_to: email, subject: 'New Ask Dillon request from ' + first, html })]);
   if (done.every((x) => x.status === 'rejected')) return reply({ ok: false, error: 'unavailable' }, 502, headers);
-  const site = String(env.SITE_URL || 'https://www.traditionlocal.com').replace(/\/$/, '');
+  const site = String(env.SITE_URL || 'https://traditionlocal.com').replace(/\/$/, '');
   ctx.waitUntil(send(env, { from: env.FROM, to: email, reply_to: env.REPLY_TO, subject: 'Your request is in', html: '<p>Hi ' + esc(first) + ',</p><p>Thank you for reaching out. Dillon reads every request and will reply personally.</p><p>While you wait, you can explore neighborhoods at <a href="' + site + '/neighborhoods">' + site + '/neighborhoods</a>.</p><p>Tradition Local</p>' }).catch(() => {}));
   if (wantsLoop) ctx.waitUntil(subscribe(env, email, site));
   return reply({ ok: true }, 200, headers);
