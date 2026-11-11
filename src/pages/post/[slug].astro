@@ -1,0 +1,71 @@
+---
+// One page for every Article and Guide in the Content tab. Written the way the body cell is typed:
+// ## and ### headings, bullet lines starting with a dash, **bold**, and [text](https://link) links.
+import Base from '../../layouts/Base.astro';
+import { posts, byName, href, media, dateText, url } from '../../lib/data';
+import { areaPages } from '../../lib/helpers';
+export function getStaticPaths() { return posts().map((p) => ({ params: { slug: p.slug }, props: { p } })); }
+const { p } = Astro.props;
+const m = media(p);
+const area = areaPages().find((a) => a.name === p.profile) || byName(p.profile);
+const more = posts().filter((x) => x.slug !== p.slug).sort((a, b) => (b.profile === p.profile ? 1 : 0) - (a.profile === p.profile ? 1 : 0)).slice(0, 3);
+
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const inline = (s: string) => esc(s)
+  .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+  .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, (_m, t, u) => `<a href="${u}" rel="noopener" target="_blank">${t}</a>`);
+type Block = { t: 'h2' | 'h3' | 'p' | 'ul'; x?: string; lines?: string[] };
+const blocks: Block[] = [];
+let para: string[] = [], list: string[] = [];
+const flush = () => {
+  if (para.length) { blocks.push({ t: 'p', lines: para }); para = []; }
+  if (list.length) { blocks.push({ t: 'ul', lines: list }); list = []; }
+};
+for (const raw of (p.body || '').split('\n')) {
+  const l = raw.trim();
+  if (!l) flush();
+  else if (/^###\s+/.test(l)) { flush(); blocks.push({ t: 'h3', x: l.replace(/^###\s+/, '') }); }
+  else if (/^##\s+/.test(l)) { flush(); blocks.push({ t: 'h2', x: l.replace(/^##\s+/, '') }); }
+  else if (/^[-*•]\s+/.test(l)) { if (para.length) { blocks.push({ t: 'p', lines: para }); para = []; } list.push(l.replace(/^[-*•]\s+/, '')); }
+  else { if (list.length) { blocks.push({ t: 'ul', lines: list }); list = []; } para.push(l); }
+}
+flush();
+---
+<Base title={p.title} description={p.summary} active="">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="meta" style="margin-bottom:12px"><a href={url('/neighborhoods')} style="font-weight:700">Neighborhoods</a>{area && <> &rsaquo; <a href={href(area)} style="font-weight:700">{area.name}</a></>} &rsaquo; {p.type}</p>
+      <p class="eyebrow">{p.type}</p>
+      <h1 style="margin-bottom:20px;max-width:900px">{p.title}</h1>
+      {p.summary && <p class="lead" style="max-width:760px">{p.summary}</p>}
+      {(p.author || p.reviewDate) && <p class="meta" style="margin-top:14px">{p.author ? 'By ' + p.author : ''}{p.author && p.reviewDate ? ', ' : ''}{p.reviewDate ? dateText(p.reviewDate) : ''}</p>}
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap split">
+      <div class="main" style="max-width:720px">
+        {m && <figure style="margin:0 0 32px"><img class="photo" style="height:380px;border-radius:12px" src={m.src} alt={m.alt} />{m.credit && <figcaption class="credit">{m.credit}</figcaption>}</figure>}
+        {blocks.map((b) =>
+          b.t === 'h2' ? <h2 style="margin:40px 0 14px" set:html={inline(b.x || '')} />
+          : b.t === 'h3' ? <h3 style="margin:28px 0 10px" set:html={inline(b.x || '')} />
+          : b.t === 'ul' ? <ul style="font-size:19px;line-height:1.7;margin:0 0 20px;padding-left:24px">{(b.lines || []).map((li) => <li style="margin-bottom:6px" set:html={inline(li)} />)}</ul>
+          : <p style="font-size:19px;line-height:1.7;margin-bottom:20px" set:html={(b.lines || []).map(inline).join('<br />')} />
+        )}
+      </div>
+      {area && (
+        <div class="side">
+          <div class="card pad">
+            <p class="eyebrow">About the area</p>
+            <h3 style="margin-bottom:12px">{area.name}</h3>
+            {area.summary && <p class="meta" style="font-size:15px;margin-bottom:14px">{area.summary}</p>}
+            <a class="btn" href={href(area)}>Open the guide</a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+  {more.length > 0 && (
+    <section class="band tint"><div class="wrap"><p class="eyebrow">Keep going</p><h2 style="margin-bottom:28px">More to Read</h2>
+      <div class="grid g3">{more.map((x) => <a class="card pad" href={href(x)} style="text-decoration:none"><span class="tag">{x.type}</span><h4 style="margin-top:12px">{x.title}</h4></a>)}</div></div></section>
+  )}
+</Base>
