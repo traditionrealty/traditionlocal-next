@@ -26,7 +26,7 @@ const mail = `mailto:${config.contactEmail}?subject=${encodeURIComponent(subject
       </div>
       <div class="side">
         <div class="card pad"><p class="eyebrow">Who this is for</p><ul style="padding-left:20px;margin:0;display:grid;gap:8px">{who.map((w) => <li>{w}</li>)}</ul></div>
-        <div class="card pad pick" style="margin-top:24px"><p class="eyebrow">Start here</p><h3 style="margin-bottom:8px">Tell Us What You Need.</h3><p class="meta" style="margin-bottom:16px;font-size:16px">A short note is enough. We will reply personally.</p><a class="btn" href={mail} style="width:100%">Email Dillon</a></div>
+        <div class="card pad pick" style="margin-top:24px"><p class="eyebrow">Start here</p><h3 style="margin-bottom:8px">Tell Us What You Need</h3><p class="meta" style="margin-bottom:16px;font-size:16px">A short note is enough. We will reply personally.</p><a class="btn" href={mail} style="width:100%">Email Dillon</a></div>
         <div class="card pad" style="margin-top:24px"><p class="eyebrow">Explore first</p><a class="menu" href={url('/neighborhoods')}>Neighborhood guides</a><a class="menu" href={url('/find-your-fit')}>Find your fit</a><a class="menu" href={url('/make-it-home')} style="border-bottom:0">All ways we can help</a></div>
       </div>
     </div>
