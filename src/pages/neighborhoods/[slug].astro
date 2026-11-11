@@ -47,7 +47,7 @@ const label = p.type === 'City' ? 'City guide' : p.type === 'Area' ? 'Area guide
     <div class="wrap">
       <div class="card pad pick" style="padding:32px;max-width:760px">
         <p class="eyebrow">Locally Plus for {p.name}</p>
-        <h3 style="margin-bottom:8px">A closer look at where you live.</h3>
+        <h3 style="margin-bottom:8px">A Closer Look at Where You Live.</h3>
         <p class="meta" style="margin-bottom:20px;font-size:16px">Your neighborhood, in your inbox. For now, signing up joins In the Loop, and Locally Plus for {p.name} follows when it opens.</p>
         <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
           <div style="flex:1;min-width:220px"><label class="sr" for="loc-email">Your email</label><input id="loc-email" name="email" type="email" required placeholder="name@email.com" /></div>
@@ -62,7 +62,7 @@ const label = p.type === 'City' ? 'City guide' : p.type === 'Area' ? 'Area guide
   {biz.length > 0 && (
     <section class="band tint">
       <div class="wrap">
-        <p class="eyebrow">Eat and explore</p><h2 style="margin-bottom:28px">Places we reviewed in {p.name}</h2>
+        <p class="eyebrow">Eat and explore</p><h2 style="margin-bottom:28px">Places We Reviewed in {p.name}</h2>
         <div class="grid g4">
           {biz.map(({ b, r }) => <a class="card pad" href={href(b)} style="text-decoration:none">{r > 0 && <span class="tag">{r} out of 5</span>}<h4 style="margin:12px 0 4px">{b.name}</h4><p class="meta">{category(b)}</p></a>)}
         </div>
@@ -74,7 +74,7 @@ const label = p.type === 'City' ? 'City guide' : p.type === 'Area' ? 'Area guide
   {places.length > 0 && (
     <section class="band">
       <div class="wrap">
-        <p class="eyebrow">Things to do</p><h2 style="margin-bottom:28px">Places to visit near {p.name}</h2>
+        <p class="eyebrow">Things to do</p><h2 style="margin-bottom:28px">Places to Visit Near {p.name}</h2>
         <div class="grid g3">{places.map((x) => <a class="card pad" href={href(x)} style="text-decoration:none"><h4 style="margin-bottom:4px">{x.name}</h4><p class="meta">{x.subCategory || x.postalCity}</p></a>)}</div>
       </div>
     </section>
@@ -83,7 +83,7 @@ const label = p.type === 'City' ? 'City guide' : p.type === 'Area' ? 'Area guide
   {subs.length > 0 && (
     <section class="band tint">
       <div class="wrap">
-        <p class="eyebrow">Subdivisions</p><h2 style="margin-bottom:28px">Know the streets in {p.name}</h2>
+        <p class="eyebrow">Subdivisions</p><h2 style="margin-bottom:28px">Know the Streets in {p.name}</h2>
         <div class="chips">{subs.slice(0, 40).map((s) => <a class="chip" href={href(s)}>{s.name}</a>)}</div>
         {subs.length > 40 && <p class="meta" style="margin-top:16px">And {subs.length - 40} more.</p>}
       </div>
@@ -91,12 +91,12 @@ const label = p.type === 'City' ? 'City guide' : p.type === 'Area' ? 'Area guide
   )}
 
   {biz.length === 0 && subs.length === 0 && places.length === 0 && (
-    <section class="band tint"><div class="wrap"><p class="eyebrow">Coming next</p><h2 style="margin-bottom:12px">More on {p.name} is on the way</h2><p style="font-size:17px;max-width:700px">We are adding reviews, events, and subdivision guides for this area. Follow it above to hear when they arrive.</p></div></section>
+    <section class="band tint"><div class="wrap"><p class="eyebrow">Coming next</p><h2 style="margin-bottom:12px">More on {p.name} Is on the Way</h2><p style="font-size:17px;max-width:700px">We are adding reviews, events, and subdivision guides for this area. Follow it above to hear when they arrive.</p></div></section>
   )}
 
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
-      <div style="max-width:700px"><p class="eyebrow" style="color:var(--navy)">A neighbor to ask</p><h3 style="margin-bottom:8px">Curious about living in {p.name}?</h3><p style="font-size:17px">Dillon is a local Realtor who loves these neighborhoods. Questions are always welcome, with no pressure.</p></div>
+      <div style="max-width:700px"><p class="eyebrow" style="color:var(--navy)">A neighbor to ask</p><h3 style="margin-bottom:8px">Curious About Living in {p.name}?</h3><p style="font-size:17px">Dillon is a local Realtor who loves these neighborhoods. Questions are always welcome, with no pressure.</p></div>
       <a class="btn" href={url('/ask-dillon')}>Explore living here</a>
     </div>
   </section>
