@@ -34,6 +34,7 @@ const pages: [string, string, string][] = [
   ['Apartment locating', '/apartments', 'Help finding a rental'],
   ['Commercial real estate', '/commercial', 'Buying, selling, or leasing space'],
   ['International clients', '/international', 'Moving to or buying in Houston from abroad'],
+  ['Off market properties', '/off-market', 'Homes for sale that are not publicly listed yet'],
   ['Tradition Realty Group', '/tradition-realty-group', 'Dillon Loren real estate'],
   ['Ask Dillon', '/ask-dillon', 'Questions about an area'],
   ['Local Directory', '/local-directory', 'Providers we know and trust'],
