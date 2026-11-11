@@ -109,22 +109,46 @@ export function pathFor(e: Profile | Content): string {
 }
 export const href = (e: Profile | Content) => url(pathFor(e));
 
-// Media: only show images that are approved (or any in preview). Drive links cannot be embedded,
-// so they show a placeholder until the image is mirrored into the site.
-export function media(e: { heroImage: string; heroAlt: string; heroCredit: string; heroRights: string }) {
-  const src = e.heroImage || '';
-  const embeddable = /^\//.test(src) || /^https:\/\/(thumb\.)?(upload\.)?wikimedia\.org/.test(src) || /^https:\/\/[^/]*wikimedia\.org/.test(src);
+// Photos that are copied into the site. Two sources, both optional:
+//  1. public/images/BATCH n/<slug>/01.jpg, 02.jpg ... one folder per page, named by the page slug.
+//  2. src/data/image-map.json, written by the "Copy Drive photos" workflow: { "<Drive file id>": "/images/drive/<id>.jpg" }.
+// The Approved rule below still decides what is shown on the live site.
+const IMG_ROOT = path.join(process.cwd(), 'public', 'images');
+const folderPhotos = new Map<string, string[]>();
+try {
+  for (const batch of fs.readdirSync(IMG_ROOT, { withFileTypes: true })) {
+    if (!batch.isDirectory() || !/^BATCH /i.test(batch.name)) continue;
+    for (const dir of fs.readdirSync(path.join(IMG_ROOT, batch.name), { withFileTypes: true })) {
+      if (!dir.isDirectory()) continue;
+      const files = fs.readdirSync(path.join(IMG_ROOT, batch.name, dir.name)).filter((f) => /\.(jpe?g|png|webp)$/i.test(f)).sort();
+      if (files.length) folderPhotos.set(dir.name, files.map((f) => ['', 'images', batch.name, dir.name, f].map((s, i) => (i ? encodeURIComponent(s) : s)).join('/')));
+    }
+  }
+} catch { /* no photo folders yet */ }
+let driveMap: Record<string, string> = {};
+try { driveMap = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'src', 'data', 'image-map.json'), 'utf-8')); } catch { /* no copied Drive photos yet */ }
+const driveId = (s: string) => ((s || '').match(/\/d\/([A-Za-z0-9_-]{20,})/) || (s || '').match(/[?&]id=([A-Za-z0-9_-]{20,})/) || [])[1] || '';
+const embeddable = (s: string) => /^\//.test(s) || /^https:\/\/[^/]*wikimedia\.org/.test(s);
+// Swap a Drive link for its copied version when there is one.
+const copied = (s: string) => driveMap[driveId(s)] || s;
+
+// Media: only show images that are approved (or any in preview). Drive links cannot be embedded, so a Drive photo
+// shows only once it has been copied into the site (by the map or by a photo folder named after the page).
+export function media(e: { heroImage: string; heroAlt: string; heroCredit: string; heroRights: string; slug?: string }) {
+  let src = copied(e.heroImage || '');
+  if ((!src || !embeddable(src)) && e.slug && folderPhotos.has(e.slug)) src = folderPhotos.get(e.slug)![0];
   const approved = e.heroRights.toLowerCase() === 'approved';
-  if (!src || !embeddable || (!approved && !IS_PREVIEW)) return null;
+  if (!src || !embeddable(src) || (!approved && !IS_PREVIEW)) return null;
   return { src: /^\//.test(src) ? url(src) : src, alt: e.heroAlt || '', credit: e.heroCredit || '', needsReview: !approved };
 }
 
 // Gallery photos follow the same rule as the hero: copied photos (site paths) and Wikimedia, approved only in production.
-export function galleryMedia(e: { gallery: string[]; heroRights: string; heroAlt: string; heroCredit: string }) {
+export function galleryMedia(e: { gallery: string[]; heroRights: string; heroAlt: string; heroCredit: string; slug?: string }) {
   const approved = e.heroRights.toLowerCase() === 'approved';
   if (!approved && !IS_PREVIEW) return [];
-  return (e.gallery || []).filter((s) => /^\//.test(s) || /^https:\/\/[^/]*wikimedia\.org/.test(s))
-    .map((s) => ({ src: /^\//.test(s) ? url(s) : s, alt: e.heroAlt || '', credit: e.heroCredit || '' }));
+  let list = (e.gallery || []).map(copied).filter(embeddable);
+  if (!list.length && e.slug && folderPhotos.has(e.slug)) list = folderPhotos.get(e.slug)!;
+  return list.map((s) => ({ src: /^\//.test(s) ? url(s) : s, alt: e.heroAlt || '', credit: e.heroCredit || '' }));
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
