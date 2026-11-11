@@ -29,9 +29,9 @@ const redirects = Object.fromEntries(Object.entries(moved).filter(([from]) => !p
 
 // The GitHub Pages workflow sets SITE_URL and BASE_PATH.
 // Preview:  https://traditionrealty.github.io/traditionlocal-next
-// Live:     https://www.traditionlocal.com
+// Live:     https://traditionlocal.com
 export default defineConfig({
-  site: process.env.SITE_URL || 'https://www.traditionlocal.com',
+  site: process.env.SITE_URL || 'https://traditionlocal.com',
   base: process.env.BASE_PATH || '/',
   trailingSlash: 'ignore',
   build: { format: 'directory' },
