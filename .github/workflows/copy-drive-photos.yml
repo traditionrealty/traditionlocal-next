@@ -1,0 +1,54 @@
+name: Copy Drive photos
+
+# Copies the Approved photos from Google Drive into the site, so they show on traditionlocal.com.
+# Run it with mode check first. That only tests that every photo can be reached and changes nothing.
+# Then run it with mode copy. A big job can be done in chunks with the limit box.
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'check = only test access, changes nothing. copy = download and save photos.'
+        type: choice
+        options: ['check', 'copy']
+        default: 'check'
+      limit:
+        description: 'Most photos to handle in this run. Leave 0 for all.'
+        required: false
+        default: '0'
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: drive-photos
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install --no-audit --no-fund --no-save sharp
+      - name: Run the photo script
+        run: node scripts/copy-drive-photos.mjs
+        env:
+          MODE: ${{ inputs.mode }}
+          LIMIT: ${{ inputs.limit }}
+          GDRIVE_SA_KEY: ${{ secrets.GDRIVE_SA_KEY }}
+      - name: Save the photos and update the live site
+        if: ${{ inputs.mode == 'copy' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add public/images/drive src/data/image-map.json
+          if git diff --cached --quiet; then echo "Nothing new to save."; exit 0; fi
+          git commit -m "Copy approved Drive photos into the site"
+          git pull --rebase origin main
+          git push
+          gh workflow run deploy-live.yml
