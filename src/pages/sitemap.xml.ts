@@ -1,5 +1,5 @@
 // The list Google reads to find every page. Live mode only: the draft preview publishes an empty list.
-import { businesses, reviews, profiles, events, byName, isClosed, href, url, IS_PREVIEW } from '../lib/data';
+import { businesses, reviews, posts, profiles, events, byName, isClosed, href, url, IS_PREVIEW } from '../lib/data';
 import { areaPages } from '../lib/helpers';
 import { issues } from '../lib/issues';
 
@@ -17,6 +17,7 @@ export function GET({ site }: { site?: URL }) {
     for (const p of profiles.filter((x) => x.type === 'Place' || x.type === 'Subdivision')) if (!isClosed(p)) add(href(p));
     for (const p of areaPages()) add(href(p));
     for (const e of events()) add(href(e));
+    for (const p of posts()) add(href(p));
     for (const s of issues) add(url('/newsletters/' + s.slug));
   }
   const rows = [...out].sort().map((p) => '  <url><loc>' + esc(new URL(p, origin).href) + '</loc></url>').join('\n');
