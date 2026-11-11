@@ -94,7 +94,7 @@
 }
 
 /* Featured Tradition Local event, right under the top of Things to do */
-.tt-ft-band { padding: 56px 0 24px; }
+.tt-ft-band { padding: 48px 0 16px; }
 .tt-ft { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 48px; align-items: center; padding: 36px 40px; color: inherit; text-decoration: none; }
 .tt-ft .eyebrow { margin-bottom: 10px; }
 .tt-ft-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
