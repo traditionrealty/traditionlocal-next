@@ -14,15 +14,15 @@ const scale: [number, string][] = [
   [1, 'Worth trying once, to see if it is your thing.'],
 ];
 const tried = [
-  ['What we tried', 'The dishes, drinks, services, or activities we actually had, and what we noticed along the way.'],
-  ['How it felt', 'The food, the welcome, the atmosphere, the practical details, and whether it was worth it.'],
-  ['Who might love it', 'The occasion or taste it suits, and anything worth knowing before you go.'],
+  ['What We Tried', 'The dishes, drinks, services, or activities we actually had, and what we noticed along the way.'],
+  ['How It Felt', 'The food, the welcome, the atmosphere, the practical details, and whether it was worth it.'],
+  ['Who Might Love It', 'The occasion or taste it suits, and anything worth knowing before you go.'],
 ];
 const promises = [
-  ['Recommendations are earned', 'We explain why we recommend a place, and we include the limits. A partnership never buys a rating.'],
-  ['One visit is one visit', 'A great latte is not a verdict on the whole menu. We tell you what we had, so you can see what a rating rests on.'],
-  ['Relationships are in the open', 'If a place invited us, gave us something, or we have a partnership, we say so right in the review.'],
-  ['Dated, and kept fresh', 'Every review shows when we visited. A rating reflects our latest visit, and we update it when a place changes.'],
+  ['Recommendations Are Earned', 'We explain why we recommend a place, and we include the limits. A partnership never buys a rating.'],
+  ['One Visit Is One Visit', 'A great latte is not a verdict on the whole menu. We tell you what we had, so you can see what a rating rests on.'],
+  ['Relationships Are in the Open', 'If a place invited us, gave us something, or we have a partnership, we say so right in the review.'],
+  ['Dated, and Kept Fresh', 'Every review shows when we visited. A rating reflects our latest visit, and we update it when a place changes.'],
 ];
 const faqs = [
   ['Is a rating a score for everything on the menu?', 'No. It is our overall take after a visit. We name the specific things we tried, so you can see what the rating is based on.'],
@@ -32,25 +32,25 @@ const faqs = [
 ];
 const suggest = 'mailto:traditionlocal@gmail.com?subject=Suggest%20a%20place';
 ---
-<Base title="How we review places" active="Food" description="Honest, kind, and useful. How Tradition Local reviews places, and what our ratings mean.">
+<Base title="How We Review Places" active="Food" description="Honest, kind, and useful. How Tradition Local reviews places, and what our ratings mean.">
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">How we review places</p>
-      <h1 style="margin-bottom:16px;max-width:900px">Honest, kind, and useful.</h1>
+      <h1 style="margin-bottom:16px;max-width:900px">Honest, Kind, and Useful.</h1>
       <p class="lead" style="max-width:720px">Every review starts with a visit. We tell you what we tried, what stood out, and who it might suit, so you can decide for yourself.</p>
     </div>
   </section>
 
   <section class="band">
     <div class="wrap">
-      <p class="eyebrow">What goes into a review</p><h2 style="margin-bottom:28px">More than a number.</h2>
+      <p class="eyebrow">What goes into a review</p><h2 style="margin-bottom:28px">More Than a Number.</h2>
       <div class="grid g3">{tried.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
     </div>
   </section>
 
   <section class="band tint" id="ratings">
     <div class="wrap">
-      <p class="eyebrow">Our ratings</p><h2 style="margin-bottom:8px">What the numbers mean.</h2>
+      <p class="eyebrow">Our ratings</p><h2 style="margin-bottom:8px">What the Numbers Mean.</h2>
       <p class="meta" style="font-size:17px;margin-bottom:28px;max-width:720px">Ratings are out of five. They are our own take on our most recent visit, never a score for every item on the menu.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:20px">
         {scale.map(([n, d]) => (
@@ -67,28 +67,28 @@ const suggest = 'mailto:traditionlocal@gmail.com?subject=Suggest%20a%20place';
 
   <section class="band">
     <div class="wrap">
-      <p class="eyebrow">Our promises</p><h2 style="margin-bottom:28px">Helpful detail. Honest context.</h2>
+      <p class="eyebrow">Our promises</p><h2 style="margin-bottom:28px">Helpful Detail. Honest Context.</h2>
       <div class="grid g2">{promises.map(([t, d]) => <div class="card pad"><h4 style="margin-bottom:8px">{t}</h4><p class="meta" style="font-size:16px">{d}</p></div>)}</div>
     </div>
   </section>
 
   <section class="band tint">
     <div class="wrap" style="display:flex;gap:40px;align-items:center;flex-wrap:wrap;justify-content:space-between">
-      <div style="max-width:700px"><p class="eyebrow">Whose voice you are reading</p><h2 style="margin-bottom:12px">Written by people who live here.</h2><p style="font-size:18px">Reviews come from Sara, Dillon, and our contributors. Sara visits the places she writes about, then shares what she found, honestly and kindly.</p></div>
+      <div style="max-width:700px"><p class="eyebrow">Whose voice you are reading</p><h2 style="margin-bottom:12px">Written by People Who Live Here.</h2><p style="font-size:18px">Reviews come from Sara, Dillon, and our contributors. Sara visits the places she writes about, then shares what she found, honestly and kindly.</p></div>
       <a class="btn line" href={url('/about')}>Meet Sara and Dillon</a>
     </div>
   </section>
 
   <section class="band">
     <div class="wrap" style="max-width:860px">
-      <p class="eyebrow">A few questions</p><h2 style="margin-bottom:24px">Good to know.</h2>
+      <p class="eyebrow">A few questions</p><h2 style="margin-bottom:24px">Good to Know.</h2>
       {faqs.map(([q, a]) => <details class="card pad" style="margin-bottom:12px"><summary style="cursor:pointer;font-weight:700;font-size:18px">{q}</summary><p style="margin-top:12px;font-size:17px">{a}</p></details>)}
     </div>
   </section>
 
   <section class="band tint">
     <div class="wrap">
-      <p class="eyebrow">Browse by rating</p><h2 style="margin-bottom:8px">Start with what you trust.</h2>
+      <p class="eyebrow">Browse by rating</p><h2 style="margin-bottom:8px">Start With What You Trust.</h2>
       <p class="meta" style="margin-bottom:24px;font-size:17px">{rated.length} places reviewed so far.</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <a class="btn line" href={url('/food') + '?rating=5'}>5 out of 5 ({atLeast(5)})</a>
@@ -101,7 +101,7 @@ const suggest = 'mailto:traditionlocal@gmail.com?subject=Suggest%20a%20place';
 
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
-      <div style="max-width:700px"><h3 style="margin-bottom:8px">Read the experience. Choose your next stop.</h3><p style="font-size:17px">Know a place we should visit? We would love to hear about it.</p></div>
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Read the Experience. Choose Your Next Stop.</h3><p style="font-size:17px">Know a place we should visit? We would love to hear about it.</p></div>
       <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/food')}>Explore our reviews</a><a class="btn line" href={suggest}>Recommend a place</a></div>
     </div>
   </section>
