@@ -38,7 +38,7 @@ const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], 
           <div class="card pad hidden" id="fit-none"><b>We did not find a close match for that mix.</b><p class="meta" style="margin-top:4px">Try fewer choices, or ask Dillon and he will suggest a few areas.</p></div>
           <div class="card pad pick hidden" id="fit-locally" style="margin-top:24px;padding:32px">
             <p class="eyebrow">Keep exploring <span id="fit-locally-name"></span></p>
-            <h3 style="margin-bottom:8px">Locally Plus, for Where You Might Land.</h3>
+            <h3 style="margin-bottom:8px">Locally Plus, for Where You Might Land</h3>
             <p class="meta" style="margin-bottom:20px;font-size:16px">For now, signing up joins In the Loop, and Locally Plus for your top match follows when it opens.</p>
             <form action={config.newsletterAction} method="post" style="display:flex;gap:10px;flex-wrap:wrap">
               <div style="flex:1;min-width:220px"><label class="sr" for="fit-email">Your email</label><input id="fit-email" name="email" type="email" required placeholder="name@email.com" /></div>
@@ -51,7 +51,7 @@ const homes = [['single', 'Single family home'], ['town', 'Townhome or condo'], 
       <div class="side">
         <div class="card pad" style="margin-bottom:24px"><p class="eyebrow">Your neighborhood visit list</p><div id="visit-list"></div><p class="meta" style="margin-top:8px">Saved on this device.</p></div>
         <div class="card pad"><p class="eyebrow">How this works</p><p class="meta" style="font-size:16px">Matches come from what we wrote in each neighborhood guide, so they are a starting point, not a verdict. Always visit before you decide.</p></div>
-        <div class="card pad pick" style="margin-top:24px"><p class="eyebrow">Want a person?</p><h3 style="margin-bottom:8px">Ask Dillon.</h3><p class="meta" style="margin-bottom:16px;font-size:16px">Tell us what you are looking for, and he will reply personally.</p><a class="btn" href={url('/ask-dillon')} style="width:100%">Ask Dillon</a></div>
+        <div class="card pad pick" style="margin-top:24px"><p class="eyebrow">Want a person?</p><h3 style="margin-bottom:8px">Ask Dillon</h3><p class="meta" style="margin-bottom:16px;font-size:16px">Tell us what you are looking for, and he will reply personally.</p><a class="btn" href={url('/ask-dillon')} style="width:100%">Ask Dillon</a></div>
       </div>
     </div>
   </section>
