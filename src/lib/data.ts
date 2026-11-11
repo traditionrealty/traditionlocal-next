@@ -94,12 +94,14 @@ export const isClosed = (p?: { status?: string } | null) => !!p && CLOSED.test(p
 // Reviews for places that are still open. A review of a closed place is only found in the closed area.
 export const liveReviews = () => reviews().filter((r) => !isClosed(byName(r.profile)));
 export const events = () => content.filter((c) => c.type === 'Event');
+// Articles, Guides, and any other written piece from the Content tab that is not a review or an event.
+export const posts = () => content.filter((c) => c.type !== 'Review' && c.type !== 'Event');
 
 // Where each kind of page lives.
 const BASE = (import.meta.env.BASE_URL || '/').replace(/\/$/, '');
 export const url = (p: string) => BASE + p;
 export function pathFor(e: Profile | Content): string {
-  if ('title' in e) return e.type === 'Event' ? `/events/${e.slug}` : e.type === 'Article' ? `/post/${e.slug}` : `/reviews/${e.slug}`;
+  if ('title' in e) return e.type === 'Event' ? `/events/${e.slug}` : e.type === 'Review' ? `/reviews/${e.slug}` : `/post/${e.slug}`; // Articles, Guides, and any other written piece live under /post
   switch (e.type) {
     case 'Business': return `/food/${e.slug}`;
     case 'Place': return `/things-to-do/${e.slug}`;
