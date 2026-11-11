@@ -74,17 +74,11 @@ html { scroll-padding-top: 104px; }
   .nav-end .signin { order: 2; text-align: center; padding: 12px 0; font-size: 16px; border-bottom: 0; }
 }
 
-/* Small phones: keep the mark and the name on one row with the search and menu buttons. */
+/* Phones: the mark and the name scale with the screen, so they stay on one row with the search and menu buttons from 320 to 400 pixels wide. */
 @media (max-width: 400px) {
   .top .wrap { gap: 0 8px; }
-  .logo { font-size: 19px; gap: 10px; }
-  .logo img { width: 36px; height: 36px; }
+  .logo { font-size: clamp(15px, 4.7vw, 20px); gap: 8px; }
+  .logo img { width: clamp(32px, 10vw, 40px); height: clamp(32px, 10vw, 40px); }
   .mbar { gap: 6px; }
-  .nav-toggle { padding: 0 14px; }
-}
-@media (max-width: 340px) {
-  .logo { font-size: 17px; gap: 8px; }
-  .logo img { width: 32px; height: 32px; }
-  .srch-open { width: 36px; }
   .nav-toggle { padding: 0 10px; }
 }
