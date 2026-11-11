@@ -4,9 +4,9 @@ import '../styles/pages.css';
 import { url, href, IS_PREVIEW } from '../lib/data';
 import { openingsOf, whenText, profileHref, closedReviewed, lastChecked } from '../lib/openings';
 const groups = [
-  { id: 'now-open', eyebrow: 'Now open', title: 'Fresh on the List.', rows: openingsOf('open') },
-  { id: 'places-to-watch', eyebrow: 'Places to watch', title: 'Coming Soon.', rows: openingsOf('watch') },
-  { id: 'recently-closed', eyebrow: 'Recently closed', title: 'Saying Goodbye.', rows: openingsOf('closed') },
+  { id: 'now-open', eyebrow: 'Now open', title: 'Fresh on the List', rows: openingsOf('open') },
+  { id: 'places-to-watch', eyebrow: 'Places to watch', title: 'Coming Soon', rows: openingsOf('watch') },
+  { id: 'recently-closed', eyebrow: 'Recently closed', title: 'Saying Goodbye', rows: openingsOf('closed') },
 ];
 const gone = closedReviewed();
 const any = groups.some((g) => g.rows.length > 0);
@@ -17,7 +17,7 @@ const tip = 'mailto:traditionlocal@gmail.com?subject=Opening%20or%20closing%20ti
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Openings and closings</p>
-      <h1 style="margin-bottom:16px;max-width:900px">What Is New in Houston Food and Drink.</h1>
+      <h1 style="margin-bottom:16px;max-width:900px">What Is New in Houston Food and Drink</h1>
       <p class="lead" style="max-width:720px">What just opened, what is on the way, and what we said goodbye to. Every tip shows where it came from.{checked && (' Last checked ' + checked + '.')}</p>
       {IS_PREVIEW && <p class="meta" style="margin-top:14px;max-width:720px">Preview note: items tagged Needs check stay hidden on the live site until they are marked verified.</p>}
     </div>
@@ -55,7 +55,7 @@ const tip = 'mailto:traditionlocal@gmail.com?subject=Opening%20or%20closing%20ti
   {gone.length > 0 && (
     <section class="band" id="reviewed-closed">
       <div class="wrap">
-        <p class="eyebrow">From our reviews</p><h2 style="margin-bottom:8px">Places We Reviewed That Have Closed.</h2>
+        <p class="eyebrow">From our reviews</p><h2 style="margin-bottom:8px">Places We Reviewed That Have Closed</h2>
         <p class="meta" style="font-size:17px;margin-bottom:24px;max-width:720px">{gone.length} places we have reviewed are marked closed in our latest check. Their reviews stay up as a record. You can also <a href={url('/food') + '?closed=1#browse'} style="font-weight:700">find them in Food</a>, marked closed.</p>
         <div class="grid g3">{gone.map((b) => <a class="card pad" href={href(b)} style="text-decoration:none"><h4 style="margin-bottom:4px">{b.name}</h4><p class="meta">{b.area || 'Houston area'}</p></a>)}</div>
       </div>
