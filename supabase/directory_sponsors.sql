@@ -11,11 +11,17 @@ create table if not exists public.directory_sponsors (
   tagline text,                      -- what they do, in one line
   website text,                      -- their website
   logo_url text,                     -- a link to their logo image (https, or a path on this site such as /images/sponsors/name.png)
+  service_area text,                 -- where they serve, for example Galleria. Leave blank for all of Houston.
+  is_main boolean not null default false,    -- tick this for the Main Sponsor spot. Tick several and the page rotates between them.
   sort_order integer not null default 100,   -- lower numbers show first
   published boolean not null default false,  -- tick this to show the sponsor on the site
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- If the table was made earlier without these two columns, add them.
+alter table public.directory_sponsors add column if not exists service_area text;
+alter table public.directory_sponsors add column if not exists is_main boolean not null default false;
 
 comment on table public.directory_sponsors is 'Local Directory sponsors. Public, published rows only. Edit in the Table Editor.';
 
