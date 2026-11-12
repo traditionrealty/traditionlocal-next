@@ -1,9 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
+import AuthClient from '../components/AuthClient.astro';
 import '../styles/pages.css';
 import { url } from '../lib/data';
-import { config } from '../config';
-const mail = `mailto:${config.contactEmail}?subject=${encodeURIComponent('Local Directory access')}`;
+const back = encodeURIComponent('/local-directory/');
 ---
 <Base title="Local Directory" active="More" description="Local providers we know and trust, for members.">
   <section class="band hero">
@@ -11,32 +11,126 @@ const mail = `mailto:${config.contactEmail}?subject=${encodeURIComponent('Local 
       <p class="eyebrow">Members</p>
       <h1 style="margin-bottom:16px;max-width:860px">Providers We Know and Trust</h1>
       <p class="lead" style="margin-bottom:28px">The Local Directory is a members only list of local pros we would call ourselves, shared with neighbors who are moving, buying, or settling in.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={mail}>Request access</a><a class="btn line" href={url('/account')}>Sign in</a></div>
+      <div id="ld-cta" style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/sign-in?next=' + back + '#create')}>Create a free account</a><a class="btn line" href={url('/sign-in?next=' + back)}>Sign in</a></div>
     </div>
   </section>
-  <section class="band">
+
+  <section class="band" id="ld-out">
     <div class="wrap split">
       <div class="main">
-        <p class="eyebrow">How it works</p><h2 style="margin-bottom:24px">Opening Soon, for Members</h2>
+        <p class="eyebrow">How it works</p><h2 style="margin-bottom:24px">Free for Members</h2>
         <ol class="wx" role="list">
           <li><span class="wx-n" aria-hidden="true">1</span><div><b>Every Pro Is One We Know</b><span class="meta" style="font-size:16px">We list people we have worked with or heard good things about from neighbors.</span></div></li>
-          <li><span class="wx-n" aria-hidden="true">2</span><div><b>Members See the List</b><span class="meta" style="font-size:16px">Request access, and we will share the list with you personally.</span></div></li>
+          <li><span class="wx-n" aria-hidden="true">2</span><div><b>Create a Free Account</b><span class="meta" style="font-size:16px">Sign up with your email and a password, confirm your email, and the list opens right away.</span></div></li>
           <li><span class="wx-n" aria-hidden="true">3</span><div><b>Ask Us Anything</b><span class="meta" style="font-size:16px">Not sure who to call? Ask Dillon and he will point you the right way.</span></div></li>
         </ol>
       </div>
       <div class="side">
         <div class="card pad pick">
-          <p class="eyebrow">Hear first</p><h3 style="margin-bottom:8px">Be the First to Know</h3>
-          <p class="meta" style="margin-bottom:16px;font-size:16px">Join In the Loop and we will tell you when the directory opens.</p>
-          <form action={config.newsletterAction} method="post">
-            <label class="sr" for="ld-email">Your email</label><input id="ld-email" name="email" type="email" required placeholder="name@email.com" />
-            <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" /><input type="hidden" name="return" id="ld-return" />
-            <button class="btn" type="submit" style="width:100%;margin-top:12px">Join In the Loop</button>
-          </form>
+          <p class="eyebrow">Members only</p><h3 style="margin-bottom:8px">Why an Account?</h3>
+          <p class="meta" style="margin-bottom:16px;font-size:16px">We keep this list for neighbors, not the whole internet. A free account keeps it that way, and it takes about a minute.</p>
+          <a class="btn" href={url('/sign-in?next=' + back + '#create')} style="width:100%">Create a free account</a>
         </div>
         <div class="card pad" style="margin-top:24px"><p class="eyebrow">Questions</p><p style="margin-bottom:16px">Looking for a specific kind of help right now?</p><a class="btn line" href={url('/ask-dillon')}>Ask Dillon</a></div>
       </div>
     </div>
   </section>
-  <script is:inline>(function () { var r = document.getElementById('ld-return'); if (r) r.value = location.origin + location.pathname; })();</script>
+
+  <section class="band" id="ld-wait" hidden><div class="wrap"><p class="meta" style="font-size:17px">One moment, opening the directory.</p></div></section>
+
+  <section class="band" id="ld-in" hidden>
+    <div class="wrap">
+      <p class="eyebrow">For members</p><h2 id="ld-hi" style="margin-bottom:8px">Your Local Directory</h2>
+      <p class="meta" style="margin-bottom:24px;max-width:720px;font-size:16px">These are people we would call ourselves. Always check licenses and get your own quotes. This list is a starting point, not a guarantee.</p>
+      <div id="ld-tools" hidden style="display:grid;gap:16px;margin-bottom:32px">
+        <div style="max-width:460px"><label class="sr" for="ld-q">Search the directory</label><input id="ld-q" type="search" placeholder="Search by name or kind of help" autocomplete="off" /></div>
+        <div class="chips" id="ld-cats" role="group" aria-label="Kinds of help"></div>
+      </div>
+      <div class="ld-note" id="ld-note" role="status" aria-live="polite" hidden></div>
+      <div id="ld-list"></div>
+      <p class="meta" style="margin-top:36px">Know a great pro we should add? <a href={url('/ask-dillon')} style="font-weight:700">Tell Dillon</a>.</p>
+    </div>
+  </section>
+
+  <style>
+    .ld-note { padding: 14px 16px; border-radius: 12px; font-size: 16px; line-height: 1.5; background: #f1eee6; border: 1px solid #ddd6c4; margin-bottom: 24px; max-width: 720px; }
+    #ld-tools[hidden], #ld-cta[hidden], .ld-note[hidden] { display: none !important; }
+    .ld-cat { margin: 0 0 14px; }
+    .ld-group { margin-bottom: 40px; }
+    .ld-card h4 { margin: 10px 0 4px; }
+    .ld-links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-weight: 700; font-size: 15px; }
+  </style>
+  <AuthClient />
+  <script is:inline>
+    (function () {
+      var A = window.TLAuth, c = A && A.client();
+      var $ = function (i) { return document.getElementById(i); };
+      var rows = [], cat = '', q = '';
+      function show(which) { ['ld-out', 'ld-wait', 'ld-in'].forEach(function (id) { $(id).hidden = id !== which; }); $('ld-cta').hidden = which !== 'ld-out'; }
+      function note(t) { $('ld-note').textContent = t || ''; $('ld-note').hidden = !t; }
+      function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
+      function link(href, text, ext) { var a = el('a', '', text); a.href = href; if (ext) { a.rel = 'noopener'; a.target = '_blank'; } return a; }
+      function safeUrl(u) { u = String(u || '').trim(); if (!u) return ''; if (!/^https?:\/\//i.test(u)) u = 'https://' + u; try { var p = new URL(u); return /^https?:$/.test(p.protocol) ? p.href : ''; } catch (e) { return ''; } }
+      function safeTel(p) { var d = String(p || '').replace(/[^0-9+]/g, ''); return d.length >= 7 ? d : ''; }
+      function safeMail(m) { m = String(m || '').trim(); return /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(m) ? m : ''; }
+      function matches(r) { if (cat && r.category !== cat) return false; if (!q) return true; return [r.name, r.category, r.contact_name, r.why, r.service_area].join(' ').toLowerCase().indexOf(q) > -1; }
+      function render() {
+        var list = $('ld-list'); list.textContent = '';
+        var shown = rows.filter(matches);
+        if (!rows.length) { note('We are adding providers now. Check back soon, or ask Dillon who to call.'); return; }
+        if (!shown.length) { note('Nothing matches that search. Try a different word, or choose All.'); return; }
+        note('');
+        var groups = {}, order = [];
+        shown.forEach(function (r) { var k = r.category || 'Other'; if (!groups[k]) { groups[k] = []; order.push(k); } groups[k].push(r); });
+        order.forEach(function (k) {
+          var g = el('div', 'ld-group'); g.appendChild(el('h3', 'ld-cat', k));
+          var grid = el('div', 'grid g3');
+          groups[k].forEach(function (r) {
+            var card = el('div', 'card pad ld-card');
+            card.appendChild(el('span', 'tag', k));
+            card.appendChild(el('h4', '', r.name));
+            if (r.contact_name) card.appendChild(el('p', 'meta', 'Ask for ' + r.contact_name));
+            if (r.why) card.appendChild(el('p', '', r.why));
+            if (r.service_area) card.appendChild(el('p', 'meta', 'Serves ' + r.service_area));
+            var links = el('div', 'ld-links'), tel = safeTel(r.phone), mail = safeMail(r.email), web = safeUrl(r.website);
+            if (tel) links.appendChild(link('tel:' + tel, 'Call ' + r.phone));
+            if (mail) links.appendChild(link('mailto:' + mail, 'Email'));
+            if (web) links.appendChild(link(web, 'Website', true));
+            if (links.children.length) card.appendChild(links);
+            grid.appendChild(card);
+          });
+          g.appendChild(grid); list.appendChild(g);
+        });
+      }
+      function chips() {
+        var box = $('ld-cats'); box.textContent = '';
+        var cats = []; rows.forEach(function (r) { if (r.category && cats.indexOf(r.category) < 0) cats.push(r.category); }); cats.sort();
+        [''].concat(cats).forEach(function (k) {
+          var b = el('button', 'chip' + (k === cat ? ' on' : ''), k || 'All'); b.type = 'button'; b.setAttribute('aria-pressed', k === cat ? 'true' : 'false');
+          b.addEventListener('click', function () { cat = k; chips(); render(); }); box.appendChild(b);
+        });
+        $('ld-tools').hidden = !rows.length;
+      }
+      function load(user) {
+        var first = user && user.user_metadata && user.user_metadata.first_name;
+        $('ld-hi').textContent = first ? 'Welcome, ' + first : 'Your Local Directory'; show('ld-in'); note('');
+        c.from('directory_providers').select('id,category,name,contact_name,phone,email,website,service_area,why').eq('published', true).order('category').order('sort_order').order('name').then(function (r) {
+          if (r && r.error) {
+            var code = String(r.error.code || '');
+            note(code === '42P01' || code === 'PGRST205' ? 'The directory is being set up. Please check back soon.' : 'We could not open the directory just now. Please refresh the page, or try again in a moment.');
+            return;
+          }
+          rows = (r && r.data) || []; chips(); render();
+        }, function () { note('We could not open the directory just now. Please refresh the page, or try again in a moment.'); });
+      }
+      $('ld-q').addEventListener('input', function () { q = this.value.trim().toLowerCase(); render(); });
+      if (!c) { show('ld-out'); return; }
+      c.auth.getSession().then(function (r) { var s = r && r.data && r.data.session; if (s) load(s.user); else show('ld-out'); }, function () { show('ld-out'); });
+      c.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_OUT') { rows = []; $('ld-list').textContent = ''; show('ld-out'); } });
+    })();
+  </script>
+  <script is:inline>
+    // Someone who signed in earlier sees a short wait, not a flash of the sign in teaser.
+    (function () { try { var k = Object.keys(localStorage).filter(function (x) { return /^sb-.*-auth-token$/.test(x); })[0]; if (k && localStorage.getItem(k)) { document.getElementById('ld-out').hidden = true; document.getElementById('ld-wait').hidden = false; document.getElementById('ld-cta').hidden = true; } } catch (e) {} })();
+  </script>
 </Base>
