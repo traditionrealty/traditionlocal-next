@@ -189,7 +189,7 @@ const DX = { businesses: url('/directory-businesses.json'), signin: url('/sign-i
     var CATS = [{ l: 'Lenders', one: 'lenders', re: /lend|mortgage/i }, { l: 'Inspectors', one: 'inspectors', re: /inspect/i }, { l: 'Home warranty', one: 'home warranty providers', re: /warrant/i }, { l: 'Lawyers', one: 'lawyers', re: /lawyer|attorney|legal/i }];
     var PRESETS = {
       moving: { t: 'Moving in', pr: /lend|mortgage|inspect|mover|moving|warrant|lawyer|attorney|title|insur/i, bz: /grocer|supermarket|pharmac|market/i, sp: /lend|mortgage|inspect|mov|warrant|law|insur|title/i },
-      fixing: { t: 'Fixing up', pr: /plumb|roof|paint|contractor|electric|hvac|handyman|landscap|clean|pest|floor|remodel|repair|construct|window|foundation/i, bz: /hardware|home improvement|furniture|garden|nursery|lumber|appliance/i, sp: /plumb|roof|paint|contract|electric|hvac|repair|remodel|clean|landscap/i },
+      fixing: { t: 'Fixing up', pr: /plumb|roof|paint|contractor|electric|hvac|heating|cooling|handyman|landscap|clean|pest|floor|remodel|repair|construct|window|foundation|garage|lock|pool|rekey/i, bz: /hardware|home improvement|furniture|garden|nursery|lumber|appliance/i, sp: /plumb|roof|paint|contract|electric|hvac|repair|remodel|clean|landscap/i },
       settling: { t: 'Settling in', pr: /insur|pet|vet|dent|doctor|physician|trainer|chiropract/i, bz: /coffee|grocer|market|gym|fitness|salon|bakery|cafe|yoga|barber|spa/i, sp: /coffee|grocer|gym|fitness|salon|bakery|cafe|yoga|barber|spa|pet|vet/i },
       going: { t: 'Going out', pr: /photograph|cater|event|dj|florist|limo|planner/i, bz: null, sp: /restaurant|bar|dessert|event|cater|dining|brew|wine|food/i }
     };
