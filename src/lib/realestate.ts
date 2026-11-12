@@ -1,7 +1,8 @@
 // The real estate feed on the Tradition Realty Group page.
 // Written updates come from data/realestate.csv (example = yes rows show only in the draft preview).
+// Articles and guides from the Content tab join them when the Author is Tradition Realty Group.
 // They are mixed with the latest videos from Dillon Loren and Tradition Realty Group.
-import { readTable, IS_PREVIEW, url } from './data';
+import { readTable, IS_PREVIEW, url, posts as contentPosts, href } from './data';
 import { channelVideos } from './videos';
 import type { Video } from './videos';
 
@@ -17,7 +18,7 @@ const when = (s: string) => {
 };
 const show = (ms: number) => (ms ? new Date(ms).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '');
 
-const posts: Post[] = readTable('realestate.csv')
+const updates: Post[] = readTable('realestate.csv')
   .filter((r) => r.title)
   .filter((r) => IS_PREVIEW || !/^(yes|true)$/i.test((r.example || '').trim()))
   .map((r) => {
@@ -25,6 +26,13 @@ const posts: Post[] = readTable('realestate.csv')
     return { title: r.title, summary: clip(r.summary, 200), link: ext ? r.link : /^\//.test(r.link || '') ? url(r.link) : '', external: ext, date: show(when(r.date)), ts: when(r.date), label: r.kind || 'Update', source: r.source || '', example: /^(yes|true)$/i.test((r.example || '').trim()) };
   })
   .sort((a, b) => b.ts - a.ts);
+
+// Every Article or Guide in the Content tab written by Tradition Realty Group. It links to its own page on the site.
+const articles: Post[] = contentPosts()
+  .filter((c) => /^tradition realty group$/i.test((c.author || '').trim()))
+  .map((c) => ({ title: c.title, summary: clip(c.summary || c.body, 200), link: href(c), external: false, date: show(when(c.reviewDate)), ts: when(c.reviewDate), label: c.type, source: '', example: false }));
+
+const posts: Post[] = [...updates, ...articles].sort((a, b) => b.ts - a.ts);
 
 const vids: Video[] = ['dillon', 'trg'].map((k) => (channelVideos.find((c) => c.key === k)?.videos || []).slice(0, 3));
 const videos: Video[] = [];
