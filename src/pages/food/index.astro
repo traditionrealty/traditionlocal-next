@@ -6,10 +6,19 @@ import Prefs from '../../components/Prefs.astro';
 import FilterKit from '../../components/FilterKit.astro';
 import '../../styles/pages.css';
 import '../../styles/dock.css';
-import { businesses, href, url, isClosed } from '../../lib/data';
+import { businesses, href, url, isClosed, media } from '../../lib/data';
+import { config } from '../../config';
 import { category, foodTab, cuisineRegion, topRating, isFood, FOOD_TABS, WORLD } from '../../lib/helpers';
 
-const cards = businesses().filter(isFood).map((b) => ({ b, gone: isClosed(b), cat: category(b), tab: foodTab(b), world: cuisineRegion(b), rating: topRating(b.name) }))
+// Card pictures. A real photo shows on the card. A Google Maps screenshot or the shared "permanently closed" notice is not a photo of the place,
+// so those get a clean tile instead (the map is kept aside in case you want it, see config.cardMapPhotos).
+const pic = (b: any) => {
+  const m = media(b); if (!m) return { photo: '', mapPhoto: '' };
+  const note = `${b.heroCredit || ''} ${m.alt || ''}`;
+  if (/permanently closed|placeholder/i.test(note)) return { photo: '', mapPhoto: '' };
+  return /google maps/i.test(note) ? { photo: '', mapPhoto: m.src } : { photo: m.src, mapPhoto: '' };
+};
+const cards = businesses().filter(isFood).map((b) => ({ b, gone: isClosed(b), cat: category(b), tab: foodTab(b), world: cuisineRegion(b), rating: topRating(b.name), ...pic(b) }))
   .sort((x, y) => Number(x.gone) - Number(y.gone) || y.rating - x.rating || x.b.name.localeCompare(y.b.name));
 const areaCount: Record<string, number> = {};
 cards.forEach((c) => { if (c.b.area) areaCount[c.b.area] = (areaCount[c.b.area] || 0) + 1; });
@@ -51,18 +60,31 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
     </div>
     <div class="wrap">
       <h2 class="sr">Every Place We Have Reviewed</h2>
-      <div class="grid g3" id="f-grid">
+      <div class={'grid g3' + (config.cardPhotos ? ' cp-on' : '') + (config.cardPhotos && config.cardMapPhotos ? ' cp-maps' : '')} id="f-grid">
         {cards.map((c, i) => (
           <div class={i < 24 && !c.gone ? 'card tcard f-item' : 'card tcard f-item hidden'} data-closed={c.gone ? '1' : '0'} data-world={c.world} data-area={c.b.area} data-tab={c.tab} data-r={c.rating} data-name={`${c.b.name} ${c.cat} ${c.b.area}`.toLowerCase()}>
             <a href={href(c.b)}>
-              {c.gone ? <span class="tag closed">Closed</span> : c.rating > 0 && <span class="tag">{c.rating} out of 5</span>}
-              <h4 style="margin:12px 0 4px">{c.b.name}</h4><p class="meta">{[c.cat, c.b.area].filter(Boolean).join(', ')}</p>
-              {c.gone && <p class="meta" style="margin-top:6px">No longer open. We do not recommend it.</p>}
+              <div class={c.mapPhoto ? 'tc-photo has-map' : 'tc-photo'}>
+                {c.photo ? <img src={c.photo} alt="" width="640" height="480" loading="lazy" decoding="async" /> : (
+                  <>
+                    {c.mapPhoto && <img class="tc-map" src={c.mapPhoto} alt="" width="640" height="480" loading="lazy" decoding="async" />}
+                    <span class="tc-ph" aria-hidden="true">{config.mark && <img src={url(config.mark)} alt="" width="40" height="40" />}<span>{c.cat}</span></span>
+                  </>
+                )}
+              </div>
+              <div class="tc-body">
+                {c.gone ? <span class="tag closed">Closed</span> : c.rating > 0 && <span class="tag">{c.rating} out of 5</span>}
+                <h4 style="margin:12px 0 4px">{c.b.name}</h4><p class="meta">{[c.cat, c.b.area].filter(Boolean).join(', ')}</p>
+                {c.gone && <p class="meta" style="margin-top:6px">No longer open. We do not recommend it.</p>}
+              </div>
             </a>
             <button class="save" data-slug={c.b.slug} data-name={c.b.name} set:html={heart}></button>
           </div>
         ))}
       </div>
+      <script is:inline>
+        (function () { var g = document.getElementById('f-grid'), m = /[?&]photos=(on|all)\b/.exec(location.search); if (g && m) { g.classList.add('cp-on'); if (m[1] === 'all') g.classList.add('cp-maps'); } })();
+      </script>
       <p style="margin-top:24px"><button class="btn line hidden" id="f-more" type="button">Show more places</button></p>
       <p class="meta hidden" id="f-closed-hint" style="margin-top:16px;font-size:16px"><span id="f-closed-n"></span> <button class="flink" id="f-show-closed" type="button">Show closed places</button></p>
       <div class="card pad hidden" id="f-empty" style="margin-top:8px"><b>No places match yet.</b><p class="meta" style="margin-top:4px">Try a different area, rating, or search.</p></div>
