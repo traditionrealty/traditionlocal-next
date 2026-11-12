@@ -1,0 +1,28 @@
+/* Pop-ups. They stay hidden until the script decides it is time, and they are switched off in src/config.ts until you turn them on. */
+.pop [hidden] { display: none !important; }
+.pop-back { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(29, 26, 109, .6); }
+.pop-card { position: relative; display: flex; width: min(880px, 100%); max-height: calc(100vh - 48px); overflow: auto; background: #fff; border-radius: var(--radius); box-shadow: 0 24px 60px rgba(29, 26, 109, .38); animation: pop-in .18s ease-out; outline: none; }
+.pop-side { flex: 0 0 330px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: 40px; padding: 36px; background: var(--navy); color: #fff; }
+.pop-side img { width: 54px; height: 54px; display: block; }
+.pop-big { margin: 0; font-family: var(--serif); font-weight: 600; font-size: 36px; line-height: 1.1; color: #fff; }
+.pop-kick { margin: 12px 0 0; font-size: 15px; font-weight: 700; letter-spacing: 1px; color: var(--gold); }
+.pop-main { flex: 1; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 12px; padding: 44px 48px; }
+.pop-main .eyebrow { margin: 0; }
+.pop-main h2 { margin: 0; padding-right: 36px; font-size: 30px; line-height: 1.15; }
+.pop-lede { margin: 0; font-size: 16px; color: var(--slate); }
+.pop-form { display: flex; align-items: flex-end; gap: 10px; margin-top: 6px; }
+.pop-field { flex: 1; min-width: 0; }
+.pop-field label { display: block; margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--navy); }
+.pop-field input { width: 100%; box-sizing: border-box; min-height: var(--control-h); padding: 0 18px; border: 1.5px solid var(--slate); border-radius: 999px; background: #fff; font: 16px var(--sans); color: var(--navy); }
+.pop-form .btn { flex: none; }
+.pop-hp { position: absolute; left: -9999px; }
+.pop-fine { margin: 0; font-size: 13px; color: var(--slate); }
+.pop-no { padding: 10px 6px; border: 0; background: none; font: 700 15px var(--sans); color: var(--blue); text-decoration: underline; cursor: pointer; }
+.pop-x, .pop-tx { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 1.5px solid var(--navy); border-radius: 50%; background: #fff; cursor: pointer; }
+.pop-x { position: absolute; top: 14px; right: 14px; z-index: 2; }
+.pop-toast { position: fixed; right: 24px; bottom: 24px; z-index: 100; display: flex; align-items: center; gap: 12px; max-width: 400px; padding: 14px 14px 14px 20px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 18px 44px rgba(29, 26, 109, .28); font-weight: 700; color: var(--navy); }
+.pop-toast .pop-tx { flex: none; width: 40px; height: 40px; }
+@keyframes pop-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .pop-card { animation: none; } }
+@media (max-width: 900px) { .pop-side { display: none; } .pop-main { padding: 40px 28px; } }
+@media (max-width: 560px) { .pop-form { flex-direction: column; align-items: stretch; } }
