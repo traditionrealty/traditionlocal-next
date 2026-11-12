@@ -1,0 +1,171 @@
+---
+import Base from '../layouts/Base.astro';
+import AuthClient from '../components/AuthClient.astro';
+import '../styles/pages.css';
+import { url } from '../lib/data';
+import { areaPages } from '../lib/helpers';
+const areas = areaPages().map((p) => p.name).sort();
+---
+<Base title="Sign in" noindex description="Sign in or create your Tradition Local account.">
+  <section class="band hero"><div class="wrap"><p class="eyebrow">Your account</p><h1 id="si-h" style="margin-bottom:12px">Sign In</h1><p class="lead" id="si-lead">Welcome back. Sign in with your email and password.</p></div></section>
+  <section class="band">
+    <div class="wrap" style="max-width:600px">
+      <div class="panel">
+        <div class="chips" id="si-tabs" role="group" aria-label="Sign in or create an account">
+          <button type="button" class="chip on" data-m="signin" aria-pressed="true">Sign in</button>
+          <button type="button" class="chip" data-m="create" aria-pressed="false">Create account</button>
+        </div>
+        <div class="si-note" id="si-note" role="status" aria-live="polite" hidden></div>
+        <p style="margin-top:12px" id="si-resend-wrap" hidden><button type="button" class="si-link" id="si-resend">Send the confirmation email again</button></p>
+
+        <form id="f-signin" class="si-form">
+          <div><label for="si-email">Email</label><input id="si-email" name="email" type="email" autocomplete="email" required /></div>
+          <div><label for="si-pass">Password</label><input id="si-pass" name="password" type="password" autocomplete="current-password" required /></div>
+          <label class="si-show"><input type="checkbox" data-show="si-pass" /> Show password</label>
+          <button class="btn" type="submit">Sign in</button>
+          <p class="meta"><button type="button" class="si-link" data-m="forgot">Forgot your password?</button></p>
+        </form>
+
+        <form id="f-create" class="si-form" hidden>
+          <div class="si-two">
+            <div><label for="ca-first">First name</label><input id="ca-first" name="first_name" type="text" autocomplete="given-name" required /></div>
+            <div><label for="ca-last">Last name</label><input id="ca-last" name="last_name" type="text" autocomplete="family-name" /></div>
+          </div>
+          <div><label for="ca-email">Email</label><input id="ca-email" name="email" type="email" autocomplete="email" required /></div>
+          <div><label for="ca-pass">Create a password</label><input id="ca-pass" name="password" type="password" autocomplete="new-password" minlength="8" required aria-describedby="ca-hint" /><p class="meta" id="ca-hint" style="font-size:14px;margin-top:6px">At least 8 characters. A mix of letters and numbers is best.</p></div>
+          <label class="si-show"><input type="checkbox" data-show="ca-pass" /> Show password</label>
+          <div><label for="ca-area">Area you are most interested in (optional)</label><select id="ca-area" name="area"><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}</select></div>
+          <p class="meta" style="font-size:14px">By creating an account you agree to our <a href={url('/privacy')}>Privacy page</a>. We never sell your information. We will email you a link to confirm your address.</p>
+          <button class="btn" type="submit">Create my account</button>
+        </form>
+
+        <form id="f-forgot" class="si-form" hidden>
+          <div><label for="fg-email">Email</label><input id="fg-email" name="email" type="email" autocomplete="email" required /></div>
+          <button class="btn" type="submit">Send me a reset link</button>
+          <p class="meta"><button type="button" class="si-link" data-m="signin">Back to sign in</button></p>
+        </form>
+
+        <form id="f-reset" class="si-form" hidden>
+          <div><label for="rs-pass">New password</label><input id="rs-pass" name="password" type="password" autocomplete="new-password" minlength="8" required /></div>
+          <div><label for="rs-pass2">Type it again</label><input id="rs-pass2" name="password2" type="password" autocomplete="new-password" minlength="8" required /></div>
+          <label class="si-show"><input type="checkbox" data-show="rs-pass" data-also="rs-pass2" /> Show passwords</label>
+          <button class="btn" type="submit">Save new password</button>
+        </form>
+
+        <div id="si-done" class="si-form" hidden>
+          <p style="font-size:18px">You are signed in as <b id="si-who"></b>.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" id="si-acct" href={url('/account')}>Go to your account</a><button class="btn line" type="button" id="si-out">Sign out</button></div>
+        </div>
+      </div>
+      <p class="meta" style="margin-top:20px;font-size:15px">Your password is stored securely by Supabase, and we can never read it. You can also keep using Tradition Local without an account.</p>
+    </div>
+  </section>
+  <style>
+    .si-form { display: grid; gap: 16px; margin-top: 24px; }
+    .si-two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 520px) { .si-two { grid-template-columns: 1fr; } }
+    .si-show { display: flex; align-items: center; gap: 10px; font-weight: 600; margin: 0; }
+    .si-show input { min-height: 0; width: 20px; height: 20px; }
+    .si-link { background: none; border: 0; padding: 0; color: var(--blue); font: inherit; font-weight: 700; cursor: pointer; text-decoration: underline; }
+    .si-note { margin-top: 20px; padding: 14px 16px; border-radius: 12px; font-size: 16px; line-height: 1.5; }
+    .si-note.ok { background: #e8f4ec; border: 1px solid #bcd9c5; color: #1d4d2b; }
+    .si-note.err { background: #fdecea; border: 1px solid #f0c4be; color: #7a1f14; }
+  </style>
+  <AuthClient />
+  <script is:inline>
+    (function () {
+      var A = window.TLAuth, c = A && A.client();
+      var $ = function (i) { return document.getElementById(i); };
+      var note = $('si-note'), forms = ['signin', 'create', 'forgot', 'reset'], mode = 'signin';
+      var next = A ? A.safeNext(new URLSearchParams(location.search).get('next')) : '';
+      var heads = { signin: ['Sign In', 'Welcome back. Sign in with your email and password.'], create: ['Create Your Account', 'It is free. You need your email and a password.'], forgot: ['Reset Your Password', 'Enter your email and we will send you a link.'], reset: ['Choose a New Password', 'Pick a password you have not used before.'] };
+      function say(t, kind) { note.textContent = t || ''; note.className = 'si-note' + (kind ? ' ' + kind : ''); note.hidden = !t; }
+      function toAccount() { A.go(next || A.paths.account); }
+      function busy(form, on) { var b = form.querySelector('button[type=submit]'); if (!b) return; b.disabled = on; if (on) { b.dataset.t = b.textContent; b.textContent = 'One moment'; } else if (b.dataset.t) b.textContent = b.dataset.t; }
+      function setMode(m, keepNote) {
+        mode = m;
+        forms.forEach(function (f) { $('f-' + f).hidden = f !== m; });
+        $('si-done').hidden = true; $('si-tabs').hidden = m === 'forgot' || m === 'reset';
+        document.querySelectorAll('#si-tabs .chip').forEach(function (b) { var on = b.dataset.m === m; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+        $('si-h').textContent = heads[m][0]; $('si-lead').textContent = heads[m][1];
+        if (!keepNote) { say(''); $('si-resend-wrap').hidden = true; }
+      }
+      function showDone(user) {
+        forms.forEach(function (f) { $('f-' + f).hidden = true; }); $('si-tabs').hidden = true; say('');
+        $('si-who').textContent = (user && user.email) || 'your account'; $('si-done').hidden = false;
+        $('si-h').textContent = 'You Are Signed In'; $('si-lead').textContent = 'Welcome back to Tradition Local.';
+      }
+      if (!c) { say('Sign in is not available right now. Please try again in a moment.', 'err'); return; }
+
+      document.addEventListener('click', function (e) {
+        var b = e.target.closest && e.target.closest('[data-m]'); if (!b) return; e.preventDefault(); setMode(b.dataset.m);
+      });
+      document.querySelectorAll('input[data-show]').forEach(function (cb) {
+        cb.addEventListener('change', function () { [cb.dataset.show, cb.dataset.also].forEach(function (id) { if (id && $(id)) $(id).type = cb.checked ? 'text' : 'password'; }); });
+      });
+
+      $('f-signin').addEventListener('submit', function (e) {
+        e.preventDefault(); var f = e.target; say(''); $('si-resend-wrap').hidden = true; busy(f, true);
+        c.auth.signInWithPassword({ email: $('si-email').value.trim(), password: $('si-pass').value }).then(function (r) {
+          if (r && r.error) {
+            busy(f, false); say(A.friendly(r.error), 'err');
+            if (r.error.code === 'email_not_confirmed') $('si-resend-wrap').hidden = false;
+            return;
+          }
+          toAccount();
+        }, function () { busy(f, false); say(A.friendly(null), 'err'); });
+      });
+
+      $('f-create').addEventListener('submit', function (e) {
+        e.preventDefault(); var f = e.target; say('');
+        var first = $('ca-first').value.trim(), email = $('ca-email').value.trim(), pass = $('ca-pass').value;
+        if (!first) { say('Please tell us your first name.', 'err'); return; }
+        if (pass.length < 8) { say('Please use at least 8 characters for your password.', 'err'); return; }
+        busy(f, true);
+        c.auth.signUp({ email: email, password: pass, options: { emailRedirectTo: location.origin + A.paths.account, data: { first_name: first, last_name: $('ca-last').value.trim(), area_of_interest: $('ca-area').value } } }).then(function (r) {
+          busy(f, false);
+          if (r && r.error) { say(A.friendly(r.error), 'err'); return; }
+          if (r && r.data && r.data.session) { toAccount(); return; }
+          $('ca-pass').value = '';
+          say('Check your email. If ' + email + ' is new to us, we sent a link to confirm it. Open the link to finish creating your account. If you already have an account, use Sign in instead.', 'ok');
+          $('si-resend-wrap').hidden = false; $('si-resend').dataset.email = email;
+        }, function () { busy(f, false); say(A.friendly(null), 'err'); });
+      });
+
+      $('si-resend').addEventListener('click', function () {
+        var email = ($('si-resend').dataset.email || $('si-email').value || '').trim(); if (!email) { say('Type your email above first, then try again.', 'err'); return; }
+        c.auth.resend({ type: 'signup', email: email, options: { emailRedirectTo: location.origin + A.paths.account } }).then(function (r) {
+          if (r && r.error) say(A.friendly(r.error), 'err'); else say('Sent. Please check your email, and your spam folder too.', 'ok');
+        });
+      });
+
+      $('f-forgot').addEventListener('submit', function (e) {
+        e.preventDefault(); var f = e.target; say(''); busy(f, true);
+        c.auth.resetPasswordForEmail($('fg-email').value.trim(), { redirectTo: location.origin + A.paths.signin }).then(function (r) {
+          busy(f, false);
+          if (r && r.error && /rate|too many|over_/i.test((r.error.code || '') + ' ' + (r.error.message || ''))) { say(A.friendly(r.error), 'err'); return; }
+          say('If an account uses that email, a link to reset your password is on its way. Please check your spam folder too.', 'ok');
+        }, function () { busy(f, false); say(A.friendly(null), 'err'); });
+      });
+
+      $('f-reset').addEventListener('submit', function (e) {
+        e.preventDefault(); var f = e.target, p1 = $('rs-pass').value, p2 = $('rs-pass2').value; say('');
+        if (p1.length < 8) { say('Please use at least 8 characters for your password.', 'err'); return; }
+        if (p1 !== p2) { say('The two passwords do not match.', 'err'); return; }
+        busy(f, true);
+        c.auth.updateUser({ password: p1 }).then(function (r) {
+          busy(f, false);
+          if (r && r.error) { say(A.friendly(r.error), 'err'); return; }
+          say('Your password is updated. Taking you to your account.', 'ok'); setTimeout(toAccount, 1200);
+        }, function () { busy(f, false); say(A.friendly(null), 'err'); });
+      });
+
+      $('si-out').addEventListener('click', function () { c.auth.signOut().then(function () { A.go(A.paths.home); }); });
+      c.auth.onAuthStateChange(function (ev) { if (ev === 'PASSWORD_RECOVERY') setMode('reset'); });
+
+      var hash = location.hash;
+      setMode(/type=recovery/.test(hash) ? 'reset' : hash === '#create' ? 'create' : 'signin');
+      c.auth.getSession().then(function (r) { var s = r && r.data && r.data.session; if (s && mode !== 'reset') showDone(s.user); });
+    })();
+  </script>
+</Base>
