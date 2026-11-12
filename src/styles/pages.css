@@ -21,6 +21,8 @@
 .cp-on .tcard:hover .tc-photo > img { transform: scale(1.03); }
 .cp-on .tc-body { display: block; padding: 20px 24px 24px; }
 .cp-on .tcard h4 { padding-right: 0; }
+.tc-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; padding-right: 56px; }
+.cp-on .tc-tags { padding-right: 0; }
 .cp-on .save { box-shadow: 0 2px 8px rgba(29, 26, 109, .25); }
 .tc-ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; text-align: center; background: var(--ivory); color: var(--slate); font-size: 14px; }
 .tc-ph img { width: 40px; height: 40px; opacity: .55; }
