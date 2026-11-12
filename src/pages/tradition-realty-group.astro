@@ -58,15 +58,15 @@ const principles = [
           <div class="grid g3">
             {listings.map((l) => (
               <a class="card ls" href={l.link || url('/ask-dillon')} rel="noopener">
-                {l.photo && <img src={l.photo} alt={l.address} loading="lazy" />}
+                {l.photo && <img src={l.photo} alt={l.alt} loading="lazy" />}
                 <div class="ls-body">
-                  <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag">{l.status}</span>{IS_PREVIEW && l.example && <span class="tag soft">Example</span>}</div>
-                  {l.price && <div class="ls-price">{l.price}</div>}
+                  <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag">{l.status}</span></div>
+                  {l.price && <div class="ls-price">{l.price}{l.priceNote && <span class="ls-note">{l.priceNote}</span>}</div>}
                   <h4>{l.address}</h4>
                   <p class="meta">{l.city}</p>
                   {l.facts && <p class="meta" style="margin-top:6px">{l.facts}</p>}
                   {l.summary && <p class="meta" style="margin-top:10px;font-size:15px">{l.summary}</p>}
-                  <span class="ls-link">{l.link ? 'View listing' : 'Ask about this home'}</span>
+                  <span class="ls-link">{l.link ? l.linkLabel : 'Ask about this home'}</span>
                 </div>
               </a>
             ))}
@@ -153,6 +153,7 @@ const principles = [
     .ls img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
     .ls-body { padding: 20px 22px 22px; display: flex; flex-direction: column; flex: 1; }
     .ls-price { font-family: var(--serif); font-weight: 600; font-size: 30px; line-height: 1.1; margin: 12px 0 6px; }
+    .ls-note { display: block; margin-top: 4px; font-family: var(--sans); font-size: 13px; font-weight: 400; color: var(--slate); }
     .ls-link { margin-top: auto; padding-top: 14px; font-weight: 700; color: var(--blue); }
   </style>
 </Base>
