@@ -10,7 +10,7 @@ export type Profile = {
   heroImage: string; heroAlt: string; heroCredit: string; heroRights: string; gallery: string[];
   faqs: { q: string; a: string }[]; typicalHomes: string; localTake: string; bestFor: string;
   schools: string; zips: string; region: string; subCategory: string; tags: string[];
-  show: Record<string, boolean>; published: boolean;
+  show: Record<string, boolean>; published: boolean; spotlight: boolean;
 };
 export type Content = {
   slug: string; type: string; title: string; profile: string; summary: string; body: string;
@@ -52,6 +52,8 @@ function faqs(s: string) {
   }).filter((x) => x.q && x.a);
 }
 const on = (v: string) => (v || '').toLowerCase() === 'active';
+// A tick box in the sheet comes through as TRUE (or yes, or active).
+const ticked = (v: string) => /^(true|yes|y|1|active)$/i.test((v || '').trim());
 
 const rawProfiles = readTable('profiles.csv');
 const rawContent = readTable('content.csv');
@@ -69,7 +71,7 @@ export const profiles: Profile[] = rawProfiles.filter((r) => r.name).map((r) => 
   faqs: faqs(r.faqs), typicalHomes: r.typical_homes, localTake: r.local_take, bestFor: r.best_for, schools: r.school_district,
   zips: r.zip_codes, region: r.region, subCategory: r.sub_category, tags: list(r.tags),
   show: { living: on(r.show_living), reviews: on(r.show_reviews), nearby: on(r.show_nearby), events: on(r.show_events), newsletter: on(r.show_newsletter), faq: on(r.show_faq), media: on(r.show_media) },
-  published: (r.page_status || '').toLowerCase() === 'published',
+  published: (r.page_status || '').toLowerCase() === 'published', spotlight: ticked(r.spotlight),
 })).filter((p) => IS_PREVIEW || p.published);
 
 export const content: Content[] = contentRows.filter((r) => r.title).map((r) => ({
