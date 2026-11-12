@@ -4,9 +4,18 @@ import Prefs from '../../components/Prefs.astro';
 import FilterKit from '../../components/FilterKit.astro';
 import '../../styles/pages.css';
 import '../../styles/dock.css';
-import { href, url } from '../../lib/data';
+import { href, url, media } from '../../lib/data';
+import { config } from '../../config';
 import { areaPages, foodIn, subsIn, cleanList, REGIONS } from '../../lib/helpers';
-const list = areaPages().map((p) => ({ p, biz: foodIn(p.name).length, subs: subsIn(p.name).length })).sort((a, b) => a.p.name.localeCompare(b.p.name));
+// Card pictures, the same rules as the Food page. A real photo or a Google Maps screenshot shows on the card (maps only while config.cardMapPhotos is on).
+// The shared placeholder graphic is not a picture of the area, so those cards get a clean tile instead.
+const pic = (p: any) => {
+  const m = media(p); if (!m) return { photo: '', mapPhoto: '' };
+  const note = `${p.heroCredit || ''} ${m.alt || ''}`;
+  if (/permanently closed|placeholder/i.test(note)) return { photo: '', mapPhoto: '' };
+  return /google maps/i.test(note) ? { photo: '', mapPhoto: m.src } : { photo: m.src, mapPhoto: '' };
+};
+const list = areaPages().map((p) => ({ p, ...pic(p), biz: foodIn(p.name).length, subs: subsIn(p.name).length })).sort((a, b) => a.p.name.localeCompare(b.p.name));
 const found = [...new Set(list.map((x) => x.p.region).filter(Boolean))];
 const regions = [...REGIONS.filter((r) => found.includes(r)), ...found.filter((r) => !REGIONS.includes(r))];
 const text = (p: any) => [p.summary, p.bestFor, p.typicalHomes, p.localTake, cleanList(p.schools)].join(' ').toLowerCase();
@@ -47,20 +56,33 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
     </div>
     <div class="wrap">
       <h2 class="sr">All Neighborhoods</h2>
-      <div class="grid g3">
-        {list.map(({ p, biz, subs }, i) => (
+      <div class={'grid g3' + (config.cardPhotos ? ' cp-on' : '') + (config.cardPhotos && config.cardMapPhotos ? ' cp-maps' : '')} id="n-grid">
+        {list.map(({ p, biz, subs, photo, mapPhoto }, i) => (
           <div class={i < 24 ? 'card tcard n-item' : 'card tcard n-item hidden'} data-region={p.region} data-name={p.name.toLowerCase()} data-text={text(p)}>
             <a href={href(p)}>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding-right:56px"><span class="tag">{p.type}</span>{p.region && <span class="tag soft">{p.region}</span>}</div>
-              <h4 style="margin-bottom:8px">{p.name}</h4>
-              <p class="meta" style="margin-bottom:12px">{p.summary}</p>
-              <p class="meta"><b>{biz}</b> places reviewed, <b>{subs}</b> subdivisions</p>
+              <div class={mapPhoto ? 'tc-photo has-map' : 'tc-photo'}>
+                {photo ? <img src={photo} alt="" width="640" height="480" loading="lazy" decoding="async" /> : (
+                  <>
+                    {mapPhoto && <img class="tc-map" src={mapPhoto} alt="" width="640" height="480" loading="lazy" decoding="async" />}
+                    <span class="tc-ph" aria-hidden="true">{config.mark && <img src={url(config.mark)} alt="" width="40" height="40" />}<span>{p.region || p.type}</span></span>
+                  </>
+                )}
+              </div>
+              <div class="tc-body">
+                <div class="tc-tags"><span class="tag">{p.type}</span>{p.region && <span class="tag soft">{p.region}</span>}</div>
+                <h4 style="margin-bottom:8px">{p.name}</h4>
+                <p class="meta" style="margin-bottom:12px">{p.summary}</p>
+                <p class="meta"><b>{biz}</b> places reviewed, <b>{subs}</b> subdivisions</p>
+              </div>
             </a>
             <button class="save" data-slug={'n:' + p.slug} data-name={p.name} set:html={heart}></button>
             <div style="padding:0 24px 20px"><button class="chip cmp" type="button" data-n={p.name} aria-pressed="false">Compare</button></div>
           </div>
         ))}
       </div>
+      <script is:inline>
+        (function () { var g = document.getElementById('n-grid'), m = /[?&]photos=(on|all)\b/.exec(location.search); if (g && m) { g.classList.add('cp-on'); g.classList.toggle('cp-maps', m[1] === 'all'); } })();
+      </script>
       <p style="margin-top:24px"><button class="btn line hidden" id="n-more" type="button">Show more areas</button></p>
       <div class="card pad hidden" id="n-empty"><b>No areas match yet.</b><p class="meta" style="margin-top:4px">Try another name, region, or interest.</p></div>
     </div>
