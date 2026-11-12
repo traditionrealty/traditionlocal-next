@@ -14,6 +14,9 @@ export const config = {
   // The newsletter signup service the live site already uses. It accepts a normal form post.
   newsletterAction: 'https://tl-newsletter-signup.bold-bush-f938.workers.dev',
   formsAction: 'https://tl-forms.bold-bush-f938.workers.dev',
+  // Pop-ups are built but switched off. Change enabled to true when you are ready for visitors to see them.
+  // To try them first: add ?popup=newsletter to any page address, or ?popup=on to see the real behavior on your own device.
+  popups: { enabled: false },
   mark: '/tradition-local-mark.svg', // the approved Tradition Local mark, shown beside the name in the header. Leave empty to hide it.
   // Member sign in (Supabase Auth). The publishable key is meant to be public: the database rules keep each member's details private.
   supabase: { url: 'https://fwjjfwnpdberayqtrkaa.supabase.co', key: 'sb_publishable_Fe0lWzuNVeB62KHS14z10w_XwpWKhxd' },
