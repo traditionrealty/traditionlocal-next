@@ -1,5 +1,5 @@
 /* Pop-ups. They stay hidden until the script decides it is time, and they are switched off in src/config.ts until you turn them on. */
-.pop [hidden] { display: none !important; }
+.tl-popups [hidden] { display: none !important; }
 .pop-back { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(29, 26, 109, .6); }
 .pop-card { position: relative; display: flex; width: min(880px, 100%); max-height: calc(100vh - 48px); overflow: auto; background: #fff; border-radius: var(--radius); box-shadow: 0 24px 60px rgba(29, 26, 109, .38); animation: pop-in .18s ease-out; outline: none; }
 .pop-side { flex: 0 0 330px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; gap: 40px; padding: 36px; background: var(--navy); color: #fff; }
