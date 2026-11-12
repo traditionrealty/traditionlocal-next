@@ -13,6 +13,21 @@
 .tcard { position: relative; }
 .tcard > a { display: block; padding: 24px; text-decoration: none; color: inherit; }
 .tcard h4 { padding-right: 52px; }
+/* Food cards with a picture on top. Everything here is inside .cp-on, so the cards look exactly as before until it is switched on. */
+.tc-photo { display: none; }
+.cp-on .tcard > a { padding: 0; }
+.cp-on .tc-photo { display: block; position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: var(--radius) var(--radius) 0 0; background: var(--ivory); }
+.cp-on .tc-photo > img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .25s ease; }
+.cp-on .tcard:hover .tc-photo > img { transform: scale(1.03); }
+.cp-on .tc-body { display: block; padding: 20px 24px 24px; }
+.cp-on .tcard h4 { padding-right: 0; }
+.cp-on .save { box-shadow: 0 2px 8px rgba(29, 26, 109, .25); }
+.tc-ph { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 16px; text-align: center; background: var(--ivory); color: var(--slate); font-size: 14px; }
+.tc-ph img { width: 40px; height: 40px; opacity: .55; }
+.tc-map { display: none; }
+.cp-maps .tc-photo.has-map .tc-map { display: block; }
+.cp-maps .tc-photo.has-map .tc-ph { display: none; }
+@media (prefers-reduced-motion: reduce) { .cp-on .tc-photo > img, .cp-on .tcard:hover .tc-photo > img { transition: none; transform: none; } }
 .tabs { display: flex; flex-wrap: wrap; gap: 10px; }
 button.chip { cursor: pointer; font-family: inherit; }
 .hidden { display: none !important; }
