@@ -1,6 +1,8 @@
 // The neighborhood spotlight on the home page.
 // 1. A row in data/spotlight.csv wins: a guide (slug) or an article (link and title). The newest date comes first.
-// 2. With no rows, the home page holds 12 guides and shows a different one on each page load, never the same one twice in a row in a session.
+// 2. With no rows, the neighborhoods ticked "Neighborhood spotlight" in the Profiles tab are the set list. The home page holds them all
+//    and shows a different one on each page load, never the same one twice in a row in a session.
+// 3. If nothing is ticked yet, it falls back to 12 evenly spaced guides that have a picture.
 import { readTable, href, url, media } from './data';
 import { config } from '../config';
 import { areaPages, foodIn, subsIn } from './helpers';
@@ -49,7 +51,11 @@ const pool = guides.filter((p) => p.summary && p.bestFor && p.typicalHomes);
 const pictured = pool.filter((p) => pic(p));
 const source = pictured.length >= 12 ? pictured : pool;
 const step = Math.max(1, Math.floor(source.length / 12));
-const rotation = source.filter((_, i) => i % step === 0).slice(0, 12).map((p) => fromGuide(p, { label: 'Featured guide' }));
+const fallback = source.filter((_, i) => i % step === 0).slice(0, 12).map((p) => fromGuide(p, { label: 'Featured guide' }));
+
+// The set list from the sheet: every ticked neighborhood that has a summary to show.
+const listed = guides.filter((p) => p.spotlight && p.summary).map((p) => fromGuide(p, { label: 'Featured guide' }));
+const rotation = listed.length ? listed : fallback;
 
 export const rotating = picked.length === 0;
 export const spots: Spot[] = picked.length ? picked.slice(0, 1) : rotation;
