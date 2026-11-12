@@ -17,10 +17,10 @@ export const config = {
   // Pop-ups are built but switched off. Change enabled to true when you are ready for visitors to see them.
   // To try them first: add ?popup=newsletter to any page address, or ?popup=on to see the real behavior on your own device.
   popups: { enabled: false },
-  // Pictures on the Food cards. Preview first: /food/?photos=on (real photos only) or /food/?photos=all (also Google Maps screenshots).
-  // Set cardPhotos to true to show them to everyone. cardMapPhotos adds the map screenshots for places that have no real photo.
-  cardPhotos: false,
-  cardMapPhotos: false,
+  // Pictures on the Food cards, the same way the home page shows them. cardPhotos shows them. cardMapPhotos also uses the Google Maps
+  // screenshot for places that have no real photo. To try the other setting on your own device: /food/?photos=on (real photos only) or /food/?photos=all.
+  cardPhotos: true,
+  cardMapPhotos: true,
   mark: '/tradition-local-mark.svg', // the approved Tradition Local mark, shown beside the name in the header. Leave empty to hide it.
   // Member sign in (Supabase Auth). The publishable key is meant to be public: the database rules keep each member's details private.
   supabase: { url: 'https://fwjjfwnpdberayqtrkaa.supabase.co', key: 'sb_publishable_Fe0lWzuNVeB62KHS14z10w_XwpWKhxd' },
