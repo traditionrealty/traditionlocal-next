@@ -4,6 +4,7 @@ import '../styles/header.css';
 import { IS_PREVIEW, url } from '../lib/data';
 import { config } from '../config';
 import SearchBox from '../components/SearchBox.astro';
+import Popups from '../components/Popups.astro';
 interface Props { title: string; description?: string; active?: string; sub?: string; noindex?: boolean; }
 const { title, description = 'Honest reviews, weekend plans, and neighborhood guides from people who live here.', active = '', sub = '', noindex = false } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site || 'https://traditionlocal.com').href;
@@ -136,5 +137,6 @@ const moreOn = sub !== '' || active === 'More';
     })();
   </script>
   <SearchBox />
+  <Popups />
 </body>
 </html>
