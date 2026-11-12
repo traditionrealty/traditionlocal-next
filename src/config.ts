@@ -15,5 +15,7 @@ export const config = {
   newsletterAction: 'https://tl-newsletter-signup.bold-bush-f938.workers.dev',
   formsAction: 'https://tl-forms.bold-bush-f938.workers.dev',
   mark: '/tradition-local-mark.svg', // the approved Tradition Local mark, shown beside the name in the header. Leave empty to hide it.
+  // Member sign in (Supabase Auth). The publishable key is meant to be public: the database rules keep each member's details private.
+  supabase: { url: 'https://fwjjfwnpdberayqtrkaa.supabase.co', key: 'sb_publishable_Fe0lWzuNVeB62KHS14z10w_XwpWKhxd' },
   brokerage: { name: 'Tradition Realty Group', url: 'https://traditionrealtygroup.kw.com/' },
 };
