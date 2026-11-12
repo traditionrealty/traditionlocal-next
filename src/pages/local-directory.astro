@@ -131,6 +131,6 @@ const back = encodeURIComponent('/local-directory/');
   </script>
   <script is:inline>
     // Someone who signed in earlier sees a short wait, not a flash of the sign in teaser.
-    (function () { try { var k = Object.keys(localStorage).filter(function (x) { return /^sb-.*-auth-token$/.test(x); })[0]; if (k && localStorage.getItem(k)) { document.getElementById('ld-out').hidden = true; document.getElementById('ld-wait').hidden = false; document.getElementById('ld-cta').hidden = true; } } catch (e) {} })();
+    (function () { try { var k = Object.keys(localStorage).filter(function (x) { return /^sb-.*-auth-token$/.test(x); })[0]; if (k && localStorage.getItem(k) && document.getElementById('ld-in').hidden) { document.getElementById('ld-out').hidden = true; document.getElementById('ld-wait').hidden = false; document.getElementById('ld-cta').hidden = true; } } catch (e) {} })();
   </script>
 </Base>
