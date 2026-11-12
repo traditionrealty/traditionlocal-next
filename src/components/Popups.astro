@@ -1,0 +1,124 @@
+---
+// Pop-ups. Right now there is one: the newsletter card (1A on the pop-up options board).
+// It is switched off in src/config.ts. To preview it on any page add ?popup=newsletter to the address.
+// To see how it behaves for a real visitor on your own device, add ?popup=on once (and ?popup=off to stop). ?popup=reset clears what this device remembers.
+import '../styles/popups.css';
+import { config } from '../config';
+import { url } from '../lib/data';
+const enabled = !!config.popups.enabled;
+---
+<div class="pop" id="pop-root">
+  <div class="pop-back" id="pop-nl" hidden>
+    <div class="pop-card" id="pop-nl-card" role="dialog" aria-modal="true" aria-labelledby="pop-nl-title" aria-describedby="pop-nl-desc" tabindex="-1">
+      <div class="pop-side">
+        {config.mark && <img src={url(config.mark)} alt="" width="54" height="54" />}
+        <div>
+          <p class="pop-big">Houston,<br />every Monday.</p>
+          <p class="pop-kick">IN THE LOOP</p>
+        </div>
+      </div>
+      <div class="pop-main">
+        <button type="button" class="pop-x" id="pop-nl-x" aria-label="Close"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
+        <p class="eyebrow">Free newsletter</p>
+        <h2 id="pop-nl-title">What Is Opening, What Is Happening, Where to Eat</h2>
+        <p class="pop-lede" id="pop-nl-desc">A short email each Monday about the neighborhoods you care about.</p>
+        <form class="pop-form" id="pop-nl-form" action={config.newsletterAction} method="post">
+          <div class="pop-field"><label for="pop-nl-email">Email</label><input id="pop-nl-email" name="email" type="email" required placeholder="name@email.com" autocomplete="email" /></div>
+          <input class="pop-hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <input type="hidden" name="return" id="pop-nl-return" />
+          <button type="submit" class="btn gold" id="pop-nl-join">Join</button>
+        </form>
+        <p class="pop-fine">Free, and one click to leave. We never sell your email.</p>
+        <div><button type="button" class="pop-no" id="pop-nl-no">No thanks</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="pop-toast" id="pop-toast" role="status" hidden>
+    <span id="pop-toast-t"></span>
+    <button type="button" class="pop-tx" id="pop-toast-x" aria-label="Close"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
+  </div>
+</div>
+<script is:inline define:vars={{ POP_ON: enabled }}>
+  (function () {
+    var KEY = 'tl_popups', PREVIEW = 'tl_pop_preview', SHOWN = 'tl_pop_shown', PV = 'tl_pv', FROM = 'tl_nl_from';
+    var $ = function (id) { return document.getElementById(id); };
+    var back = $('pop-nl'); if (!back) return;
+    var card = $('pop-nl-card'), email = $('pop-nl-email'), toastBox = $('pop-toast');
+    function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
+    function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} return null; }
+    function mem() { try { return JSON.parse(ls(KEY)) || {}; } catch (e) { return {}; } }
+    function save(m) { ls(KEY, JSON.stringify(m)); }
+    var qs = new URLSearchParams(location.search), flag = qs.get('popup');
+    if (flag === 'reset') { ls(KEY, null); ls(PREVIEW, null); ss(SHOWN, null); ss(PV, null); ss(FROM, null); }
+    if (flag === 'on') ls(PREVIEW, '1');
+    if (flag === 'off') ls(PREVIEW, null);
+    var on = POP_ON || ls(PREVIEW) === '1', forced = flag === 'newsletter';
+
+    // A small thank you after the signup service sends the reader back to the page.
+    function toast(text) {
+      $('pop-toast-t').textContent = text; toastBox.hidden = false;
+      setTimeout(function () { toastBox.hidden = true; }, 8000);
+    }
+    $('pop-toast-x').addEventListener('click', function () { toastBox.hidden = true; });
+    var back_ = qs.get('newsletter');
+    if (back_) {
+      var m0 = mem(); if (back_ === 'ok') { m0.nl = m0.nl || {}; m0.nl.joined = true; save(m0); }
+      if (ss(FROM) === 'pop') {
+        toast(back_ === 'ok' ? 'Thanks, you are subscribed. Welcome to Tradition Local.' : back_ === 'invalid' ? 'That email address does not look right. Please try again.' : 'Something went wrong. Please try again in a minute.');
+        ss(FROM, null);
+      }
+    }
+
+    var lastFocus = null, prevOverflow = '';
+    function open(real) {
+      lastFocus = document.activeElement;
+      $('pop-nl-return').value = location.origin + location.pathname;
+      back.hidden = false;
+      prevOverflow = document.documentElement.style.overflow; document.documentElement.style.overflow = 'hidden';
+      if (real) { var m = mem(); m.nl = m.nl || {}; m.nl.shown = Date.now(); save(m); ss(SHOWN, '1'); }
+      try { email.focus(); } catch (e) {}
+    }
+    function close(why) {
+      if (back.hidden) return;
+      back.hidden = true; document.documentElement.style.overflow = prevOverflow;
+      if (!forced) { var m = mem(); m.nl = m.nl || {}; m.nl.closed = Date.now(); m.nl.how = why; save(m); }
+      try { if (lastFocus && lastFocus.focus) lastFocus.focus(); } catch (e) {}
+    }
+    $('pop-nl-x').addEventListener('click', function () { close('x'); });
+    $('pop-nl-no').addEventListener('click', function () { close('no'); });
+    back.addEventListener('mousedown', function (e) { if (e.target === back) close('outside'); });
+    $('pop-nl-form').addEventListener('submit', function () { ss(FROM, 'pop'); var b = $('pop-nl-join'); setTimeout(function () { b.disabled = true; b.textContent = 'Joining'; }, 0); });
+    back.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { e.preventDefault(); close('esc'); return; }
+      if (e.key !== 'Tab') return;
+      var f = [].slice.call(card.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]):not([type="hidden"]), select, textarea')).filter(function (x) { return !x.closest('[hidden]'); });
+      if (!f.length) return;
+      var first = f[0], last = f[f.length - 1], cur = document.activeElement;
+      if (e.shiftKey && (cur === first || cur === card)) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && cur === last) { e.preventDefault(); first.focus(); }
+    });
+
+    // The rules: one time only, never for people who joined, never on the first screen, never on account or legal pages.
+    var skip = /^\/(sign-in|account|newsletters|privacy|disclosures|contact|ask-dillon|404)(\/|$)/;
+    function busy() {
+      var a = document.activeElement, tag = a && a.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+      if (document.visibilityState && document.visibilityState !== 'visible') return true;
+      var h = document.querySelector('header.top'); if (h && h.classList.contains('open')) return true;
+      if (document.querySelector('.tt-cal.open')) return true;
+      return false;
+    }
+    function attempt(tries) {
+      if (ss(SHOWN)) return;
+      if (busy()) { if (tries < 6) setTimeout(function () { attempt(tries + 1); }, 5000); return; }
+      open(true);
+    }
+    if (forced) { setTimeout(function () { open(false); }, 600); return; }
+    if (!on || back_) return;
+    var m = mem(); if (m.nl && (m.nl.joined || m.nl.shown)) return;
+    if (ss(SHOWN) || skip.test(location.pathname)) return;
+    if (window.innerWidth < 761) return; // the phone version comes next
+    var pv = (parseInt(ss(PV), 10) || 0) + 1; ss(PV, String(pv));
+    setTimeout(function () { attempt(0); }, pv >= 2 ? 8000 : 45000);
+  })();
+</script>
