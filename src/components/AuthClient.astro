@@ -1,0 +1,36 @@
+---
+// Member sign in. Supabase Auth, loaded only on the pages that need it (Sign in and Account).
+// The publishable key is meant to be public. The database rules (Row Level Security) keep each member's details private.
+import { config } from '../config';
+import { url } from '../lib/data';
+const SB = { url: config.supabase.url, key: config.supabase.key };
+const PATHS = { account: url('/account'), signin: url('/sign-in'), home: url('/') };
+---
+<script is:inline src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
+<script is:inline define:vars={{ SB, PATHS }}>
+  (function () {
+    var sb = null;
+    // Plain words for the things Supabase can say back. Never shows a technical message to a reader.
+    function friendly(err) {
+      var c = String((err && err.code) || ''), m = String((err && err.message) || '');
+      if (c === 'invalid_credentials' || /invalid login/i.test(m)) return 'That email and password do not match. Check them and try again, or reset your password.';
+      if (c === 'email_not_confirmed' || /not confirmed/i.test(m)) return 'Please confirm your email first. Use the link we sent when you signed up.';
+      if (c === 'weak_password' || /at least|weak/i.test(m)) return 'Please choose a stronger password, with at least 8 characters.';
+      if (/rate|too many|over_/i.test(c + ' ' + m)) return 'Too many tries. Please wait a few minutes and try again.';
+      if (c === 'signup_disabled') return 'New accounts are paused right now. Please try again later.';
+      if (c === 'same_password' || /different from the old/i.test(m)) return 'Please choose a password you have not used before.';
+      return 'Something went wrong. Please try again, or contact us if it keeps happening.';
+    }
+    window.TLAuth = {
+      paths: PATHS,
+      client: function () {
+        if (!sb && window.supabase) sb = window.supabase.createClient(SB.url, SB.key, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } });
+        return sb;
+      },
+      friendly: friendly,
+      // Only ever send people to a page on this site.
+      safeNext: function (n) { n = String(n || ''); return /^\/[A-Za-z0-9\/_.~%-]*$/.test(n) && n.indexOf('//') !== 0 ? n : ''; },
+      go: function (u) { location.href = u; }
+    };
+  })();
+</script>
