@@ -5,6 +5,7 @@ import '../styles/pages.css';
 import { businesses, profiles, href, url, isClosed } from '../lib/data';
 import { areaPages, bizIn, topRating, category, isFood } from '../lib/helpers';
 import ComboKit from '../components/ComboKit.astro';
+import AuthClient from '../components/AuthClient.astro';
 import { config } from '../config';
 const areas = areaPages().map((p) => p.name).sort();
 const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b), x: isClosed(b) ? 1 : 0 }))
@@ -14,11 +15,34 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
 ---
 <Base title="Your Account" description="Your area, the places you follow, and what you receive." noindex>
   <section class="band hero"><div class="wrap"><p class="eyebrow">Your account</p><h1 style="margin-bottom:12px">Account and Settings</h1><p class="lead">Choose your area, follow the places you care about, and decide what you receive.</p>
-    <p class="meta" style="margin-top:16px">Your choices are saved on this device. Sign in is coming, and we will move them to your account then.</p></div></section>
+    <p class="meta" style="margin-top:16px">Your area and saved places stay on this device. Your name and details are kept with your account when you sign in.</p></div></section>
   <section class="band">
     <div class="wrap" style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
-      <nav aria-label="Account sections" style="flex:0 0 240px"><a class="menu" href="#areas">Your areas</a><a class="menu" href="#locally">Locally Plus</a><a class="menu" href="#loop">In the Loop</a><a class="menu" href="#saved">Saved places</a><a class="menu" href="#privacy">Privacy and data</a></nav>
+      <nav aria-label="Account sections" style="flex:0 0 240px"><a class="menu" href="#member">Your details</a><a class="menu" href="#areas">Your areas</a><a class="menu" href="#locally">Locally Plus</a><a class="menu" href="#loop">In the Loop</a><a class="menu" href="#saved">Saved places</a><a class="menu" href="#privacy">Privacy and data</a></nav>
       <div class="stack" style="flex:999 1 560px;min-width:0">
+
+        <div class="panel" id="member"><p class="eyebrow">Your details</p><h2 style="font-size:32px;margin-bottom:8px">Your Tradition Local Account</h2>
+          <div id="m-out"><p class="meta" style="font-size:16px;margin-bottom:20px">Create a free account to keep your name and details with us. You sign in with your email and a password.</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/sign-in#create')}>Create an account</a><a class="btn line" href={url('/sign-in')}>Sign in</a></div></div>
+          <div id="m-in" hidden>
+            <p class="meta" style="font-size:16px;margin-bottom:20px">You are signed in as <b id="m-email"></b>.</p>
+            <form id="m-form" style="display:grid;gap:14px;max-width:460px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div><label for="m-first">First name</label><input id="m-first" type="text" autocomplete="given-name" required /></div><div><label for="m-last">Last name</label><input id="m-last" type="text" autocomplete="family-name" /></div></div>
+              <div><label for="m-phone">Phone (optional)</label><input id="m-phone" type="tel" autocomplete="tel" /></div>
+              <div><label for="m-area">Area you are most interested in</label><select id="m-area"><option value="">Choose an area</option>{areas.map((a) => <option>{a}</option>)}</select></div>
+              <div><button class="btn" type="submit">Save my details</button></div>
+            </form>
+            <div class="si-note" id="m-note" role="status" aria-live="polite" hidden></div>
+            <p style="font-size:13px;font-weight:700;margin:32px 0 10px">Change your password</p>
+            <form id="m-pw" style="display:grid;gap:14px;max-width:460px">
+              <div><label for="m-p1">New password</label><input id="m-p1" type="password" autocomplete="new-password" minlength="8" required /></div>
+              <div><label for="m-p2">Type it again</label><input id="m-p2" type="password" autocomplete="new-password" minlength="8" required /></div>
+              <div><button class="btn line" type="submit">Update password</button></div>
+            </form>
+            <div class="si-note" id="m-pwnote" role="status" aria-live="polite" hidden></div>
+            <p style="margin-top:28px"><button class="btn line sm" type="button" id="m-out-btn">Sign out</button></p>
+          </div>
+        </div>
 
         <div class="panel" id="areas"><p class="eyebrow">Your areas</p><h2 style="font-size:32px;margin-bottom:8px">Where Do You Call Home?</h2>
           <p class="meta" style="font-size:16px;margin-bottom:20px">We use this for your local picks and to open Food on your area first.</p>
@@ -37,7 +61,7 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
           <div class="chips" id="l-topics">{topics.map(([k, l]) => <button class="chip" data-k={k} aria-pressed="false">{l}</button>)}</div>
           <p style="font-size:13px;font-weight:700;margin:24px 0 10px">How often</p>
           <div class="chips" id="l-freq"><button class="chip" data-f="twice" aria-pressed="false">Twice a month</button><button class="chip" data-f="monthly" aria-pressed="false">Monthly</button></div>
-          <p class="meta" style="margin:20px 0 16px">We save these now. Locally Plus emails start once sign in is connected.</p>
+          <p class="meta" style="margin:20px 0 16px">We save these now. Locally Plus emails have not started yet.</p>
           <a class="btn line sm" href={url('/locally')}>Open your Locally Plus page</a>
         </div>
 
@@ -103,6 +127,52 @@ const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openin
       link.href = URL.createObjectURL(blob); link.download = 'tradition-local-my-data.json'; link.click();
     });
     initHome(); picks(); follows(); drawLocally(); saved();
+  </script>
+  <style>
+    .si-note { margin-top: 18px; padding: 14px 16px; border-radius: 12px; font-size: 16px; line-height: 1.5; max-width: 460px; }
+    .si-note.ok { background: #e8f4ec; border: 1px solid #bcd9c5; color: #1d4d2b; }
+    .si-note.err { background: #fdecea; border: 1px solid #f0c4be; color: #7a1f14; }
+  </style>
+  <AuthClient />
+  <script is:inline>
+    (function () {
+      var A = window.TLAuth, c = A && A.client(); if (!c) return;
+      var $ = function (i) { return document.getElementById(i); }, cur = null, hasRow = false, shown = '';
+      function say(id, t, k) { var n = $(id); n.textContent = t || ''; n.className = 'si-note' + (k ? ' ' + k : ''); n.hidden = !t; }
+      function view(user) {
+        cur = user; $('m-out').hidden = !!user; $('m-in').hidden = !user; if (!user) { shown = ''; return; }
+        $('m-email').textContent = user.email || ''; if (shown === user.id) return; shown = user.id;
+        var meta = user.user_metadata || {};
+        c.from('profiles').select('first_name,last_name,phone,area_of_interest').eq('id', user.id).maybeSingle().then(function (r) {
+          var p = (r && r.data) || {}; hasRow = !!(r && r.data);
+          $('m-first').value = p.first_name || meta.first_name || ''; $('m-last').value = p.last_name || meta.last_name || '';
+          $('m-phone').value = p.phone || ''; $('m-area').value = p.area_of_interest || meta.area_of_interest || '';
+        });
+      }
+      c.auth.getSession().then(function (r) { var s = r && r.data && r.data.session; view(s ? s.user : null); });
+      c.auth.onAuthStateChange(function (ev, s) { if (ev === 'SIGNED_OUT') view(null); else if (s && s.user && (ev === 'SIGNED_IN' || ev === 'USER_UPDATED')) view(s.user); });
+      $('m-form').addEventListener('submit', function (e) {
+        e.preventDefault(); if (!cur) return; say('m-note', '');
+        var row = { first_name: $('m-first').value.trim(), last_name: $('m-last').value.trim(), phone: $('m-phone').value.trim(), area_of_interest: $('m-area').value };
+        if (!row.first_name) { say('m-note', 'Please tell us your first name.', 'err'); return; }
+        if (row.phone && !/^[0-9 +().-]{7,20}$/.test(row.phone)) { say('m-note', 'That phone number does not look right. Use numbers only, or leave it blank.', 'err'); return; }
+        var q = hasRow ? c.from('profiles').update(row).eq('id', cur.id) : c.from('profiles').insert(Object.assign({ id: cur.id, email: cur.email }, row));
+        q.then(function (r) {
+          if (r && r.error) { say('m-note', 'We could not save that. Please try again.', 'err'); return; }
+          hasRow = true; say('m-note', 'Saved.', 'ok'); c.auth.updateUser({ data: { first_name: row.first_name, last_name: row.last_name, area_of_interest: row.area_of_interest } });
+        });
+      });
+      $('m-pw').addEventListener('submit', function (e) {
+        e.preventDefault(); var p1 = $('m-p1').value, p2 = $('m-p2').value; say('m-pwnote', '');
+        if (p1.length < 8) { say('m-pwnote', 'Please use at least 8 characters.', 'err'); return; }
+        if (p1 !== p2) { say('m-pwnote', 'The two passwords do not match.', 'err'); return; }
+        c.auth.updateUser({ password: p1 }).then(function (r) {
+          if (r && r.error) { say('m-pwnote', A.friendly(r.error), 'err'); return; }
+          $('m-p1').value = ''; $('m-p2').value = ''; say('m-pwnote', 'Your password is updated.', 'ok');
+        });
+      });
+      $('m-out-btn').addEventListener('click', function () { c.auth.signOut().then(function () { A.go(A.paths.home); }); });
+    })();
   </script>
 <ComboKit />
 </Base>
