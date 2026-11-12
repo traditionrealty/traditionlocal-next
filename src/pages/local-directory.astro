@@ -2,135 +2,345 @@
 import Base from '../layouts/Base.astro';
 import AuthClient from '../components/AuthClient.astro';
 import '../styles/pages.css';
+import '../styles/dock.css';
 import { url } from '../lib/data';
-const back = encodeURIComponent('/local-directory/');
+const here = Astro.url.pathname.replace(/\/?$/, '/');
+const back = encodeURIComponent(here);
+const DX = { businesses: url('/directory-businesses.json'), signin: url('/sign-in?next=' + back), create: url('/sign-in?next=' + back + '#create'), ask: url('/ask-dillon') };
 ---
-<Base title="Local Directory" active="More" description="Local providers we know and trust, for members.">
-  <section class="band hero">
+<Base title="Local Directory" active="More" description="Search the sponsors, service providers, and local businesses we know and trust.">
+<div class="dx">
+  <section class="band hero dock-hero">
     <div class="wrap">
-      <p class="eyebrow">Members</p>
-      <h1 style="margin-bottom:16px;max-width:860px">Providers We Know and Trust</h1>
-      <p class="lead" style="margin-bottom:28px">The Local Directory is a members only list of local pros we would call ourselves, shared with neighbors who are moving, buying, or settling in.</p>
-      <div id="ld-cta" style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/sign-in?next=' + back + '#create')}>Create a free account</a><a class="btn line" href={url('/sign-in?next=' + back)}>Sign in</a></div>
+      <p class="eyebrow">Local Directory</p>
+      <h1 style="margin-bottom:12px">Who Are You Looking For?</h1>
+      <p class="lead" style="margin-bottom:0">Sponsors, service providers, and local businesses in one place. Members see it all, including the pros we would call ourselves.</p>
     </div>
   </section>
 
-  <section class="band" id="ld-out">
-    <div class="wrap split">
-      <div class="main">
-        <p class="eyebrow">How it works</p><h2 style="margin-bottom:24px">Free for Members</h2>
-        <ol class="wx" role="list">
-          <li><span class="wx-n" aria-hidden="true">1</span><div><b>Every Pro Is One We Know</b><span class="meta" style="font-size:16px">We list people we have worked with or heard good things about from neighbors.</span></div></li>
-          <li><span class="wx-n" aria-hidden="true">2</span><div><b>Create a Free Account</b><span class="meta" style="font-size:16px">Sign up with your email and a password, confirm your email, and the list opens right away.</span></div></li>
-          <li><span class="wx-n" aria-hidden="true">3</span><div><b>Ask Us Anything</b><span class="meta" style="font-size:16px">Not sure who to call? Ask Dillon and he will point you the right way.</span></div></li>
-        </ol>
-      </div>
-      <div class="side">
-        <div class="card pad pick">
-          <p class="eyebrow">Members only</p><h3 style="margin-bottom:8px">Why an Account?</h3>
-          <p class="meta" style="margin-bottom:16px;font-size:16px">We keep this list for neighbors, not the whole internet. A free account keeps it that way, and it takes about a minute.</p>
-          <a class="btn" href={url('/sign-in?next=' + back + '#create')} style="width:100%">Create a free account</a>
+  <section class="band results dx-main">
+    <div class="fdock" id="f-dock">
+      <div class="wrap">
+        <div class="fbar">
+          <div class="fbar-row">
+            <div class="fbar-search dx-search">
+              <form id="dx-form" role="search" autocomplete="off">
+                <label for="dx-q">Search the directory</label>
+                <input id="dx-q" type="search" role="combobox" aria-expanded="false" aria-controls="dx-list" aria-autocomplete="list" aria-haspopup="listbox" placeholder="Search by name, kind of help, or neighborhood" />
+              </form>
+              <div id="dx-dd" class="dx-dd" hidden><div id="dx-list" role="listbox" aria-label="Search results"></div></div>
+            </div>
+          </div>
+          <div class="fbar-status">
+            <div class="dx-tabs" id="dx-tabs" role="group" aria-label="Sections of the directory">
+              <button class="chip on" type="button" data-v="" aria-pressed="true">All</button>
+              <button class="chip" type="button" data-v="sponsors" aria-pressed="false">Sponsors</button>
+              <button class="chip" type="button" data-v="providers" aria-pressed="false">Service providers</button>
+              <button class="chip" type="button" data-v="businesses" aria-pressed="false">Businesses</button>
+            </div>
+            <span class="meta" id="dx-status"></span>
+          </div>
         </div>
-        <div class="card pad" style="margin-top:24px"><p class="eyebrow">Questions</p><p style="margin-bottom:16px">Looking for a specific kind of help right now?</p><a class="btn line" href={url('/ask-dillon')}>Ask Dillon</a></div>
       </div>
     </div>
-  </section>
-
-  <section class="band" id="ld-wait" hidden><div class="wrap"><p class="meta" style="font-size:17px">One moment, opening the directory.</p></div></section>
-
-  <section class="band" id="ld-in" hidden>
     <div class="wrap">
-      <p class="eyebrow">For members</p><h2 id="ld-hi" style="margin-bottom:8px">Your Local Directory</h2>
-      <p class="meta" style="margin-bottom:24px;max-width:720px;font-size:16px">These are people we would call ourselves. Always check licenses and get your own quotes. This list is a starting point, not a guarantee.</p>
-      <div id="ld-tools" hidden style="display:grid;gap:16px;margin-bottom:32px">
-        <div style="max-width:460px"><label class="sr" for="ld-q">Search the directory</label><input id="ld-q" type="search" placeholder="Search by name or kind of help" autocomplete="off" /></div>
-        <div class="chips" id="ld-cats" role="group" aria-label="Kinds of help"></div>
+      <div id="dx-home">
+        <p class="eyebrow">Or browse by section</p>
+        <div class="grid g3">
+          <a class="card pad dx-door" href="#sponsors"><span class="tag soft">Public</span><h3>Sponsors</h3><p>The companies behind Tradition Local. Sponsors pay to be listed, and their support keeps this site free.</p><span class="dx-go">Browse sponsors</span></a>
+          <a class="card pad dx-door" href="#providers"><span class="tag">Members only</span><h3>Service Providers</h3><p>Inspectors, lenders, movers, and more. Pros we would call ourselves, free for members.</p><span class="dx-go">Browse service providers</span></a>
+          <a class="card pad dx-door" href="#businesses"><span class="tag soft">Public</span><h3>Businesses</h3><p>Food, shops, and services around Houston, with our honest reviews.</p><span class="dx-go">Browse businesses</span></a>
+        </div>
+        <div id="dx-strip" class="dx-strip" hidden>
+          <span class="dx-strip-l">Sponsors</span><div id="dx-logos" class="dx-logos"></div>
+        </div>
+        <p class="meta dx-fine">Sponsors pay to be listed. Their support keeps Tradition Local free for neighbors. <a href={DX.ask} style="font-weight:700">Become a sponsor</a></p>
       </div>
-      <div class="ld-note" id="ld-note" role="status" aria-live="polite" hidden></div>
-      <div id="ld-list"></div>
-      <p class="meta" style="margin-top:36px">Know a great pro we should add? <a href={url('/ask-dillon')} style="font-weight:700">Tell Dillon</a>.</p>
+
+      <div id="dx-results" hidden>
+        <div class="dx-bar"><h2 id="dx-rt">Results</h2><button type="button" class="btn line sm" id="dx-clear">Clear search</button></div>
+        <div id="dx-rbody"></div>
+      </div>
+
+      <div id="dx-section" hidden>
+        <p style="margin:0 0 20px"><a href="#" class="dx-back">Back to the directory</a></p>
+        <div class="dx-bar"><h2 id="dx-st"></h2></div>
+        <p id="dx-sd" class="meta dx-sd"></p>
+        <div id="dx-chips" class="chips" role="group" aria-label="Filter" hidden></div>
+        <div id="dx-sbody"></div>
+        <p id="dx-more-wrap" hidden style="margin-top:28px"><button type="button" class="btn line" id="dx-more">Show more</button></p>
+      </div>
     </div>
   </section>
 
-  <style>
-    .ld-note { padding: 14px 16px; border-radius: 12px; font-size: 16px; line-height: 1.5; background: #f1eee6; border: 1px solid #ddd6c4; margin-bottom: 24px; max-width: 720px; }
-    #ld-out[hidden], #ld-wait[hidden], #ld-in[hidden], #ld-tools[hidden], #ld-cta[hidden], .ld-note[hidden] { display: none !important; }
-    .ld-cat { margin: 0 0 14px; }
-    .ld-group { margin-bottom: 40px; }
-    .ld-card h4 { margin: 10px 0 4px; }
-    .ld-links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 14px; font-weight: 700; font-size: 15px; }
-  </style>
-  <AuthClient />
-  <script is:inline>
-    (function () {
-      var A = window.TLAuth, c = A && A.client();
-      var $ = function (i) { return document.getElementById(i); };
-      var rows = [], cat = '', q = '';
-      function show(which) { ['ld-out', 'ld-wait', 'ld-in'].forEach(function (id) { $(id).hidden = id !== which; }); $('ld-cta').hidden = which !== 'ld-out'; }
-      function note(t) { $('ld-note').textContent = t || ''; $('ld-note').hidden = !t; }
-      function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text) e.textContent = text; return e; }
-      function link(href, text, ext) { var a = el('a', '', text); a.href = href; if (ext) { a.rel = 'noopener'; a.target = '_blank'; } return a; }
-      function safeUrl(u) { u = String(u || '').trim(); if (!u) return ''; if (!/^https?:\/\//i.test(u)) u = 'https://' + u; try { var p = new URL(u); return /^https?:$/.test(p.protocol) ? p.href : ''; } catch (e) { return ''; } }
-      function safeTel(p) { var d = String(p || '').replace(/[^0-9+]/g, ''); return d.length >= 7 ? d : ''; }
-      function safeMail(m) { m = String(m || '').trim(); return /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(m) ? m : ''; }
-      function matches(r) { if (cat && r.category !== cat) return false; if (!q) return true; return [r.name, r.category, r.contact_name, r.why, r.service_area].join(' ').toLowerCase().indexOf(q) > -1; }
-      function render() {
-        var list = $('ld-list'); list.textContent = '';
-        var shown = rows.filter(matches);
-        if (!rows.length) { note('We are adding providers now. Check back soon, or ask Dillon who to call.'); return; }
-        if (!shown.length) { note('Nothing matches that search. Try a different word, or choose All.'); return; }
-        note('');
-        var groups = {}, order = [];
-        shown.forEach(function (r) { var k = r.category || 'Other'; if (!groups[k]) { groups[k] = []; order.push(k); } groups[k].push(r); });
-        order.forEach(function (k) {
-          var g = el('div', 'ld-group'); g.appendChild(el('h3', 'ld-cat', k));
-          var grid = el('div', 'grid g3');
-          groups[k].forEach(function (r) {
-            var card = el('div', 'card pad ld-card');
-            card.appendChild(el('span', 'tag', k));
-            card.appendChild(el('h4', '', r.name));
-            if (r.contact_name) card.appendChild(el('p', 'meta', 'Ask for ' + r.contact_name));
-            if (r.why) card.appendChild(el('p', '', r.why));
-            if (r.service_area) card.appendChild(el('p', 'meta', 'Serves ' + r.service_area));
-            var links = el('div', 'ld-links'), tel = safeTel(r.phone), mail = safeMail(r.email), web = safeUrl(r.website);
-            if (tel) links.appendChild(link('tel:' + tel, 'Call ' + r.phone));
-            if (mail) links.appendChild(link('mailto:' + mail, 'Email'));
-            if (web) links.appendChild(link(web, 'Website', true));
-            if (links.children.length) card.appendChild(links);
-            grid.appendChild(card);
-          });
-          g.appendChild(grid); list.appendChild(g);
-        });
+  <section class="band navy">
+    <div class="wrap dx-cta">
+      <div><p class="eyebrow">Missing someone?</p><h2 style="color:#fff">Know a Great Pro or Business We Should Add?</h2></div>
+      <a class="btn gold" href={DX.ask}>Tell Dillon</a>
+    </div>
+  </section>
+</div>
+
+<style is:global>
+  .dx [hidden] { display: none !important; }
+  .dx-search { position: relative; }
+  .dx-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .dx-tabs .chip { min-height: var(--control-h-sm); padding: 0 14px; font-size: var(--fs-small); font-weight: 500; }
+  #dx-status a { font-weight: 700; }
+  .dx-dd { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 50; max-width: 860px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: 0 12px 32px rgba(29, 26, 109, .18); padding: 8px 0; max-height: min(70vh, 560px); overflow: auto; }
+  .dx-gh { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 4px; font-size: 12px; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; color: var(--green); border-top: 1px solid var(--line); margin-top: 6px; }
+  .dx-gh:first-child { border-top: 0; margin-top: 0; }
+  .dx-gh span:last-child { font-size: var(--fs-small); letter-spacing: 0; text-transform: none; font-weight: 400; color: var(--slate); }
+  .dx-opt { display: flex; align-items: center; gap: 14px; padding: 10px 20px; text-decoration: none; color: var(--navy); }
+  .dx-opt:hover, .dx-opt[aria-selected="true"] { background: var(--ivory); color: var(--navy); }
+  .dx-opt[aria-selected="true"] { outline: 2px solid var(--blue); outline-offset: -2px; }
+  .dx-opt .tag { flex: none; }
+  .dx-ico { width: 44px; height: 44px; flex: none; border-radius: 10px; background: var(--ivory); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .dx-ico img { width: 100%; height: 100%; object-fit: contain; }
+  .dx-name { font-family: var(--serif); font-weight: 600; font-size: 18px; line-height: 1.25; display: block; }
+  .dx-sub { font-size: var(--fs-small); color: var(--slate); display: block; }
+  .dx-body { flex: 1; min-width: 0; }
+  .dx-msg { padding: 6px 20px 12px; font-size: 15px; color: var(--slate); }
+  .dx-msg a { font-weight: 700; }
+  .dx-foot { border-top: 1px solid var(--line); margin-top: 8px; padding: 0 20px; }
+  .dx-foot a { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
+  .dx-door { display: flex; flex-direction: column; gap: 10px; text-decoration: none; color: var(--navy); }
+  .dx-door:hover { border-color: var(--navy); color: var(--navy); }
+  .dx-door h3 { margin: 6px 0 0; }
+  .dx-door p { color: var(--slate); font-size: 16px; }
+  .dx-go { margin-top: 10px; font-weight: 700; color: var(--blue); }
+  .dx-strip { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 20px 32px; }
+  .dx-strip-l { font-size: var(--fs-label); font-weight: 700; color: var(--slate); letter-spacing: 1px; text-transform: uppercase; }
+  .dx-logos { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: center; }
+  .dx-logos a, .dx-logos span { display: flex; align-items: center; justify-content: center; width: 140px; height: 56px; border-radius: 10px; background: var(--ivory); padding: 6px; font-size: var(--fs-small); color: var(--navy); text-decoration: none; text-align: center; }
+  .dx-logos img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .dx-fine { margin-top: 20px; }
+  .dx-bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .dx-sd { margin: 0 0 24px; max-width: 720px; font-size: 16px; }
+  .dx-back { display: inline-flex; align-items: center; min-height: 44px; font-weight: 700; }
+  .dx-group { margin-bottom: 44px; }
+  .dx-group h3 { margin: 0 0 6px; }
+  .dx-gnote { margin: 0 0 16px; font-size: var(--fs-small); color: var(--slate); }
+  .dx-card { display: flex; flex-direction: column; gap: 8px; }
+  .dx-card .tag { align-self: flex-start; }
+  .dx-card h4 { margin: 4px 0 0; }
+  .dx-card p { margin: 0; }
+  .dx-logo { height: 80px; border-radius: 10px; background: var(--ivory); display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 8px; }
+  .dx-logo img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  .dx-links { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: 8px; font-weight: 700; font-size: 15px; }
+  .dx-links a { display: inline-flex; align-items: center; min-height: 44px; }
+  .dx-lock { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; padding: 24px; border: 1px solid var(--gold); background: var(--ivory); border-radius: var(--radius); }
+  .dx-lock p { flex: 1 1 320px; margin: 0; font-size: 17px; }
+  .dx-lock .acts { display: flex; flex-wrap: wrap; gap: 12px; }
+  .dx-empty { padding: 18px 22px; border-radius: var(--radius); background: var(--ivory); border: 1px solid var(--line); max-width: 720px; font-size: 16px; }
+  .dx-cta { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; justify-content: space-between; }
+  #dx-chips { margin-bottom: 28px; }
+  @media (max-width: 760px) { .dx-dd { max-height: 60vh; } .dx-opt, .dx-gh, .dx-msg, .dx-foot { padding-left: 14px; padding-right: 14px; } }
+</style>
+
+<AuthClient />
+<script is:inline define:vars={{ DX }}>
+  (function () {
+    var A = window.TLAuth, c = A && A.client();
+    var $ = function (i) { return document.getElementById(i); };
+    var S = { signed: false, sponsors: [], providers: [], biz: [], ready: { s: false, p: false, b: false }, cat: '', shown: 24, idx: -1 };
+    var STORE = '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5F6672" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9a2.5 2.5 0 0 0 5 0a2.5 2.5 0 0 0 6 0a2.5 2.5 0 0 0 5 0"/><path d="M5 12v8h14v-8"/></svg>';
+    var PERSON = '<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#5F6672" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>';
+    var LOCK = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5F6672" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>';
+
+    function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null && text !== '') e.textContent = text; return e; }
+    function svg(markup, cls) { var s = el('span', cls); s.innerHTML = markup; return s; }
+    function a(href, text, cls, ext) { var x = el('a', cls, text); x.href = href; if (ext) { x.target = '_blank'; x.rel = ext; } return x; }
+    function norm(s) { return String(s || '').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim(); }
+    function safeUrl(u) { u = String(u || '').trim(); if (!u) return ''; if (!/^https?:\/\//i.test(u)) u = 'https://' + u; try { var p = new URL(u); return /^https?:$/.test(p.protocol) ? p.href : ''; } catch (e) { return ''; } }
+    function safeImg(u) { u = String(u || '').trim(); return /^https:\/\//i.test(u) || /^\/[^\/]/.test(u) ? u : ''; }
+    function safeTel(p) { var d = String(p || '').replace(/[^0-9+]/g, ''); return d.length >= 7 ? d : ''; }
+    function safeMail(m) { m = String(m || '').trim(); return /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/.test(m) ? m : ''; }
+    function matchWord(n) { return n === 1 ? '1 match' : n + ' matches'; }
+
+    // ---- searching: every word must appear somewhere in the name, kind, area, or description
+    function find(items, q, fields, nameKey) {
+      var words = norm(q).split(' ').filter(Boolean); if (!words.length) return [];
+      var out = [];
+      items.forEach(function (it) {
+        if (!it._h) it._h = norm(fields(it).join(' '));
+        var h = it._h, ok = words.every(function (w) { return h.indexOf(w) > -1; });
+        if (!ok) return;
+        var nm = norm(it[nameKey]), score = 1;
+        if (nm.indexOf(words[0]) === 0) score += 3; else if (words.every(function (w) { return nm.indexOf(w) > -1; })) score += 2;
+        out.push({ it: it, s: score });
+      });
+      out.sort(function (x, y) { return y.s - x.s || String(x.it[nameKey]).localeCompare(String(y.it[nameKey])); });
+      return out.map(function (o) { return o.it; });
+    }
+    function searchAll(q) {
+      return {
+        sponsors: find(S.sponsors, q, function (s) { return [s.name, s.tagline]; }, 'name'),
+        providers: S.signed ? find(S.providers, q, function (p) { return [p.name, p.category, p.contact_name, p.why, p.service_area]; }, 'name') : null,
+        biz: find(S.biz, q, function (b) { return [b.n, b.k, b.a, b.f ? 'food and drink' : 'shops and services']; }, 'n')
+      };
+    }
+
+    // ---- cards
+    function logoBox(s) { var box = el('div', 'dx-logo'), img = safeImg(s.logo_url); if (img) { var i = el('img'); i.src = img; i.alt = ''; i.loading = 'lazy'; box.appendChild(i); } else box.appendChild(svg(STORE)); return box; }
+    function sponsorCard(s) {
+      var card = el('div', 'card pad dx-card'); card.appendChild(logoBox(s)); card.appendChild(el('span', 'tag', 'Sponsor'));
+      card.appendChild(el('h4', '', s.name)); if (s.tagline) card.appendChild(el('p', 'meta', s.tagline));
+      var w = safeUrl(s.website); if (w) { var l = el('div', 'dx-links'); l.appendChild(a(w, 'Visit website', '', 'sponsored noopener')); card.appendChild(l); }
+      return card;
+    }
+    function providerCard(p) {
+      var card = el('div', 'card pad dx-card'); card.appendChild(el('span', 'tag soft', p.category || 'Other')); card.appendChild(el('h4', '', p.name));
+      if (p.contact_name) card.appendChild(el('p', 'meta', 'Ask for ' + p.contact_name)); if (p.why) card.appendChild(el('p', '', p.why)); if (p.service_area) card.appendChild(el('p', 'meta', 'Serves ' + p.service_area));
+      var l = el('div', 'dx-links'), t = safeTel(p.phone), m = safeMail(p.email), w = safeUrl(p.website);
+      if (t) l.appendChild(a('tel:' + t, 'Call ' + p.phone)); if (m) l.appendChild(a('mailto:' + m, 'Email')); if (w) l.appendChild(a(w, 'Website', '', 'noopener'));
+      if (l.children.length) card.appendChild(l); return card;
+    }
+    function bizCard(b) {
+      var card = el('div', 'card pad dx-card'); card.appendChild(el('span', 'tag soft', b.k || (b.f ? 'Food and drink' : 'Business')));
+      card.appendChild(el('h4', '', b.n)); if (b.a) card.appendChild(el('p', 'meta', b.a));
+      var l = el('div', 'dx-links'); l.appendChild(a(b.u, b.r ? 'Read our review' : 'See the page')); card.appendChild(l); return card;
+    }
+    function lockPanel(text) {
+      var box = el('div', 'dx-lock'); box.appendChild(el('p', '', text)); var acts = el('div', 'acts');
+      acts.appendChild(a(DX.create, 'Create a free account', 'btn')); acts.appendChild(a(DX.signin, 'Sign in', 'btn line')); box.appendChild(acts); return box;
+    }
+    function grid(nodes, cols) { var g = el('div', 'grid ' + (cols || 'g3')); nodes.forEach(function (n) { g.appendChild(n); }); return g; }
+
+    // ---- the dropdown under the search box
+    function option(id, href, icon, name, sub, tag, ext) {
+      var o = el('a', 'dx-opt'); o.id = id; o.href = href; o.setAttribute('role', 'option'); o.setAttribute('aria-selected', 'false'); if (ext) { o.target = '_blank'; o.rel = ext; }
+      o.appendChild(icon); var body = el('span', 'dx-body'); body.appendChild(el('span', 'dx-name', name)); if (sub) body.appendChild(el('span', 'dx-sub', sub)); o.appendChild(body);
+      if (tag) o.appendChild(el('span', 'tag', tag)); return o;
+    }
+    function note(text, linkHref, linkText) { var d = el('div', 'dx-msg'); d.setAttribute('role', 'option'); d.setAttribute('aria-disabled', 'true'); d.appendChild(document.createTextNode(text + ' ')); if (linkHref) d.appendChild(a(linkHref, linkText)); return d; }
+    function head(label, count) { var h = el('div', 'dx-gh'); h.setAttribute('role', 'presentation'); h.appendChild(el('span', '', label)); h.appendChild(el('span', '', count)); return h; }
+    function hashFor(q) { return '#search=' + encodeURIComponent(q); }
+    function drawDropdown() {
+      var q = $('dx-q').value.trim(), dd = $('dx-dd'), list = $('dx-list');
+      if (q.length < 2) { closeDD(); return; }
+      var r = searchAll(q), n = 0; list.textContent = ''; S.idx = -1;
+      function id() { return 'dx-o' + (n++); }
+      list.appendChild(head('Sponsors', matchWord(r.sponsors.length)));
+      if (r.sponsors.length) r.sponsors.slice(0, 3).forEach(function (s) { var w = safeUrl(s.website); var ic = el('span', 'dx-ico'); var im = safeImg(s.logo_url); if (im) { var i = el('img'); i.src = im; i.alt = ''; ic.appendChild(i); } else ic.appendChild(svg(STORE)); list.appendChild(option(id(), w || '#sponsors', ic, s.name, s.tagline, 'Sponsor', w ? 'sponsored noopener' : '')); });
+      else list.appendChild(note('No sponsors match ' + q + '.'));
+      list.appendChild(head('Service providers', r.providers ? matchWord(r.providers.length) : 'Members only'));
+      if (!r.providers) list.appendChild(note('Service providers are for members.', DX.create, 'Create a free account to search them'));
+      else if (r.providers.length) r.providers.slice(0, 3).forEach(function (p) { var ic = el('span', 'dx-ico'); ic.appendChild(svg(PERSON)); list.appendChild(option(id(), hashFor(q), ic, p.name, [p.category, p.service_area].filter(Boolean).join(', '))); });
+      else list.appendChild(note('Nothing for ' + q + ' here.', DX.ask, 'Ask Dillon who to call'));
+      list.appendChild(head('Businesses', matchWord(r.biz.length)));
+      if (r.biz.length) r.biz.slice(0, 4).forEach(function (b) { var ic = el('span', 'dx-ico'); ic.appendChild(svg(STORE)); list.appendChild(option(id(), b.u, ic, b.n, [b.k, b.a].filter(Boolean).join(', '))); });
+      else list.appendChild(note('No businesses match ' + q + '.'));
+      var f = el('div', 'dx-foot'); f.setAttribute('role', 'presentation'); var fa = a(hashFor(q), 'See all results for ' + q); fa.id = id(); fa.setAttribute('role', 'option'); fa.setAttribute('aria-selected', 'false'); f.appendChild(fa); list.appendChild(f);
+      dd.hidden = false; $('dx-q').setAttribute('aria-expanded', 'true');
+    }
+    function closeDD() { $('dx-dd').hidden = true; $('dx-q').setAttribute('aria-expanded', 'false'); $('dx-q').removeAttribute('aria-activedescendant'); S.idx = -1; }
+    function options() { return [].slice.call($('dx-list').querySelectorAll('[role=option]:not([aria-disabled=true])')); }
+    function setActive(i) {
+      var o = options(); o.forEach(function (x) { x.setAttribute('aria-selected', 'false'); }); S.idx = i;
+      if (i >= 0 && o[i]) { o[i].setAttribute('aria-selected', 'true'); $('dx-q').setAttribute('aria-activedescendant', o[i].id); if (o[i].scrollIntoView) o[i].scrollIntoView({ block: 'nearest' }); } else $('dx-q').removeAttribute('aria-activedescendant');
+    }
+
+    // ---- the three views: home, results, and one section
+    function show(which) { ['dx-home', 'dx-results', 'dx-section'].forEach(function (id) { $(id).hidden = id !== which; }); }
+    function drawStrip() {
+      var strip = $('dx-strip'), box = $('dx-logos'); box.textContent = '';
+      if (!S.sponsors.length) { strip.hidden = true; return; }
+      S.sponsors.slice(0, 8).forEach(function (s) { var w = safeUrl(s.website), im = safeImg(s.logo_url), x = w ? a(w, '', '', 'sponsored noopener') : el('span'); x.className = ''; if (im) { var i = el('img'); i.src = im; i.alt = s.name; x.appendChild(i); } else x.textContent = s.name; box.appendChild(x); });
+      strip.hidden = false;
+    }
+    function drawResults(q) {
+      var r = searchAll(q), body = $('dx-rbody'); body.textContent = '';
+      $('dx-rt').textContent = 'Results for ' + q;
+      var g1 = el('div', 'dx-group'); g1.appendChild(el('h3', '', 'Sponsors')); g1.appendChild(el('p', 'dx-gnote', matchWord(r.sponsors.length) + '. Sponsors pay to be listed.'));
+      if (r.sponsors.length) g1.appendChild(grid(r.sponsors.map(sponsorCard))); else g1.appendChild(el('div', 'dx-empty', 'No sponsors match ' + q + '.')); body.appendChild(g1);
+      var g2 = el('div', 'dx-group'); g2.appendChild(el('h3', '', 'Service providers'));
+      if (!r.providers) { g2.appendChild(el('p', 'dx-gnote', 'Members only')); g2.appendChild(lockPanel('Service providers are for members. Create a free account to search the pros we would call ourselves.')); }
+      else { g2.appendChild(el('p', 'dx-gnote', matchWord(r.providers.length) + '.')); if (r.providers.length) g2.appendChild(grid(r.providers.map(providerCard))); else { var e = el('div', 'dx-empty'); e.appendChild(document.createTextNode('Nothing for ' + q + ' here. ')); e.appendChild(a(DX.ask, 'Ask Dillon who to call')); g2.appendChild(e); } }
+      body.appendChild(g2);
+      var g3 = el('div', 'dx-group'); g3.appendChild(el('h3', '', 'Businesses')); g3.appendChild(el('p', 'dx-gnote', matchWord(r.biz.length) + '.'));
+      if (r.biz.length) g3.appendChild(grid(r.biz.slice(0, 24).map(bizCard), 'g3')); else g3.appendChild(el('div', 'dx-empty', 'No businesses match ' + q + '.'));
+      if (r.biz.length > 24) g3.appendChild(el('p', 'meta', 'Showing the first 24 of ' + r.biz.length + '. Add a word to narrow it down.'));
+      body.appendChild(g3); show('dx-results');
+    }
+    function chipRow(options, current, onPick) {
+      var box = $('dx-chips'); box.textContent = ''; box.hidden = options.length < 2;
+      options.forEach(function (o) { var b = el('button', 'chip' + (o.v === current ? ' on' : ''), o.l); b.type = 'button'; b.setAttribute('aria-pressed', o.v === current ? 'true' : 'false'); b.addEventListener('click', function () { onPick(o.v); }); box.appendChild(b); });
+    }
+    function drawSection(which, stay) {
+      var body = $('dx-sbody'); body.textContent = ''; $('dx-more-wrap').hidden = true; $('dx-chips').hidden = true;
+      if (which === 'sponsors') {
+        $('dx-st').textContent = 'Sponsors'; $('dx-sd').textContent = 'The companies behind Tradition Local. Sponsors pay to be listed, and their support keeps this site free.';
+        if (!S.ready.s) body.appendChild(el('p', 'meta', 'One moment.')); else if (!S.sponsors.length) { var e = el('div', 'dx-empty'); e.appendChild(document.createTextNode('Sponsors will appear here soon. Want your business here? ')); e.appendChild(a(DX.ask, 'Become a sponsor')); body.appendChild(e); } else body.appendChild(grid(S.sponsors.map(sponsorCard), 'g3'));
+      } else if (which === 'providers') {
+        $('dx-st').textContent = 'Service Providers'; $('dx-sd').textContent = 'Pros we would call ourselves. Always check licenses and get your own quotes. This list is a starting point, not a guarantee.';
+        if (!S.signed) body.appendChild(lockPanel('Service providers are for members. It is free, and it takes about a minute.'));
+        else if (!S.ready.p) body.appendChild(el('p', 'meta', 'One moment.'));
+        else if (!S.providers.length) body.appendChild(el('div', 'dx-empty', 'We are adding providers now. Check back soon, or ask Dillon who to call.'));
+        else {
+          var cats = []; S.providers.forEach(function (p) { var k = p.category || 'Other'; if (cats.indexOf(k) < 0) cats.push(k); }); cats.sort();
+          chipRow([{ v: '', l: 'All' }].concat(cats.map(function (k) { return { v: k, l: k }; })), S.cat, function (v) { S.cat = v; drawSection('providers', true); });
+          var list = S.providers.filter(function (p) { return !S.cat || (p.category || 'Other') === S.cat; }); body.appendChild(grid(list.map(providerCard), 'g3'));
+        }
+      } else {
+        $('dx-st').textContent = 'Businesses'; $('dx-sd').textContent = 'Food, shops, and services around Houston, with our honest reviews.';
+        if (!S.ready.b) body.appendChild(el('p', 'meta', 'One moment.'));
+        else {
+          chipRow([{ v: '', l: 'All' }, { v: 'food', l: 'Food and drink' }, { v: 'shops', l: 'Shops and services' }], S.cat, function (v) { S.cat = v; S.shown = 24; drawSection('businesses', true); });
+          var all = S.biz.filter(function (b) { return !S.cat || (S.cat === 'food' ? b.f : !b.f); });
+          body.appendChild(grid(all.slice(0, S.shown).map(bizCard), 'g3'));
+          if (all.length > S.shown) $('dx-more-wrap').hidden = false;
+        }
       }
-      function chips() {
-        var box = $('ld-cats'); box.textContent = '';
-        var cats = []; rows.forEach(function (r) { if (r.category && cats.indexOf(r.category) < 0) cats.push(r.category); }); cats.sort();
-        [''].concat(cats).forEach(function (k) {
-          var b = el('button', 'chip' + (k === cat ? ' on' : ''), k || 'All'); b.type = 'button'; b.setAttribute('aria-pressed', k === cat ? 'true' : 'false');
-          b.addEventListener('click', function () { cat = k; chips(); render(); }); box.appendChild(b);
-        });
-        $('ld-tools').hidden = !rows.length;
-      }
-      function load(user) {
-        var first = user && user.user_metadata && user.user_metadata.first_name;
-        $('ld-hi').textContent = first ? 'Welcome, ' + first : 'Your Local Directory'; show('ld-in'); note('');
-        c.from('directory_providers').select('id,category,name,contact_name,phone,email,website,service_area,why').eq('published', true).order('category').order('sort_order').order('name').then(function (r) {
-          if (r && r.error) {
-            var code = String(r.error.code || '');
-            note(code === '42P01' || code === 'PGRST205' ? 'The directory is being set up. Please check back soon.' : 'We could not open the directory just now. Please refresh the page, or try again in a moment.');
-            return;
-          }
-          rows = (r && r.data) || []; chips(); render();
-        }, function () { note('We could not open the directory just now. Please refresh the page, or try again in a moment.'); });
-      }
-      $('ld-q').addEventListener('input', function () { q = this.value.trim().toLowerCase(); render(); });
-      if (!c) { show('ld-out'); return; }
-      c.auth.getSession().then(function (r) { var s = r && r.data && r.data.session; if (s) load(s.user); else show('ld-out'); }, function () { show('ld-out'); });
-      c.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_OUT') { rows = []; $('ld-list').textContent = ''; show('ld-out'); } });
-    })();
-  </script>
-  <script is:inline>
-    // Someone who signed in earlier sees a short wait, not a flash of the sign in teaser.
-    (function () { try { var k = Object.keys(localStorage).filter(function (x) { return /^sb-.*-auth-token$/.test(x); })[0]; if (k && localStorage.getItem(k) && document.getElementById('ld-in').hidden) { document.getElementById('ld-out').hidden = true; document.getElementById('ld-wait').hidden = false; document.getElementById('ld-cta').hidden = true; } } catch (e) {} })();
-  </script>
+      show('dx-section'); if (!stay) window.scrollTo(0, 0);
+    }
+    function mark(which) { [].slice.call($('dx-tabs').querySelectorAll('.chip')).forEach(function (b) { var on = b.getAttribute('data-v') === which; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); }); }
+    function status() {
+      var s = $('dx-status'); s.textContent = '';
+      if (S.signed) { s.textContent = 'You are signed in, so service providers are included.'; return; }
+      s.appendChild(a(DX.signin, 'Sign in')); s.appendChild(document.createTextNode(' or ')); s.appendChild(a(DX.create, 'create a free account')); s.appendChild(document.createTextNode(' to include service providers.'));
+    }
+    function route() {
+      var h = decodeURIComponent((location.hash || '').replace(/^#/, '')); status();
+      if (h.indexOf('search=') === 0) { var q = h.slice(7); $('dx-q').value = q; closeDD(); drawResults(q); mark(''); return; }
+      if (h === 'sponsors' || h === 'providers' || h === 'businesses') { drawSection(h); mark(h); return; }
+      show('dx-home'); mark('');
+    }
+    function refresh() { var h = decodeURIComponent((location.hash || '').replace(/^#/, '')); status(); if (h) route(); drawStrip(); }
+
+    // ---- data
+    function rows(res) { return res && !res.error && res.data ? res.data : []; }
+    if (!c) { $('dx-q').disabled = true; return; }
+    c.from('directory_sponsors').select('id,name,tagline,website,logo_url').eq('published', true).order('sort_order').order('name').then(function (r) { S.sponsors = rows(r); S.ready.s = true; refresh(); }, function () { S.ready.s = true; refresh(); });
+    fetch(DX.businesses).then(function (r) { return r.json(); }).then(function (j) { S.biz = Array.isArray(j) ? j : []; S.ready.b = true; refresh(); }, function () { S.ready.b = true; refresh(); });
+    function loadProviders() {
+      c.from('directory_providers').select('id,category,name,contact_name,phone,email,website,service_area,why').eq('published', true).order('category').order('sort_order').order('name').then(function (r) { S.providers = rows(r); S.ready.p = true; refresh(); }, function () { S.ready.p = true; refresh(); });
+    }
+    c.auth.getSession().then(function (r) { S.signed = !!(r && r.data && r.data.session); if (S.signed) loadProviders(); else S.ready.p = true; route(); }, function () { S.ready.p = true; route(); });
+    c.auth.onAuthStateChange(function (ev) { if (ev === 'SIGNED_OUT') { S.signed = false; S.providers = []; S.ready.p = true; refresh(); } });
+
+    // ---- interaction
+    var q = $('dx-q');
+    q.addEventListener('input', function () { drawDropdown(); });
+    q.addEventListener('focus', function () { if (q.value.trim().length >= 2) drawDropdown(); });
+    q.addEventListener('keydown', function (e) {
+      var o = options();
+      if (e.key === 'ArrowDown') { e.preventDefault(); if ($('dx-dd').hidden) drawDropdown(); o = options(); if (o.length) setActive((S.idx + 1) % o.length); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (o.length) setActive(S.idx <= 0 ? o.length - 1 : S.idx - 1); }
+      else if (e.key === 'Escape') { closeDD(); }
+      else if (e.key === 'Enter' && S.idx >= 0 && o[S.idx]) { e.preventDefault(); o[S.idx].click(); }
+    });
+    $('dx-form').addEventListener('submit', function (e) { e.preventDefault(); var v = q.value.trim(); if (v.length < 1) return; closeDD(); if (location.hash === hashFor(v)) route(); else location.hash = hashFor(v); });
+    $('dx-dd').addEventListener('click', function (e) { if (e.target.closest && e.target.closest('a')) closeDD(); });
+    document.addEventListener('click', function (e) { if (!e.target.closest || !e.target.closest('.dx-search')) closeDD(); });
+    $('dx-clear').addEventListener('click', function () { q.value = ''; closeDD(); history.replaceState(null, '', location.pathname + location.search); show('dx-home'); q.focus(); });
+    $('dx-tabs').addEventListener('click', function (e) {
+      var b = e.target.closest && e.target.closest('.chip'); if (!b) return; var v = b.getAttribute('data-v');
+      if (v) { if (location.hash === '#' + v) route(); else location.hash = v; }
+      else { history.pushState(null, '', location.pathname + location.search); S.cat = ''; S.shown = 24; route(); }
+    });
+    $('dx-more').addEventListener('click', function () { S.shown += 24; drawSection('businesses', true); });
+    window.addEventListener('hashchange', function () { S.cat = ''; S.shown = 24; route(); });
+  })();
+</script>
 </Base>
