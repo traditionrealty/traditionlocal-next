@@ -16,7 +16,7 @@ const hasFacts = b.address || b.phone || b.website;
 const status = isClosed(b) ? (/temporar/i.test(b.status) ? 'Temporarily closed' : /permanent/i.test(b.status) ? 'Permanently closed' : 'Closed') : b.status === 'Open' ? 'Open' : /coming soon/i.test(b.status) ? 'Coming soon' : 'Status not confirmed';
 const web = b.website.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 ---
-<Base title={isClosed(b) ? b.name + ' (closed)' : b.name} description={isClosed(b) ? 'Closed. ' + (b.summary || '') : b.summary} active="Food">
+<Base title={isClosed(b) ? b.name + ' (closed)' : b.name} description={isClosed(b) ? 'Closed. ' + (b.summary || b.name + ' is no longer open.') : (b.summary || b.name + (b.area ? ' in ' + b.area : '') + '. See our review and the details before you go.')} active="Food">
   <section class="band hero">
     <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
       <div style="grid-column:span 7">
