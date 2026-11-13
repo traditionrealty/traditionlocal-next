@@ -78,7 +78,7 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
                 {c.gone && <p class="meta" style="margin-top:6px">No longer open. We do not recommend it.</p>}
               </div>
             </a>
-            <button class="save" data-slug={c.b.slug} data-name={c.b.name} set:html={heart}></button>
+            <button class="save" type="button" data-slug={c.b.slug} data-name={c.b.name} aria-label={'Save ' + c.b.name} aria-pressed="false" set:html={heart}></button>
           </div>
         ))}
       </div>
