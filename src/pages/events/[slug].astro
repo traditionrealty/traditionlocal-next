@@ -16,8 +16,10 @@ const rsvp = hostsRsvp(e);
 const rsvpUrl = String(config.newsletterAction).replace(/\/$/, '') + '/rsvp';
 const when = [dates, to12(e.startTime)].filter(Boolean).join(', ');
 const loc = e.address && where && e.address.toLowerCase().indexOf(where.toLowerCase()) === 0 ? e.address : [where, e.address].filter(Boolean).join(', ');
+// Events that repeat share a name, so the page title adds the date to tell them apart.
+const pageTitle = e.starts && events().filter((x) => x.title === e.title).length > 1 ? e.title + ', ' + dateText(e.starts) : e.title;
 ---
-<Base title={e.title} description={e.summary} active="Things to Do">
+<Base title={pageTitle} description={e.summary} active="Things to Do">
   <section class="band hero">
     <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
       <div style="grid-column:span 8">
