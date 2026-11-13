@@ -32,5 +32,10 @@ const PATHS = { account: url('/account'), signin: url('/sign-in'), home: url('/'
       safeNext: function (n) { n = String(n || ''); return /^\/[A-Za-z0-9\/_.~%-]*$/.test(n) && n.indexOf('//') !== 0 ? n : ''; },
       go: function (u) { location.href = u; }
     };
+    // Tell the header what the server confirms, so the button never disagrees with the page.
+    try {
+      var hc = window.TLAuth.client();
+      if (hc) hc.auth.onAuthStateChange(function (ev, session) { window.__tlKnown = true; window.__tlSession = session || null; if (window.TLHeader) window.TLHeader.paint(session); });
+    } catch (e) {}
   })();
 </script>
