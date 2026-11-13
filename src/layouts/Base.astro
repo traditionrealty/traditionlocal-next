@@ -104,6 +104,18 @@ const moreOn = sub !== '' || active === 'More';
     // whether the session is still good, loading the sign in library only then, so the button never says "Hi" for a session that has ended.
     // Signed out, the button sends people back to the page they were on after they sign in.
     (function () {
+      // One shared sign in connection for the whole page, loaded only when something needs it (a stale header, or saving to the account).
+      var queue = [], loading = false, client = null;
+      window.TLSb = { get: function (cb) {
+        if (window.TLAuth && window.TLAuth.client()) { cb(window.TLAuth.client()); return; }
+        if (client) { cb(client); return; }
+        queue.push(cb); if (loading) return; loading = true;
+        function done(c) { client = c; loading = false; queue.splice(0).forEach(function (f) { try { f(c); } catch (e) {} }); }
+        function ready() { var c = null; try { c = window.supabase.createClient(sbUrl, sbKey, { auth: { persistSession: true, autoRefreshToken: false, detectSessionInUrl: false } }); } catch (e) {} done(c); }
+        if (window.supabase) { ready(); return; }
+        var sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js';
+        sc.onload = ready; sc.onerror = function () { done(null); }; document.head.appendChild(sc);
+      } };
       var a = document.getElementById('nav-signin'); if (!a) return;
       var home = a.getAttribute('href'), acct = a.getAttribute('data-account') || home;
       function out() {
@@ -117,14 +129,7 @@ const moreOn = sub !== '' || active === 'More';
       if (!s || !s.user || !(s.access_token || s.refresh_token)) { out(); return; }
       inn(s.user);
       if (window.TLAuth || (s.expires_at && s.expires_at * 1000 > Date.now() + 60000)) return; // pages with the sign in library report for themselves
-      var sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js';
-      sc.onload = function () {
-        try {
-          var c = window.supabase.createClient(sbUrl, sbKey, { auth: { persistSession: true, autoRefreshToken: false, detectSessionInUrl: false } });
-          c.auth.getSession().then(function (r) { window.TLHeader.paint(r && r.data && r.data.session); }, function () {});
-        } catch (e) {}
-      };
-      document.head.appendChild(sc);
+      window.TLSb.get(function (c) { if (c) c.auth.getSession().then(function (r) { window.TLHeader.paint(r && r.data && r.data.session); }, function () {}); });
     })();
   </script>
   <script is:inline>
