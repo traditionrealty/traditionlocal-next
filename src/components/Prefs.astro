@@ -1,14 +1,72 @@
-<script is:inline>
-  // Remembers a reader's area, followed areas, and saved places on this device until sign in is connected.
+---
+// Remembers a reader's area, followed areas, and saved places on this device. Members who are signed in also have them kept with their account,
+// so they follow them to their other devices. That part switches on when supabase/member_lists.sql has been run; until then it all stays on the device.
+import { config } from '../config';
+const sbRef = new URL(config.supabase.url).hostname.split('.')[0];
+---
+<script is:inline define:vars={{ sbRef }}>
   (function () {
     function g(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
     function s(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+    function raw(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
+    var UID = 'tl_sync_uid', SNAP = 'tl_sync_snap', AT = 'tl_sync_at';
+    function me() { try { var t = JSON.parse(localStorage.getItem('sb-' + sbRef + '-auth-token')); return t && t.user && t.user.id && (t.access_token || t.refresh_token) ? String(t.user.id) : ''; } catch (e) { return ''; } }
+    function mine() { var a = g('tl_area', ''); return { saved_places: g('tl_saved', []), followed_areas: g('tl_follows', []), home_area: typeof a === 'string' ? a : '' }; }
+    function snapOf(o) { return JSON.stringify([o.saved_places || [], o.followed_areas || [], o.home_area || '']); }
+    function clean(a, n) { return (Array.isArray(a) ? a : []).filter(function (x) { return typeof x === 'string' && x && x.length <= 120; }).slice(0, n); }
+    function union(a, b, n) { var out = clean(a, n); clean(b, n).forEach(function (x) { if (out.indexOf(x) < 0 && out.length < n) out.push(x); }); return out; }
+    function tell(name) { try { document.dispatchEvent(new Event(name)); } catch (e) {} }
+    // The account is the master copy once a device has synced. This takes what the account has and makes it this device's copy.
+    function apply(o) {
+      s('tl_saved', clean(o.saved_places, 500)); s('tl_follows', clean(o.followed_areas, 100)); s('tl_area', String(o.home_area || '').slice(0, 80));
+      raw(SNAP, snapOf(mine())); tell('tl:repaint'); tell('tl:saved'); tell('tl:pulled'); tell('tl:synced');
+    }
+    function push(c, id, done) {
+      var m = mine();
+      c.from('profiles').update({ saved_places: clean(m.saved_places, 500), followed_areas: clean(m.followed_areas, 100), home_area: m.home_area ? m.home_area.slice(0, 80) : null }).eq('id', id).then(function (r) {
+        if (!r || r.error) { if (done) done(false); return; }
+        raw(UID, id); raw(SNAP, snapOf(m)); tell('tl:synced'); if (done) done(true);
+      }, function () { if (done) done(false); });
+    }
+    function run() {
+      var id = me(); if (!id || !window.TLSb) return;
+      window.TLSb.get(function (c) {
+        if (!c) return;
+        c.from('profiles').select('saved_places,followed_areas,home_area').eq('id', id).maybeSingle().then(function (r) {
+          if (!r || r.error || !r.data) return; // not set up yet, or no member row: everything stays on this device
+          try { sessionStorage.setItem(AT, String(Date.now())); } catch (e) {}
+          var acc = r.data, prev = raw(UID), now = mine();
+          if (prev && prev !== id) { apply(acc); raw(UID, id); return; } // another member's lists were on this device: use this member's
+          if (!prev) { // first time on this device: keep what is here and what is in the account
+            apply({ saved_places: union(acc.saved_places, now.saved_places, 500), followed_areas: union(acc.followed_areas, now.followed_areas, 100), home_area: now.home_area || acc.home_area || '' });
+            push(c, id); return;
+          }
+          if (snapOf(now) !== raw(SNAP)) { push(c, id); return; } // changed on this device since the last sync, on any page
+          apply(acc);
+        }, function () {});
+      });
+    }
+    var timer = null;
+    function start(force) {
+      var id = me(); if (!id) return;
+      var last = 0; try { last = parseInt(sessionStorage.getItem(AT), 10) || 0; } catch (e) {}
+      if (force || Date.now() - last > 300000 || snapOf(mine()) !== raw(SNAP) || raw(UID) !== id) run();
+    }
+    function later() {
+      var id = me(); if (!id) return;
+      if (raw(UID) !== id) { start(true); return; } // never synced on this device yet: merge first, so a device list cannot overwrite the account
+      clearTimeout(timer);
+      timer = setTimeout(function () { if (window.TLSb && me() === id) window.TLSb.get(function (c) { if (c) push(c, id); }); }, 600);
+    }
     var TL = window.TL = {
       get: g, set: s,
-      area: function () { return g('tl_area', ''); }, setArea: function (a) { s('tl_area', a); },
-      follows: function () { return g('tl_follows', []); }, setFollows: function (a) { s('tl_follows', a); },
+      area: function () { return g('tl_area', ''); }, setArea: function (a) { s('tl_area', a); later(); },
+      follows: function () { return g('tl_follows', []); }, setFollows: function (a) { s('tl_follows', a); later(); },
       saved: function () { return g('tl_saved', []); },
-      toggleSaved: function (slug) { var a = g('tl_saved', []), i = a.indexOf(slug); if (i > -1) a.splice(i, 1); else a.push(slug); s('tl_saved', a); return i < 0; }
+      toggleSaved: function (slug) { var a = g('tl_saved', []), i = a.indexOf(slug); if (i > -1) a.splice(i, 1); else a.push(slug); s('tl_saved', a); later(); return i < 0; },
+      signedIn: function () { return !!me(); },
+      sync: function (force) { start(force !== false); },
+      pushNow: function (done) { var id = me(); if (!id || !window.TLSb) { if (done) done(false); return; } window.TLSb.get(function (c) { if (!c) { if (done) done(false); return; } push(c, id, done); }); }
     };
     function paint() {
       var saved = TL.saved();
@@ -27,5 +85,6 @@
       e.preventDefault(); TL.toggleSaved(b.dataset.slug); paint(); document.dispatchEvent(new Event('tl:saved'));
     });
     document.addEventListener('tl:repaint', paint); paint();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { start(false); }); else start(false);
   })();
 </script>
