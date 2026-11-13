@@ -86,7 +86,7 @@ const moreOn = sub !== '' || active === 'More';
             <label for="foot-email" style="color:#E7BC52">Join In the Loop, every Monday</label>
             <div class="join"><input id="foot-email" name="email" type="email" required placeholder="name@email.com" autocomplete="email" /><button type="submit">Join</button></div>
             <input type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
-            <input type="hidden" name="return" id="nl-return" />
+            <input type="hidden" name="return" id="nl-return-f" />
             <p id="nl-msg" role="status" hidden style="margin-top:8px;font-size:14px;color:#fff;font-weight:700"></p>
           </form>
           <p style="margin-top:10px;font-size:14px;color:#D4D2EE">Free, and one click to leave. We never sell your email.</p>
@@ -99,22 +99,39 @@ const moreOn = sub !== '' || active === 'More';
       </div>
     </div>
   </footer>
-  <script is:inline define:vars={{ sbRef: new URL(config.supabase.url).hostname.split('.')[0] }}>
-    // Once someone is signed in, the header button says so and goes to their account. Reads only what sign in already saved on this device.
+  <script is:inline define:vars={{ sbRef: new URL(config.supabase.url).hostname.split('.')[0], sbUrl: config.supabase.url, sbKey: config.supabase.key }}>
+    // The header button follows the sign in. It reads what sign in saved on this device. When that has gone stale (the hour is up), it asks Supabase
+    // whether the session is still good, loading the sign in library only then, so the button never says "Hi" for a session that has ended.
+    // Signed out, the button sends people back to the page they were on after they sign in.
     (function () {
-      try {
-        var raw = localStorage.getItem('sb-' + sbRef + '-auth-token'), a = document.getElementById('nav-signin'); if (!raw || !a) return;
-        var s = JSON.parse(raw); if (!s || !s.user || !(s.access_token || s.refresh_token)) return;
-        var n = (s.user.user_metadata && s.user.user_metadata.first_name) || '';
-        a.textContent = n && n.length <= 14 ? 'Hi, ' + n : 'Account'; a.href = a.getAttribute('data-account') || a.href; a.classList.add('in');
-      } catch (e) {}
+      var a = document.getElementById('nav-signin'); if (!a) return;
+      var home = a.getAttribute('href'), acct = a.getAttribute('data-account') || home;
+      function out() {
+        a.textContent = 'Sign in'; a.classList.remove('in');
+        a.href = /^\/(sign-in|account)(\/|$)/.test(location.pathname) ? home : home + '?next=' + encodeURIComponent(location.pathname);
+      }
+      function inn(u) { var n = (u && u.user_metadata && u.user_metadata.first_name) || ''; a.textContent = n && n.length <= 14 ? 'Hi, ' + n : 'Account'; a.href = acct; a.classList.add('in'); }
+      window.TLHeader = { paint: function (session) { if (session && session.user) inn(session.user); else out(); } };
+      if (window.__tlKnown) { window.TLHeader.paint(window.__tlSession); return; }
+      var s = null; try { s = JSON.parse(localStorage.getItem('sb-' + sbRef + '-auth-token')); } catch (e) {}
+      if (!s || !s.user || !(s.access_token || s.refresh_token)) { out(); return; }
+      inn(s.user);
+      if (window.TLAuth || (s.expires_at && s.expires_at * 1000 > Date.now() + 60000)) return; // pages with the sign in library report for themselves
+      var sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js';
+      sc.onload = function () {
+        try {
+          var c = window.supabase.createClient(sbUrl, sbKey, { auth: { persistSession: true, autoRefreshToken: false, detectSessionInUrl: false } });
+          c.auth.getSession().then(function (r) { window.TLHeader.paint(r && r.data && r.data.session); }, function () {});
+        } catch (e) {}
+      };
+      document.head.appendChild(sc);
     })();
   </script>
   <script is:inline>
     // Fill in the return address, and show the result when the signup service sends the reader back.
     var q = new URLSearchParams(location.search).get('newsletter');
-    var m = document.getElementById('nl-msg'), r = document.getElementById('nl-return');
-    if (r) r.value = location.origin + location.pathname;
+    var m = document.getElementById('nl-msg');
+    document.querySelectorAll('input[name="return"]').forEach(function (x) { x.value = location.origin + location.pathname; });
     if (q && m) { m.hidden = false; m.textContent = q === 'ok' ? 'Thanks, you are subscribed. Welcome to Tradition Local.' : q === 'invalid' ? 'That email address does not look right. Please try again.' : 'Something went wrong. Please try again, or email us.'; }
   </script>
   <script is:inline>
