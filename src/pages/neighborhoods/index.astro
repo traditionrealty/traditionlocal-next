@@ -75,7 +75,7 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
                 <p class="meta"><b>{biz}</b> places reviewed, <b>{subs}</b> subdivisions</p>
               </div>
             </a>
-            <button class="save" data-slug={'n:' + p.slug} data-name={p.name} set:html={heart}></button>
+            <button class="save" type="button" data-slug={'n:' + p.slug} data-name={p.name} aria-label={'Save ' + p.name} aria-pressed="false" set:html={heart}></button>
             <div style="padding:0 24px 20px"><button class="chip cmp" type="button" data-n={p.name} aria-pressed="false">Compare</button></div>
           </div>
         ))}
