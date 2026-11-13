@@ -79,12 +79,12 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
       <h2 style="margin-bottom:28px">Find Your Way Around</h2>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px">
         {tiles.map((t) => (
-          <a class="card pad tile" href={url(t.path)} style="text-decoration:none">
-            <div style="font-family:var(--serif);font-weight:600;font-size:40px;line-height:1">{t.n}</div>
+          <a class={t.path === '/make-it-home' ? 'card pad tile tile-cta' : 'card pad tile'} href={url(t.path)} style="text-decoration:none">
+            <div class="tile-n" style="font-family:var(--serif);font-weight:600;font-size:40px;line-height:1">{t.n}</div>
             <p class="meta" style="margin:4px 0 14px;font-size:14px">{t.unit}</p>
             <h4 style="margin-bottom:6px">{t.title}</h4>
             <p class="meta" style="font-size:15px;margin-bottom:14px">{t.blurb}</p>
-            <span style="font-weight:700;color:var(--blue)">{t.cta}</span>
+            <span class="tile-go">{t.cta}</span>
           </a>
         ))}
       </div>
@@ -471,6 +471,15 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
   <style is:global>
     .tile { transition: transform .18s, box-shadow .18s; }
     .tile:hover, .tile:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
+    .tile-go { font-weight: 700; color: var(--blue); }
+    /* Phones only: Make It Home runs the full width of the row, as a navy call to action. The other tiles are untouched. */
+    @media (max-width: 640px) {
+      .tile.tile-cta { grid-column: 1 / -1; background: var(--navy); border-color: var(--navy); }
+      .tile-cta .tile-n { color: var(--gold); }
+      .tile-cta .meta { color: rgba(255, 255, 255, .88); }
+      .tile-cta h4 { color: #fff; }
+      .tile-cta .tile-go { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 24px; border-radius: 999px; background: var(--gold); color: var(--navy); }
+    }
   </style>
   <style is:global>
     .spot-wrap { margin: 0; }
