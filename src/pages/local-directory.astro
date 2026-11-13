@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import AuthClient from '../components/AuthClient.astro';
+import Prefs from '../components/Prefs.astro';
 import '../styles/pages.css';
 import '../styles/dock.css';
 import { url } from '../lib/data';
@@ -181,6 +182,7 @@ const DX = { businesses: url('/directory-businesses.json'), signin: url('/sign-i
 </style>
 
 <AuthClient />
+<Prefs />
 <script is:inline define:vars={{ DX }}>
   (function () {
     var A = window.TLAuth, c = A && A.client();
@@ -404,8 +406,9 @@ const DX = { businesses: url('/directory-businesses.json'), signin: url('/sign-i
     $('dx-pause').addEventListener('click', function () { S.paused = !S.paused; this.setAttribute('aria-pressed', S.paused ? 'true' : 'false'); this.setAttribute('aria-label', S.paused ? 'Start rotation' : 'Pause rotation'); if (S.paused) stopRot(); else startRot(); drawShort(); });
     var sh = $('dx-short'); sh.addEventListener('mouseenter', stopRot); sh.addEventListener('mouseleave', startRot); sh.addEventListener('focusin', stopRot); sh.addEventListener('focusout', startRot);
     $('dx-change').addEventListener('click', function () { var p = $('dx-pick'); p.hidden = !p.hidden; $('dx-pickt').textContent = 'Choose a different community.'; if (!p.hidden) $('dx-sel').focus(); });
-    $('dx-setc').addEventListener('click', function () { var v = $('dx-sel').value; if (!v) return; lsSet('tl_area', v); drawNear(); });
+    $('dx-setc').addEventListener('click', function () { var v = $('dx-sel').value; if (!v) return; if (window.TL) window.TL.setArea(v); else lsSet('tl_area', v); drawNear(); });
     $('dx-nmore').addEventListener('click', function () { var comm = community(); S.q = comm; S.preset = ''; S.type = ''; q.value = comm; S.shown = 24; hashSync(); markTabs(); markTiles(); drawResults(); var r = $('dx-results'); try { r.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' }); } catch (x) {} r.focus(); });
+    document.addEventListener('tl:pulled', function () { drawNear(); });
   })();
 </script>
 </Base>
