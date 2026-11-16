@@ -1,9 +1,12 @@
 ---
 import ServicePage from '../components/ServicePage.astro';
+import InternationalSpotlight from '../components/InternationalSpotlight.astro';
 ---
 <ServicePage ask="Sara" title="International Clients" eyebrow="Make it home" subject="International Clients"
   description="Help for people moving to or buying in Houston from another country."
   lead="Moving to Houston from another country, or buying from abroad? Get to know the neighborhoods before you arrive."
   who={['People relocating to Houston from another country', 'Buyers and investors based overseas', 'Families planning a move across time zones']}
   help={[['Know the Place Before You Land', 'Neighborhood guides cover where to eat, what to do, and what daily life looks like.'], ['Understand the Process', 'A clear walk through how buying or renting works here, one step at a time.'], ['Working Across Time Zones', 'We will find times that work for your schedule, wherever you are.'], ['A Person to Ask', 'Questions are always welcome, in plain language and without pressure.']]}
-  steps={['Tell us where you are moving from, your timing, and what matters most.', 'We talk through areas, homes or rentals, and what to expect.', 'We stay in touch as you plan, and help when you arrive.']} />
+  steps={['Tell us where you are moving from, your timing, and what matters most.', 'We talk through areas, homes or rentals, and what to expect.', 'We stay in touch as you plan, and help when you arrive.']}>
+  <InternationalSpotlight slot="after-hero" />
+</ServicePage>
