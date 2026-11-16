@@ -185,3 +185,16 @@ export function upcomingEvents(limit = 6, today = new Date()) {
     .sort((x, y) => +(x.a || 0) - +(y.a || 0)).slice(0, limit).map((x) => x.e);
 }
 export const stars = (r: string) => (Number(r) > 0 ? Number(r) : 0);
+
+// New developments for the New Builds search. data/developments.csv comes from the "New Development" rows
+// (Published only) of the Real Estate Profiles tab. The records are a historical export, so pages say to confirm current plans.
+export type Development = {
+slug: string; name: string; area: string; city: string; zip: string; builders: string[];
+bedsMin: number; bedsMax: number; sqftMin: number; sqftMax: number; plans: string; website: string;
+};
+const num = (s: string) => (s && !isNaN(Number(s)) ? Number(s) : 0);
+export const developments: Development[] = readTable('developments.csv').filter((r) => r.name).map((r) => ({
+slug: r.slug || slugify(r.name), name: r.name, area: r.area, city: r.city, zip: r.zip, builders: list(r.builders),
+bedsMin: num(r.beds_min), bedsMax: num(r.beds_max), sqftMin: num(r.sqft_min), sqftMax: num(r.sqft_max), plans: r.plans,
+website: /^https?:\/\//.test(r.website || '') ? r.website : '',
+})).sort((a, b) => a.name.localeCompare(b.name));
