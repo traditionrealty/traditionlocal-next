@@ -13,16 +13,16 @@ const pins = pts.map((r: any) => {
   const kind = p.type === 'Place' ? 'place' : isFood(p) ? 'food' : 'business';
   const cat = p.type === 'Place' ? (p.subCategory || 'Place') : category(p);
   return { n: p.name, k: kind, c: cat || '', a: p.area || '', ad: p.address || '', h: href(p), la: +r.lat, ln: +r.lng, x: r.precision === 'exact' ? 1 : 0 };
-}).filter((x: any) => x && isFinite(x.la) && isFinite(x.ln));
+}).filter((x: any) => x && isFinite(x.la) && isFinite(x.ln) && x.la > 28.8 && x.la < 30.7 && x.ln > -96.5 && x.ln < -94.3);
 const areas = [...new Set(pins.map((p: any) => p.a).filter(Boolean))].sort();
 const counts = { food: pins.filter((p: any) => p.k === 'food').length, business: pins.filter((p: any) => p.k === 'business').length, place: pins.filter((p: any) => p.k === 'place').length };
 ---
 <Base title="Map" active="Map" description="Every restaurant, business and place we have reviewed, on one map of Greater Houston.">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <section class="band hero" style="padding-bottom:20px">
+  <section class="band hero" style="padding-top:28px;padding-bottom:4px">
     <div class="wrap">
       <p class="eyebrow">Prototype</p>
-      <h1 style="margin-bottom:10px">The Tradition Local Map</h1>
+      <h1 style="margin-bottom:6px">The Tradition Local Map</h1>
       <p class="lead">Restaurants, local businesses and places to visit, all in one view. Tap a pin to see the details and open the full profile.</p>
     </div>
   </section>
