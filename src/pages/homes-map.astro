@@ -10,7 +10,7 @@ const dev = new Map(readTable('developments.csv').map((r: any) => [r.slug, r]));
 const apt = new Map(readTable('apartment_communities.csv').map((r: any) => [r.slug, r]));
 const num = (s: any) => { const n = parseInt(String(s || '').replace(/[^0-9]/g, ''), 10); return isFinite(n) ? n : 0; };
 const pins = pts.map((r: any) => {
-  const la = +r.lat, ln = +r.lng; if (!isFinite(la) || !isFinite(ln)) return null;
+  const la = +r.lat, ln = +r.lng; if (!isFinite(la) || !isFinite(ln) || la < 28.8 || la > 30.7 || ln < -96.5 || ln > -94.3) return null;
   if (r.kind === 'development') {
     const d: any = dev.get(r.slug); if (!d) return null;
     const bmin = num(d.beds_min), bmax = num(d.beds_max);
