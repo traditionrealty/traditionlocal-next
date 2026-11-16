@@ -16,3 +16,5 @@ export const countryFacts: Record<string, { capital: string; currency: string; l
   'Thailand': { capital: 'Bangkok', currency: 'Thai baht', language: 'Thai' },
   'Portugal': { capital: 'Lisbon', currency: 'Euro', language: 'Portuguese' },
 };
+
+export const isoOf: Record<string,string> = {'United Arab Emirates':'AE','Türkiye':'TR','Greece':'GR','Mexico':'MX','Spain':'ES','Italy':'IT','Costa Rica':'CR','Panama':'PA','Uruguay':'UY','Bahamas':'BS','Dominican Republic':'DO','Montenegro':'ME','Georgia':'GE','Thailand':'TH','Portugal':'PT'};
