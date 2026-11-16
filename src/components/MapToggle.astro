@@ -11,9 +11,9 @@ const pins: Record<string, number[]> = {};
 src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && isFinite(ln) && la > 28.8 && la < 30.9 && ln > -96.6 && ln < -93.9) pins[r.slug] = [la, ln]; });
 ---
 <style is:global>
-  .mt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0 6px}
+  .mt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:26px 0 8px}
   .mt-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .mt-count{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;font-size:14px;color:#4a4870}
+  .mt-count{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;padding:0 0 0 22px;font-size:14px;line-height:1.4;color:#4a4870}
   .mt-count .meta{margin:0 !important}
   @media (max-width:560px){.mt-seg{order:-1}}
   .mt-seg{display:inline-flex;border:1.5px solid #1D1A6D;border-radius:999px;overflow:hidden;height:44px;background:#fff}
@@ -47,6 +47,9 @@ src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && is
     box.innerHTML = '<div class="mt-canvas" role="region" aria-label="Map of ' + MT.noun + '"></div><p class="mt-foot">Pins on the map follow your search and filters. Map data from OpenStreetMap contributors. Open any pin for the full page.</p>';
     if (barEl && barEl.parentNode) barEl.parentNode.insertBefore(row, barEl.nextSibling); else grid.parentNode.insertBefore(row, grid);
     row.parentNode.insertBefore(line, row.nextSibling);
+    grid.style.marginTop = '16px';
+    var dock = row.closest('.fdock'); if (dock) dock.style.marginBottom = '12px';
+var sp = line.nextElementSibling; if (sp && sp.tagName === 'DIV' && !sp.children.length && !sp.textContent.trim() && sp.style.height) sp.style.height = '0';
     grid.parentNode.insertBefore(box, grid);
     var matched = null, view = 'list', map = null, layer = null;
     document.addEventListener('tlf:match', function (e) { if (!e.detail || e.detail.key !== MT.key) return; matched = e.detail.items; if (view === 'map') draw(true); });
