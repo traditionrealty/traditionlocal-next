@@ -379,7 +379,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     .ms-txt p:last-child { max-width: 560px; margin: 0; font-size: 18px; }
     .ms-btns { display: flex; flex: none; flex-direction: column; gap: 12px; }
     .ms-ask { display: flex; gap: 10px; }
-    .ms-ask .btn { flex: 1; }
+    .ms-ask .btn { flex: 1 1 auto; white-space: nowrap; padding-left: 14px; padding-right: 14px; }
     @media (max-width: 760px) {
       #meet.band { padding: 36px 0 40px; }
       .ms { flex-direction: column; align-items: flex-start; gap: 16px; }
