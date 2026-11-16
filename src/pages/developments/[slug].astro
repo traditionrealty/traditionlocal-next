@@ -15,6 +15,7 @@ const byBuilder: Record<string, string[]> = {};
 d.programs.forEach((p) => { if (p.line) (byBuilder[p.builder] = byBuilder[p.builder] || []).push(p.line); });
 const names = [...new Set([...d.builders, ...d.programs.map((p) => p.builder)])];
 const plans = (d.planList.length ? d.planList : d.plans.split(';').map((x) => x.trim()).filter(Boolean)).map(nice);
+const parsePlan = (s: string) => { const m = s.match(/^([\d,. ]+(?: to [\d,. ]+)?) bedrooms?(?:, ([\d,. ]+(?: to [\d,. ]+)?) baths?)?(?:, ([\d,. ]+(?: to [\d,. ]+)?) sq ft)?$/i); return m ? { beds: m[1].trim(), baths: (m[2] || '').trim(), size: (m[3] || '').trim() } : null; };
 const sibs = developments.filter((x) => x.slug !== d.slug && (d.area ? x.area === d.area : x.city === d.city)).slice(0, 6);
 const lead = d.name + ' is a new development in ' + (d.city || 'Greater Houston') + ', Texas' + (names.length ? '. Builders on record: ' + names.slice(0, 4).join(', ') + (names.length > 4 ? ' and more' : '') + '.' : '.');
 ---
@@ -67,7 +68,18 @@ const lead = d.name + ' is a new development in ' + (d.city || 'Greater Houston'
       <h2 style="margin-bottom:20px">Plans on Record</h2>
       {plans.length > 0 ? (
         <div class="grid g3">
-          {plans.map((p) => (<div class="card pad"><p style="font-size:17px;font-weight:600">{p}</p></div>))}
+          {plans.map((p, i) => { const q = parsePlan(p); return (
+<div class="card pad" style="border-top:4px solid #E7BC52;padding-top:22px">
+<p class="eyebrow" style="margin-bottom:14px">{plans.length > 1 ? 'Plan range ' + (i + 1) : 'Plan range'}</p>
+{q ? (
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:center">
+<div style="background:#FAF7F0;border-radius:12px;padding:14px 6px"><div style="font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:#1D1A6D;line-height:1.1">{q.beds || 'n/a'}</div><div class="meta" style="font-size:13px;margin-top:6px">Bedrooms</div></div>
+<div style="background:#FAF7F0;border-radius:12px;padding:14px 6px"><div style="font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:#1D1A6D;line-height:1.1">{q.baths || 'n/a'}</div><div class="meta" style="font-size:13px;margin-top:6px">Baths</div></div>
+<div style="grid-column:1 / -1;background:#1D1A6D;border-radius:12px;padding:14px 6px"><div style="font-family:'Fraunces',serif;font-size:24px;font-weight:600;color:#FAF7F0;line-height:1.1">{q.size || 'n/a'}</div><div style="font-size:13px;margin-top:6px;color:#E7BC52">Square feet</div></div>
+</div>
+) : (<p style="font-size:17px;font-weight:600">{p}</p>)}
+</div>
+); })}
         </div>
       ) : (
         <p style="font-size:18px">No plan ranges are recorded for this development yet.</p>
