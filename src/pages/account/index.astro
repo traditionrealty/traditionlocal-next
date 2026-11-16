@@ -1,0 +1,242 @@
+---
+import Base from '../../layouts/Base.astro';
+import Prefs from '../../components/Prefs.astro';
+import ComboKit from '../../components/ComboKit.astro';
+import AuthClient from '../../components/AuthClient.astro';
+import '../../styles/pages.css';
+import { businesses, profiles, events, href, url, isClosed, apartmentCommunities, developments } from '../../lib/data';
+import { areaPages, topRating, category, isFood, venuePlace } from '../../lib/helpers';
+import { issues } from '../../lib/issues';
+const areas = areaPages().map((p) => p.name).sort();
+const guides = areaPages().map((p) => ({ n: p.name, u: href(p) }));
+const food = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) => ({ n: b.name, u: href(b), a: b.area, c: category(b), r: topRating(b.name) }));
+const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), u: href(b), x: isClosed(b) ? 1 : 0 }))
+  .concat(profiles.filter((p) => p.type === 'Place' && !isClosed(p)).map((p) => ({ s: 'p:' + p.slug, n: p.name, a: p.area, c: p.subCategory || 'Place', u: href(p), x: 0 })))
+  .concat(areaPages().map((p) => ({ s: 'n:' + p.slug, n: p.name, a: '', c: p.region ? 'Neighborhood, ' + p.region : 'Neighborhood', u: href(p), x: 0 })))
+  .concat(apartmentCommunities.map((a) => ({ s: 'a:' + a.slug, n: a.name, a: a.area, c: 'Apartment', u: url('/apartments/' + a.slug), x: 0 })))
+  .concat(developments.map((d) => ({ s: 'd:' + d.slug, n: d.name, a: d.area || d.city, c: 'New development', u: url('/developments/' + d.slug), x: 0 })));
+const toDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
+const pad = (n: number) => String(n).padStart(2, '0');
+const iso = (d: Date) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const evs = events().map((e) => { const a = toDate(e.starts), b = toDate(e.ends || e.starts), pl = venuePlace(e); return a && b && pl && pl.area ? { t: e.title, s: iso(a), f: iso(b), u: href(e), a: pl.area, v: pl.name } : null; }).filter(Boolean);
+const latest = issues.length ? { title: issues[0].title, date: issues[0].date, preview: issues[0].preview || '', u: url('/newsletters/' + issues[0].slug) } : null;
+const U = { settings: url('/account/settings'), locally: url('/locally'), food: url('/food'), news: url('/newsletters') };
+const pin = '<path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/>';
+const house = '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>';
+---
+<Base title="Your Account" description="Your picks, saved places, and the latest In the Loop." noindex>
+<div class="ah-page"><section class="ah-hero"><div class="ah-wrap ah-herowrap">
+<details class="ah-set"><summary>Settings <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+<div class="ah-menu">
+<a href={U.settings + '#locally'}><b>Locally Plus preferences</b><span>Interests, area, how often</span></a>
+<a href={U.settings + '#areas'}><b>Places you follow</b><span>Add or remove areas</span></a>
+<a href={U.settings + '#loop'}><b>Email and newsletters</b><span>In the Loop, Locally Plus emails</span></a>
+<a href={U.settings + '#member'}><b>Account</b><span>Name, email, sign out</span></a>
+</div></details>
+<div class="ah-av" id="ah-av" aria-hidden="true">T</div>
+<h1 id="ah-hi">Welcome back</h1>
+</div></section>
+
+<div class="ah-wrap ah-body">
+<section class="ah-lp" aria-label="Your Locally Plus">
+<div class="ah-lphead"><div><p class="ah-eye">Your Locally Plus</p><h2>Places to try</h2></div><a class="ah-cta" href={U.locally}>See all your picks <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E7BC52" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+<p class="ah-paused" id="ah-paused" hidden>Locally Plus is paused. Turn it back on in <a href={U.settings + '#locally'}>Settings</a>. Your picks stay here.</p>
+<div class="ah-panels">
+<div class="ah-panel home" id="ah-ph"><div class="ah-ph"><span class="ah-ic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E7BC52" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={house}></svg></span><span class="ah-pt">Home</span><span class="ah-ps" id="ah-hname"></span><span class="ah-rule"></span></div><div class="ah-rows" id="ah-hrows"></div></div>
+<div class="ah-panel fol" id="ah-pf"><div class="ah-ph"><span class="ah-ic gold"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={pin}></svg></span><span class="ah-pt">Following</span><span class="ah-ps" id="ah-fname"></span><span class="ah-rule"></span></div><div class="ah-rows" id="ah-frows"></div></div>
+</div>
+</section>
+
+<div class="ah-two">
+<section class="ah-card" id="saved" aria-label="Saved list"><div class="ah-ch"><h2>Saved list</h2><a href={U.settings + '#saved'} id="ah-sall" hidden>Open full list</a></div><div id="ah-slist"></div><div class="ah-cf"><button class="ah-btn line" id="ah-mail" type="button">Email my list</button><a href={U.food} class="ah-more">Find more places</a></div></section>
+<section class="ah-card" id="follow" aria-label="Places you follow"><div class="ah-ch"><h2>Places you follow</h2><a href={U.settings + '#areas'}>Manage</a></div><div class="ah-chips" id="ah-chips"></div>
+<div class="ah-cf"><div class="ah-sel"><label class="sr" for="ah-add">Follow another area</label><select id="ah-add" data-combo><option value="">Follow another area</option>{areas.map((a) => <option>{a}</option>)}</select></div><button class="ah-btn" id="ah-addbtn" type="button">Follow</button></div></section>
+</div>
+
+<section class="ah-loop" aria-label="In the Loop">
+<div><p class="ah-leye">In the Loop, latest issue</p>
+{latest ? <h2>{latest.title}</h2> : <h2>Every Monday, the same for everyone</h2>}
+{latest && latest.preview && <p class="ah-lprev">{latest.preview}</p>}
+<div class="ah-lbtns"><a class="ah-gold" href={latest ? latest.u : U.news}>{latest ? 'Read the issue' : 'See In the Loop'}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ah-plain" href={U.news + '#past-issues'}>Past issues</a></div></div>
+</section>
+</div></div>
+
+<Prefs />
+<script is:inline define:vars={{ FOOD: food, GUIDES: guides, EVENTS: evs, INDEX: index, U: U }}>
+(function () {
+var TLD = window.TL, $ = function (id) { return document.getElementById(id); };
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+function pref() { return TLD.get('tl_locally', { on: true, topics: { food: true, things: true, openings: false, homes: true }, freq: 'twice' }); }
+function iso(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+var CH = '<svg class="ah-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+function row(cat, title, sub, u) { return '<a class="ah-row" href="' + esc(u) + '"><div><p class="ah-cat">' + esc(cat) + '</p><div class="ah-rt">' + esc(title) + '</div><div class="ah-rs">' + esc(sub) + '</div></div>' + CH + '</a>'; }
+function foodRows(area, n) { return FOOD.filter(function (x) { return x.a === area; }).sort(function (x, y) { return y.r - x.r; }).slice(0, n).map(function (x) { return row('Food and drink', x.n, x.c + (x.r ? ', ' + x.r + ' out of 5' : ''), x.u); }); }
+function eventRows(area, n) { var t = iso(new Date()); return EVENTS.filter(function (e) { return e.a === area && e.f >= t; }).sort(function (x, y) { return x.s < y.s ? -1 : 1; }).slice(0, n).map(function (e) { return row('Things to do', e.t, 'Near ' + area + ', ' + e.v, e.u); }); }
+function guideRows(area) { var g = GUIDES.filter(function (x) { return x.n === area; })[0]; return g ? [row('Neighborhoods and homes', 'Living in ' + area, 'Our local take and the guide', g.u)] : []; }
+function empty(msg, label) { return '<div class="ah-empty"><p>' + msg + '</p><a href="' + esc(U.settings) + '#areas">' + label + '</a></div>'; }
+function picks() {
+var p = pref(), home = TLD.area(), fol = TLD.follows().filter(function (a) { return a && a !== home; }), t = p.topics || {};
+$('ah-paused').hidden = !!p.on;
+$('ah-hname').textContent = home && home !== '__other' ? home : '';
+$('ah-fname').textContent = fol.join(', ').replace(/, ([^,]*)$/, ' and $1');
+var h = [];
+if (home && home !== '__other') { if (t.food) h = h.concat(foodRows(home, 2)); if (t.things) h = h.concat(eventRows(home, 1)); if (t.homes) h = h.concat(guideRows(home)); h = h.slice(0, 3); }
+$('ah-hrows').innerHTML = h.length ? h.join('') : (home && home !== '__other' ? '<div class="ah-empty"><p>Nothing to show here yet. Check your topics in Settings.</p></div>' : empty('Choose your home area to see picks near you.', 'Choose your area'));
+var f = [], fo = [], ev = [], gd = [];
+fol.forEach(function (a) { if (t.food) fo = fo.concat(foodRows(a, 1)); if (t.things) ev = ev.concat(eventRows(a, 1)); if (t.homes) gd = gd.concat(guideRows(a)); });
+f = fo.concat(ev, gd).slice(0, 3);
+$('ah-frows').innerHTML = f.length ? f.join('') : (fol.length ? '<div class="ah-empty"><p>Nothing to show for these areas yet.</p></div>' : empty('Follow areas to see picks from the places you care about.', 'Follow an area'));
+}
+function saved() {
+var s = TLD.saved(), rows = s.map(function (slug) { return INDEX.filter(function (x) { return x.s === slug; })[0]; }).filter(Boolean);
+$('ah-slist').innerHTML = rows.length ? rows.slice(0, 6).map(function (x) { return '<div class="ah-srow"><a href="' + esc(x.u) + '">' + esc(x.n) + '</a>' + (x.x ? ' <span class="ah-closed">Closed</span>' : '') + '<span>' + esc(x.c) + '</span></div>'; }).join('') : '<div class="ah-srow"><span>Nothing saved yet. Tap the heart on any place to add it here.</span></div>';
+$('ah-sall').hidden = rows.length <= 6;
+}
+function chips() {
+var f = TLD.follows();
+$('ah-chips').innerHTML = f.length ? f.map(function (a) { return '<button class="ah-chip" data-a="' + esc(a) + '" type="button" title="Unfollow">' + esc(a) + ' &times;</button>'; }).join('') : '<span class="ah-none">You are not following any areas yet.</span>';
+}
+$('ah-chips').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; TLD.setFollows(TLD.follows().filter(function (x) { return x !== b.dataset.a; })); chips(); picks(); });
+$('ah-addbtn').addEventListener('click', function () { var v = $('ah-add').value; if (!v) return; var f = TLD.follows(); if (f.indexOf(v) < 0) f.push(v); TLD.setFollows(f); $('ah-add').value = ''; chips(); picks(); });
+$('ah-mail').addEventListener('click', function () {
+var s = TLD.saved(), rows = s.map(function (slug) { return INDEX.filter(function (x) { return x.s === slug; })[0]; }).filter(Boolean);
+if (!rows.length) { alert('Nothing saved yet.'); return; }
+var body = rows.map(function (x) { return x.n + (x.a ? ' (' + x.a + ')' : '') + ': ' + location.origin + x.u; }).join('\n');
+location.href = 'mailto:?subject=' + encodeURIComponent('My saved places from Tradition Local') + '&body=' + encodeURIComponent(body);
+});
+function greet(name) {
+var h = new Date().getHours(), g = h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+$('ah-hi').textContent = name ? g + ', ' + name : g;
+$('ah-av').textContent = name ? name.charAt(0).toUpperCase() : 'T';
+}
+var first = '';
+try { var u = JSON.parse(localStorage.getItem('tl_user') || 'null'); if (u) first = u.first_name || (u.name ? String(u.name).split(' ')[0] : ''); } catch (e) {}
+greet(first);
+document.addEventListener('tl:pulled', function () { picks(); saved(); chips(); });
+picks(); saved(); chips();
+if (TLD.sync) TLD.sync(true);
+window.__ahGreet = greet;
+})();
+</script>
+<AuthClient />
+<script is:inline>
+(function () {
+var A = window.TLAuth, c = A && A.client(); if (!c || !window.__ahGreet) return;
+function name(user) {
+if (!user) return;
+var m = user.user_metadata || {};
+if (m.first_name) window.__ahGreet(m.first_name);
+c.from('profiles').select('first_name').eq('id', user.id).maybeSingle().then(function (r) { var p = r && r.data; if (p && p.first_name) window.__ahGreet(p.first_name); });
+}
+c.auth.getSession().then(function (r) { var s = r && r.data && r.data.session; if (s) name(s.user); });
+})();
+</script>
+<ComboKit />
+<style is:global>
+.ah-page { background: #FAF7F0; }
+.ah-wrap { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
+.ah-hero { background: #1D1A6D; color: #fff; padding: 28px 0 104px; text-align: center; }
+.ah-herowrap { position: relative; }
+.ah-av { width: 60px; height: 60px; margin: 12px auto 0; border-radius: 50%; background: #E7BC52; color: #1D1A6D; font-family: var(--serif, 'Fraunces', serif); font-weight: 700; font-size: 28px; display: flex; align-items: center; justify-content: center; }
+.ah-hero h1 { color: #fff; margin: 16px 0 0; font-size: 42px; line-height: 1.1; }
+.ah-set { position: absolute; right: 40px; top: 0; text-align: left; z-index: 5; }
+.ah-set summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid rgba(255,255,255,.6); border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 700; color: #fff; min-height: 44px; box-sizing: border-box; }
+.ah-set summary::-webkit-details-marker { display: none; }
+.ah-set[open] summary { background: rgba(255,255,255,.14); }
+.ah-menu { position: absolute; right: 0; top: 52px; width: 290px; background: #fff; color: #1D1A6D; border-radius: 16px; box-shadow: 0 18px 40px rgba(0,0,0,.28); padding: 8px; display: flex; flex-direction: column; }
+.ah-menu a { display: block; padding: 11px 14px; border-radius: 10px; text-decoration: none; color: #1D1A6D; }
+.ah-menu a:hover { background: #FAF7F0; }
+.ah-menu b { display: block; font-size: 15px; }
+.ah-menu span { display: block; font-size: 13px; color: #4a4870; }
+.ah-body { margin-top: -76px; padding-bottom: 80px; display: flex; flex-direction: column; gap: 24px; position: relative; }
+.ah-lp { background: #fff; border-radius: 24px; padding: 30px; box-shadow: 0 22px 48px rgba(29,26,109,.18); display: flex; flex-direction: column; gap: 22px; }
+.ah-lphead { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.ah-eye { margin: 0 0 6px; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #2E7D4F; }
+.ah-lphead h2 { margin: 0; font-size: 34px; line-height: 1.1; }
+.ah-cta { display: inline-flex; align-items: center; gap: 8px; background: #1D1A6D; color: #fff; font-weight: 700; font-size: 15px; text-decoration: none; border-radius: 999px; padding: 13px 26px; white-space: nowrap; min-height: 48px; box-sizing: border-box; }
+.ah-cta:hover { color: #fff; background: #004AAD; }
+.ah-paused { margin: 0; padding: 12px 16px; border-radius: 12px; background: #FAF7F0; font-size: 15px; }
+.ah-panels { display: flex; flex-wrap: wrap; gap: 18px; align-items: stretch; }
+.ah-panel { flex: 1 1 440px; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+.ah-panel.home { background: #F4F3FB; border: 1px solid #e1dff2; }
+.ah-panel.fol { background: #FEF8E6; border: 1px solid #f3e3b0; }
+.ah-ph { display: flex; align-items: center; gap: 12px; }
+.ah-ic { flex: none; width: 34px; height: 34px; border-radius: 50%; background: #1D1A6D; display: flex; align-items: center; justify-content: center; }
+.ah-ic.gold { background: #E7BC52; }
+.ah-pt { font-family: var(--serif, 'Fraunces', serif); font-weight: 700; font-size: 22px; }
+.ah-ps { font-size: 15px; color: #4a4870; }
+.ah-rule { flex: 1; height: 1px; background: #d9d7ee; }
+.ah-panel.fol .ah-rule { background: #f0dca0; }
+.ah-rows { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+.ah-row { background: #fff; border-radius: 14px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; box-shadow: 0 1px 2px rgba(29,26,109,.06); text-decoration: none; color: #1D1A6D; }
+.ah-row:hover { box-shadow: 0 4px 12px rgba(29,26,109,.14); }
+.ah-cat { margin: 0 0 3px; font-size: 11px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase; color: #2E7D4F; }
+.ah-rt { font-family: var(--serif, 'Fraunces', serif); font-weight: 700; font-size: 19px; line-height: 1.2; }
+.ah-rs { font-size: 14px; color: #4a4870; margin-top: 2px; }
+.ah-chev { flex: none; }
+.ah-empty { background: #fff; border-radius: 14px; padding: 18px 16px; font-size: 15px; }
+.ah-empty p { margin: 0 0 8px; color: #4a4870; }
+.ah-empty a { font-weight: 700; }
+.ah-two { display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch; }
+.ah-card { flex: 1 1 440px; background: #fff; border: 1px solid #e3dcc9; border-radius: 22px; padding: 26px 28px; display: flex; flex-direction: column; }
+.ah-ch { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 12px; }
+.ah-ch h2 { margin: 0; font-size: 24px; }
+.ah-ch a { font-size: 14px; font-weight: 700; }
+.ah-srow { display: flex; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid #efe9d8; font-size: 15px; }
+.ah-srow:last-child { border-bottom: 0; }
+.ah-srow a { font-weight: 700; text-decoration: none; }
+.ah-srow span { color: #4a4870; text-align: right; }
+.ah-closed { font-size: 12px; font-weight: 700; color: #7a1f14; }
+.ah-cf { margin-top: auto; padding-top: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.ah-more { font-weight: 700; font-size: 14px; }
+.ah-btn { border: 0; background: #004AAD; color: #fff; border-radius: 999px; padding: 11px 24px; font: 700 15px 'DM Sans', sans-serif; min-height: 44px; cursor: pointer; }
+.ah-btn.line { background: #fff; color: #004AAD; border: 1.5px solid #004AAD; padding: 9px 20px; font-size: 14px; }
+.ah-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.ah-chip { background: #FBEFC9; border: 1.5px solid #E7BC52; border-radius: 999px; padding: 7px 15px; font: 700 14px 'DM Sans', sans-serif; color: #1D1A6D; min-height: 40px; cursor: pointer; }
+.ah-none { font-size: 15px; color: #4a4870; }
+.ah-sel { flex: 1; min-width: 200px; }
+.ah-loop { background: #1D1A6D; color: #fff; border-radius: 24px; padding: 34px; }
+.ah-leye { margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #E7BC52; }
+.ah-loop h2 { color: #fff; margin: 0; font-size: 32px; line-height: 1.15; max-width: 760px; }
+.ah-ldate { margin: 8px 0 0; font-size: 15px; font-weight: 700; color: #E7BC52; }
+.ah-lprev { margin: 10px 0 0; font-size: 16px; color: #dcdaf5; max-width: 640px; }
+.ah-lbtns { margin-top: 20px; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.ah-gold { display: inline-flex; align-items: center; gap: 8px; background: #E7BC52; color: #1D1A6D; font-weight: 700; font-size: 15px; text-decoration: none; border-radius: 999px; padding: 13px 26px; min-height: 48px; box-sizing: border-box; }
+.ah-gold:hover { background: #f0cb6e; color: #1D1A6D; }
+.ah-plain { font-size: 14px; font-weight: 700; color: #fff; }
+@media (max-width: 720px) {
+  .ah-wrap { padding: 0 14px; }
+  .ah-hero { padding: 16px 0 70px; text-align: left; }
+  .ah-herowrap { padding: 0 18px; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; }
+  .ah-av { display: none; }
+  .ah-hero h1 { font-size: 27px; margin: 0; max-width: 11em; }
+  .ah-set { position: static; order: 2; }
+  .ah-set summary { padding: 8px 13px; font-size: 13px; }
+  .ah-menu { right: 14px; top: 62px; position: absolute; width: min(290px, calc(100vw - 28px)); }
+  .ah-body { margin-top: -44px; gap: 14px; padding-bottom: 40px; }
+  .ah-lp { border-radius: 20px; padding: 20px 18px 18px; gap: 14px; }
+  .ah-lphead h2 { font-size: 26px; }
+  .ah-cta { width: 100%; justify-content: center; order: 3; }
+  .ah-panels { gap: 4px; }
+  .ah-panel { flex-basis: 100%; background: transparent !important; border: 0 !important; padding: 0; gap: 0; }
+  .ah-ph { gap: 8px; padding: 10px 0 4px; }
+  .ah-ic { width: 26px; height: 26px; }
+  .ah-ic svg { width: 13px; height: 13px; }
+  .ah-pt { font-size: 17px; }
+  .ah-ps { font-size: 13px; }
+  .ah-rows { gap: 0; margin: 0; }
+  .ah-row { background: transparent; box-shadow: none; border-radius: 0; padding: 12px 0; border-bottom: 1px solid #efe9d8; }
+  .ah-row:hover { box-shadow: none; }
+  .ah-chev { display: none; }
+  .ah-rt { font-size: 17px; }
+  .ah-empty { padding: 10px 0; background: transparent; }
+  .ah-two { gap: 14px; }
+  .ah-card { flex-basis: 100%; border-radius: 20px; padding: 18px; }
+  .ah-ch h2 { font-size: 22px; }
+  .ah-loop { border-radius: 20px; padding: 22px 18px; }
+  .ah-loop h2 { font-size: 24px; }
+  .ah-lbtns { flex-direction: column; align-items: stretch; gap: 12px; text-align: center; }
+  .ah-gold { justify-content: center; }
+}
+</style>
+</Base>

@@ -1,12 +1,12 @@
 ---
-import Base from '../layouts/Base.astro';
-import Prefs from '../components/Prefs.astro';
-import '../styles/pages.css';
-import { businesses, profiles, href, url, isClosed, apartmentCommunities, developments } from '../lib/data';
-import { areaPages, bizIn, topRating, category, isFood } from '../lib/helpers';
-import ComboKit from '../components/ComboKit.astro';
-import AuthClient from '../components/AuthClient.astro';
-import { config } from '../config';
+import Base from '../../layouts/Base.astro';
+import Prefs from '../../components/Prefs.astro';
+import '../../styles/pages.css';
+import { businesses, profiles, href, url, isClosed, apartmentCommunities, developments } from '../../lib/data';
+import { areaPages, bizIn, topRating, category, isFood } from '../../lib/helpers';
+import ComboKit from '../../components/ComboKit.astro';
+import AuthClient from '../../components/AuthClient.astro';
+import { config } from '../../config';
 const areas = areaPages().map((p) => p.name).sort();
 const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b), x: isClosed(b) ? 1 : 0 }))
   .concat(profiles.filter((p) => p.type === 'Place' && !isClosed(p)).map((p) => ({ s: 'p:' + p.slug, n: p.name, a: p.area, c: p.subCategory || 'Place', r: 0, u: href(p) })))
@@ -15,8 +15,8 @@ const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a:
   .concat(developments.map((d) => ({ s: 'd:' + d.slug, n: d.name, a: d.area || d.city, c: 'New development', r: 0, u: url('/developments/' + d.slug), x: 0 })));
 const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openings', 'New openings'], ['homes', 'Neighborhoods and homes']];
 ---
-<Base title="Your Account" description="Your area, the places you follow, and what you receive." noindex>
-  <section class="band hero"><div class="wrap"><p class="eyebrow">Your account</p><h1 style="margin-bottom:12px">Account and Settings</h1><p class="lead">Choose your area, follow the places you care about, and decide what you receive.</p>
+<Base title="Account Settings" description="Your area, the places you follow, and what you receive." noindex>
+  <section class="band hero"><div class="wrap"><p class="eyebrow"><a href={url('/account')} style="color:inherit;text-decoration:none">Back to your account home</a></p><h1 style="margin-bottom:12px">Account and Settings</h1><p class="lead">Choose your area, follow the places you care about, and decide what you receive.</p>
     <p class="meta" id="sync-note" style="margin-top:16px">Your area, followed areas, and saved places stay on this device until you sign in. Your name and details are kept with your account when you sign in.</p></div></section>
   <section class="band">
     <div class="wrap" style="display:flex;flex-wrap:wrap;gap:56px;align-items:flex-start">
