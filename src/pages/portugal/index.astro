@@ -1,0 +1,121 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/pages.css';
+import { url } from '../../lib/data';
+const routes = [
+  {
+    name: 'Tourist and visitor stays',
+    status: 'Verified',
+    req: 'US citizens with a valid passport can stay in the Schengen Area, which includes Portugal, for up to 90 days in any 180 day period for tourism or business, without a visa. Longer stays need a visa.',
+    src: 'US Department of State, Schengen fact sheet',
+    href: 'https://travel.state.gov/content/passports/en/go/schengen-fact-sheet.html',
+  },
+  {
+    name: 'Golden Visa (investor residence permit)',
+    status: 'Real estate routes closed',
+    req: 'Law 56/2023, published in October 2023, ended new applications under the property based routes. Renewals of permits granted under the earlier rules continue, and the new investment routes cannot be directed to real estate.',
+    src: 'Lei n.º 56/2023, Diário da República',
+    href: 'https://diariodarepublica.pt/dr/detalhe/lei/56-2023-222477692',
+  },
+  {
+    name: 'Citizenship by naturalization',
+    status: 'Verified',
+    req: 'Under the Nationality Law as amended by Lei Orgânica 1/2026, adults generally need 10 years of legal residence if they are nationals of countries outside the EU and the Portuguese speaking world, and 7 years if they are nationals of EU or Portuguese speaking countries. The change took effect on May 19, 2026, and applications already pending are decided under the earlier law.',
+    src: 'Lei Orgânica n.º 1/2026, Diário da República',
+    href: 'https://diariodarepublica.pt/dr/detalhe/lei-organica/1-2026-1123539996',
+  },
+];
+const researching = ['Digital nomad and remote work visas', 'Retirement and passive income visas', 'Employment and business residence', 'Investor routes other than property', 'Permanent residence'];
+const readNext = [
+  ['Investor residence permit (ARI), Portugal visa portal', 'https://vistos.mne.gov.pt/en/ari-residency-permit-for-investors'],
+  ['National visas and legislation, Portugal visa portal', 'https://vistos.mne.gov.pt/en/national-visas/national-legislation'],
+  ['Buying a home: IMT and stamp duty, Portal das Finanças', 'https://info.portaldasfinancas.gov.pt/pt/apoio_ao_contribuinte/Cidadaos/Casa_e_propriedades/Compra_da_casa/Paginas/default.aspx'],
+  ['Annual property tax (IMI), gov.pt', 'https://www.gov.pt/servicos/pagar-o-imposto-municipal-sobre-imoveis-imi-'],
+  ['Portugal travel advisory, US Department of State', 'https://travel.state.gov/en/international-travel/travel-advisories/portugal.html'],
+  ['US reporting of foreign accounts and assets (Form 8938), IRS', 'https://www.irs.gov/businesses/corporations/basic-questions-and-answers-on-form-8938'],
+  ['Form 8938 and FBAR compared, IRS', 'https://www.irs.gov/businesses/comparison-of-form-8938-and-fbar-requirements'],
+];
+const cities = ['Lisbon', 'Porto', 'Cascais', 'Algarve'];
+---
+<Base title="Portugal" active="More" description="A Tradition Local guide to Portugal, with visa, residency and citizenship facts checked against official sources.">
+  <section class="hero">
+    <div class="wrap">
+      <p class="meta" style="margin-bottom:12px"><a href={url('/')}>Home</a> / <a href={url('/destinations')}>Destinations</a> / Western Europe / Portugal</p>
+      <p class="eyebrow">Western Europe</p>
+      <h1 style="margin-bottom:16px">Portugal</h1>
+      <p class="lead" style="margin-bottom:20px;max-width:680px">Portugal sits on the Atlantic coast of Western Europe. Lisbon is the capital, the euro is the currency, and Portuguese is the main language. This guide starts with what we have confirmed from official sources.</p>
+      <div class="pt-facts"><span class="tag soft">Capital: Lisbon</span><span class="tag soft">Currency: Euro</span><span class="tag soft">Language: Portuguese</span></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px"><a class="btn" href={url('/ask-dillon')}>Ask Dillon a question</a><a class="btn line" href={url('/destinations')}>All destinations</a></div>
+    </div>
+  </section>
+
+  <section class="butter">
+    <div class="wrap">
+      <h4 style="margin-bottom:6px">Checked against official sources on November 16, 2026</h4>
+      <p class="meta" style="font-size:16px;max-width:780px">Rows marked Verified come straight from an official government source, linked on each card. Immigration and property rules change, so confirm with an official source or a licensed professional before you act.</p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Residency, visas and citizenship</p>
+      <h2 style="margin-bottom:12px">Ways to stay, and ways to belong</h2>
+      <p class="lead" style="max-width:680px;margin-bottom:28px">Owning property does not by itself give you residency or citizenship. Here is what we have confirmed so far.</p>
+      <div class="pt-routes">
+        {routes.map((r) => (
+          <div class="card pad">
+            <p style="margin:0 0 10px"><span class={r.status === 'Verified' ? 'tag soft' : 'pill-note'}>{r.status}</span></p>
+            <h4 style="margin-bottom:10px">{r.name}</h4>
+            <p style="margin-bottom:14px">{r.req}</p>
+            <p class="meta" style="font-size:14px;margin:0">Source: <a href={r.href} target="_blank" rel="noopener">{r.src}</a></p>
+          </div>
+        ))}
+      </div>
+      <h3 style="margin:40px 0 12px">Still being researched</h3>
+      <ul class="pt-list">{researching.map((x) => <li>{x}</li>)}</ul>
+    </div>
+  </section>
+
+  <section class="band tint">
+    <div class="wrap">
+      <p class="eyebrow">Buying property as a foreigner</p>
+      <h2 style="margin-bottom:12px">Where to start checking</h2>
+      <p class="lead" style="max-width:680px;margin-bottom:24px">We are still researching ownership rules, buying costs, financing and rental rules for Portugal. Until those are checked, these official pages are the best place to start. We have not summarized them yet.</p>
+      <ul class="pt-list">{readNext.map((x) => <li><a href={x[1]} target="_blank" rel="noopener">{x[0]}</a></li>)}</ul>
+      <p class="meta" style="margin-top:20px;max-width:680px">US citizens who own foreign accounts or assets may have US reporting duties. The IRS pages above explain them.</p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Cities and regions</p>
+      <h2 style="margin-bottom:24px">City guides are coming</h2>
+      <div class="pt-cities">{cities.map((c) => <div class="card pad"><h4 style="margin-bottom:8px">{c}</h4><span class="pill-note">Coming soon</span></div>)}</div>
+    </div>
+  </section>
+
+  <section class="band tint">
+    <div class="wrap pt-cta">
+      <div>
+        <p class="eyebrow">Questions?</p>
+        <h3 style="margin-bottom:8px">Thinking about buying or moving abroad?</h3>
+        <p class="meta" style="font-size:16px">Ask Dillon. A short note is enough, and he will reply personally.</p>
+      </div>
+      <a class="btn" href={url('/ask-dillon')}>Ask Dillon a question</a>
+    </div>
+  </section>
+
+  <section class="band" style="padding:40px 0">
+    <div class="wrap"><p class="meta" style="max-width:760px;font-size:13px">Tradition Local shares general information to help you research. It is not legal, immigration, tax or investment advice. Estimated costs, appreciation and rental income are never guaranteed.</p></div>
+  </section>
+</Base>
+
+<style is:global>
+.pt-facts{display:flex;gap:8px;flex-wrap:wrap}
+.pt-routes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.pt-cities{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.pt-list{padding-left:20px;margin:0;display:grid;gap:10px;font-size:16px}
+.pt-cta{display:flex;justify-content:space-between;align-items:center;gap:32px}
+@media (max-width:900px){.pt-routes{grid-template-columns:1fr}.pt-cities{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.pt-cta{flex-direction:column;align-items:flex-start}}
+</style>
