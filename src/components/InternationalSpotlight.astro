@@ -1,0 +1,59 @@
+---
+// International spotlight for the International Clients page. Destination details match /destinations/.
+import { url } from '../lib/data';
+const featured = { city: 'Lisbon', country: 'Portugal', region: 'Western Europe', bg: '#FFE29A', tags: ['Living Abroad', 'Second Homes', 'Residency'], href: '/portugal' };
+const more = [
+  { city: 'Dubai', country: 'United Arab Emirates', bg: '#E6EEF8' },
+  { city: 'Bodrum', country: 'Türkiye', bg: '#E8F5EC' },
+  { city: 'Athens', country: 'Greece', bg: '#FFF4D6' },
+  { city: 'Cabo San Lucas', country: 'Mexico', bg: '#FFE29A' },
+];
+---
+<section class="band tint" aria-label="International Spotlight">
+  <div class="wrap">
+    <p class="eyebrow">International Spotlight</p>
+    <h2 style="margin-bottom:28px">Featured destination</h2>
+    <article class="isp-feature">
+      <div class="isp-art" style={'background:' + featured.bg}>{featured.city}</div>
+      <div class="isp-body">
+        <p class="eyebrow">{featured.region}</p>
+        <h3>{featured.city}</h3>
+        <p class="meta">{featured.country}</p>
+        <div class="isp-tags">{featured.tags.map((t) => <span class="tag soft">{t}</span>)}</div>
+        <p><a class="btn" href={url(featured.href)}>Read the {featured.country} guide</a></p>
+      </div>
+    </article>
+  </div>
+</section>
+<section class="band" aria-label="More destinations">
+  <div class="wrap">
+    <div class="isp-head">
+      <div>
+        <p class="eyebrow">Beyond Houston</p>
+        <h2 style="margin-bottom:8px">Thinking about a place abroad?</h2>
+        <p class="meta" style="max-width:620px">More destinations on our list. Guides open as each one is checked.</p>
+      </div>
+      <a class="btn line" href={url('/destinations')}>See all destinations</a>
+    </div>
+    <div class="isp-tiles">
+      {more.map((m) => (
+        <a class="isp-tile" style={'background:' + m.bg} href={url('/destinations')}>
+          <b>{m.city}</b><span>{m.country}</span><span class="pill-note">Coming soon</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+<style is:global>
+.isp-feature{display:grid;grid-template-columns:1fr 1fr;border-radius:16px;overflow:hidden;background:#fff;border:1px solid #EFEBE2;box-shadow:0 2px 12px rgba(29,26,109,.08);min-height:340px}
+.isp-art{display:flex;align-items:flex-end;padding:32px;font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:48px;line-height:1.1;color:#1D1A6D}
+.isp-body{padding:40px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.isp-tags{display:flex;gap:8px;flex-wrap:wrap}
+.isp-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:28px}
+.isp-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.isp-tile{border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;min-height:170px;color:#1D1A6D;font-size:13px;text-decoration:none}
+.isp-tile b{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:24px;line-height:1.2}
+.isp-tile .pill-note{align-self:flex-start;margin-top:8px;background:#fff}
+@media (max-width:900px){.isp-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.isp-feature{grid-template-columns:1fr}.isp-art{min-height:180px;font-size:36px;padding:20px}.isp-body{padding:24px 20px}.isp-head{flex-direction:column;align-items:flex-start}}
+</style>
