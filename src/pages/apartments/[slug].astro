@@ -14,7 +14,7 @@ const lead = (a.summary ? a.summary.replace(/^The matched listing for .*? descri
   <section class="band hero">
     <div class="wrap">
       <p class="meta" style="margin-bottom:12px"><a href={url('/apartments')} style="font-weight:700">Apartments</a>{area && <> &rsaquo; <a href={href(area)} style="font-weight:700">{area.name}</a></>} &rsaquo; {a.name}</p>
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">Apartment community</span>{a.area && <span class="tag soft">{a.area}</span>}{a.zip && <span class="tag soft">{a.zip}</span>}</div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">Apartment</span>{a.area && <span class="tag soft">{a.area}</span>}{a.zip && <span class="tag soft">{a.zip}</span>}</div>
       <h1 style="margin-bottom:16px">{a.name}</h1>
       <p class="lead" style="margin-bottom:28px">{lead}</p>
       <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon about {a.name}</a><a class="btn line" href={url('/apartments')}>Back to apartment search</a></div>
