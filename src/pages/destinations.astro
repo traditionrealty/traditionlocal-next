@@ -29,7 +29,7 @@ const phase1 = [
   { name: 'Costa Rica', region: 'Central America', bg: '#E8F5EC' },
   { name: 'Panama', region: 'Central America', bg: '#FFF4D6' },
 ];
-const slides = destinations.map((d) => ({ city: d.city, country: d.country, region: d.region, bg: d.color, tags: d.tags, href: d.guide }));
+const slides = destinations.map((d) => ({ city: d.city, country: d.country, region: d.region, bg: d.color, tags: d.tags, href: d.guide, page: d.page }));
 const pool = [
   { country: 'Portugal', cities: ['Lisbon', 'Porto'] },
   { country: 'United Arab Emirates', cities: ['Dubai', 'Abu Dhabi'] },
@@ -70,7 +70,7 @@ const tiles = pool.slice(0, 4).map((c, k) => ({ name: c.cities[0], sub: c.countr
               <h3>{s.city}</h3>
               <p class="meta">{s.country}</p>
               <div class="dest-tags">{s.tags.map((t) => <span class="tag soft">{t}</span>)}</div>
-              {s.href ? <p><a class="btn" href={url(s.href)}>Read the {s.country} guide</a></p> : <p class="meta"><span class="pill-note">Guide coming soon</span></p>}
+              {s.href ? <p><a class="btn" href={url(s.href)}>Read the {s.country} guide</a></p> : <p class="meta"><span class="pill-note">Guide coming soon</span> <a class="btn line sm" href={url(s.page)} style="margin-left:8px">See {s.country}</a></p>}
             </div>
           </article>
         ))}
