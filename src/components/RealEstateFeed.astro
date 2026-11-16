@@ -9,7 +9,7 @@ import { feed, feedHasPosts, feedHasVideos } from '../lib/realestate';
 {feed.length > 0 && (
   <section class="band" id="re-feed">
     <div class="wrap">
-      <p class="eyebrow">Real estate feed</p><h2 style="margin-bottom:12px">What Is Happening in Houston Real Estate</h2>
+      <p class="eyebrow">Reading and watching</p><h2 style="margin-bottom:12px">Houston Guides, Articles, and Videos</h2>
       <p class="meta" style="font-size:17px;margin-bottom:24px;max-width:720px">Market updates, articles, news, and videos from Dillon. Check back often.</p>
       {feedHasPosts && feedHasVideos && <div class="tabs" id="rf-tabs" style="margin-bottom:24px"><button class="chip on" data-k="" aria-pressed="true">All</button><button class="chip" data-k="update" aria-pressed="false">Articles and updates</button><button class="chip" data-k="video" aria-pressed="false">Videos</button></div>}
       <div class="grid g3" id="rf-grid">
