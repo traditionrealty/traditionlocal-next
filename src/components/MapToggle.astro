@@ -11,9 +11,9 @@ const pins: Record<string, number[]> = {};
 src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && isFinite(ln) && la > 28.8 && la < 30.9 && ln > -96.6 && ln < -93.9) pins[r.slug] = [la, ln]; });
 ---
 <style is:global>
-  .mt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0 6px}
+  .mt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:26px 0 8px}
   .mt-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .mt-count{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;font-size:14px;color:#4a4870}
+  .mt-count{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0;padding:0 0 0 22px;font-size:14px;line-height:1.4;color:#4a4870}
   .mt-count .meta{margin:0 !important}
   @media (max-width:560px){.mt-seg{order:-1}}
   .mt-seg{display:inline-flex;border:1.5px solid #1D1A6D;border-radius:999px;overflow:hidden;height:44px;background:#fff}
