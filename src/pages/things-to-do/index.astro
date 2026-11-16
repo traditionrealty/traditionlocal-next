@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import '../../styles/pages.css';
 import '../../styles/events.css';
-import { profiles, events, isClosed, href, eventDates, url } from '../../lib/data';
+import { profiles, events, isClosed, href, eventDates, url, media } from '../../lib/data';
 import { venuePlace, timeRange } from '../../lib/helpers';
 import { config } from '../../config';
 import { hostsRsvp } from '../../lib/rsvp';
@@ -21,6 +21,13 @@ const EVENTS = list.map((x) => ({ t: x.e.title, u: href(x.e), s: iso(x.a), f: is
 // Events tagged Featured or Our pick in the sheet show up in Our picks. The section stays hidden when none are tagged.
 const picks = list.filter((x) => x.e.tags.some((t: string) => /^(featured|our picks?|picks?)$/i.test(t))).slice(0, 3);
 const places = profiles.filter((p) => p.type === 'Place' && !isClosed(p)).sort((a, b) => a.name.localeCompare(b.name));
+// Card pictures, same rule as Food. A real photo shows. A Google Maps screenshot shows only when config.cardMapPhotos is on. The closed and placeholder graphics are skipped.
+const pic = (b: any) => {
+  const m = media(b); if (!m) return { photo: '', mapPhoto: '' };
+  const note = `${b.heroCredit || ''} ${m.alt || ''}`;
+  if (/permanently closed|placeholder/i.test(note)) return { photo: '', mapPhoto: '' };
+  return /google maps/i.test(note) ? { photo: '', mapPhoto: m.src } : { photo: m.src, mapPhoto: '' };
+};
 const placeAreas = [...new Set(places.map((p) => p.area).filter(Boolean))].sort();
 const clip = (s: string, n: number) => { const t = (s || '').replace(/\s+/g, ' ').trim(); return t.length > n ? t.slice(0, n - 1).trimEnd() + '…' : t; };
 // Featured event: Tradition Local's own events (the ones that take RSVPs). The page holds the next few, and the visitor's browser shows the first one that has not happened yet.
@@ -135,8 +142,26 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
       <p class="eyebrow">Places to visit</p><h2 style="margin-bottom:16px">Worth a Trip Any Day</h2>
       <div class="card pad search" style="margin-bottom:12px;display:flex;gap:16px;flex-wrap:wrap;max-width:760px"><div style="flex:2;min-width:220px"><label for="p-find">Find a place</label><input id="p-find" type="search" placeholder="Try park, market, or a name" autocomplete="off" /></div><div style="flex:1;min-width:200px"><label for="p-area">Area</label><select id="p-area"><option value="">All of Greater Houston</option>{placeAreas.map((a) => <option>{a}</option>)}</select></div></div>
       <p class="meta" id="p-count" style="margin-bottom:16px" aria-live="polite"></p>
-      <div class="grid g3" id="p-grid">
-        {places.map((p, i) => <a class={i < 12 ? 'card pad p-item' : 'card pad p-item hidden'} href={href(p)} data-area={p.area} data-find={[p.name, p.summary, p.subCategory, p.area].join(' ').toLowerCase()} style="text-decoration:none"><h4 style="margin-bottom:4px">{p.name}</h4>{(p.subCategory || p.area) && <p class="meta">{[p.subCategory, p.area].filter(Boolean).join(', ')}</p>}{p.summary && <p class="meta" style="margin-top:6px;font-size:15px">{clip(p.summary, 115)}</p>}</a>)}
+      <div class={'grid g3' + (config.cardPhotos ? ' cp-on' : '') + (config.cardPhotos && config.cardMapPhotos ? ' cp-maps' : '')} id="p-grid">
+        {places.map((p, i) => { const pc = pic(p); return (
+          <div class={i < 12 ? 'card tcard p-item' : 'card tcard p-item hidden'} data-area={p.area} data-find={[p.name, p.summary, p.subCategory, p.area].join(' ').toLowerCase()}>
+            <a href={href(p)}>
+              <div class={pc.mapPhoto ? 'tc-photo has-map' : 'tc-photo'}>
+                {pc.photo ? <img src={pc.photo} alt="" width="640" height="480" loading="lazy" decoding="async" /> : (
+                  <>
+                    {pc.mapPhoto && <img class="tc-map" src={pc.mapPhoto} alt="" width="640" height="480" loading="lazy" decoding="async" />}
+                    <span class="tc-ph" aria-hidden="true">{config.mark && <img src={url(config.mark)} alt="" width="40" height="40" />}<span>{p.subCategory || 'Place'}</span></span>
+                  </>
+                )}
+              </div>
+              <div class="tc-body">
+                <h4 style="margin-bottom:4px">{p.name}</h4>
+                {(p.subCategory || p.area) && <p class="meta">{[p.subCategory, p.area].filter(Boolean).join(', ')}</p>}
+                {p.summary && <p class="meta" style="margin-top:6px;font-size:15px">{clip(p.summary, 115)}</p>}
+              </div>
+            </a>
+          </div>
+        ); })}
       </div>
       <p style="margin-top:24px"><button class="btn line hidden" id="p-more" type="button">Show more places</button></p>
     </div>
