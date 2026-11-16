@@ -3,6 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Prefs from '../../components/Prefs.astro';
 import FilterKit from '../../components/FilterKit.astro';
 import MapToggle from '../../components/MapToggle.astro';
+import RealEstateFeed from '../../components/RealEstateFeed.astro';
 import '../../styles/pages.css';
 import '../../styles/dock.css';
 import { href, url, media } from '../../lib/data';
@@ -95,6 +96,7 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
       <div id="cmp-out" class="card hidden" style="overflow:auto"></div>
     </div>
   </section>
+  <RealEstateFeed />
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:32px;flex-wrap:wrap">
       <div style="max-width:700px"><p class="eyebrow" style="color:var(--navy)">A neighbor to ask</p><h3 style="margin-bottom:8px">Curious About Living Somewhere?</h3><p style="font-size:17px">Dillon is a local Realtor who loves these neighborhoods. Questions are always welcome, with no pressure.</p></div>
