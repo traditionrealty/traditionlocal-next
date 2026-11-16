@@ -16,6 +16,7 @@ const mail = `mailto:${config.contactEmail}?subject=${encodeURIComponent(subject
       <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={mail}>Email {ask}</a><a class="btn line" href={url('/ask-dillon')}>Ask {ask} a question</a></div>
     </div>
   </section>
+  <slot name="after-hero" />
   <section class="band">
     <div class="wrap split">
       <div class="main">
