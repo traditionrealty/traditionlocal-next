@@ -51,6 +51,7 @@ const house = '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>';
 <section class="ah-card" id="saved" aria-label="Saved list"><div class="ah-ch"><h2>Saved list</h2><a href={U.settings + '#saved'} id="ah-sall" hidden>Open full list</a></div><div id="ah-slist"></div><div class="ah-cf"><button class="ah-btn line" id="ah-mail" type="button">Email my list</button><a href={U.food} class="ah-more">Find more places</a></div></section>
 <section class="ah-card" id="follow" aria-label="Places you follow"><div class="ah-ch"><h2>Places you follow</h2><a href={U.settings + '#areas'}>Manage</a></div><div class="ah-chips" id="ah-chips"></div>
 <div class="ah-cf"><div class="ah-sel"><label class="sr" for="ah-add">Follow another area</label><select id="ah-add" data-combo><option value="">Follow another area</option>{areas.map((a) => <option>{a}</option>)}</select></div><button class="ah-btn" id="ah-addbtn" type="button">Follow</button></div></section>
+<section class="ah-card" id="save-app" aria-label="Save as an app"><div class="ah-ch"><h2>Save as an App</h2></div><div id="sa-ios" hidden><p style="margin:0 0 14px;font-size:15px;color:#4a4870">Add Tradition Local to your home screen so it opens like an app, with no app store needed.</p><ul class="wx"><li><span class="wx-n">1</span><div><p>Tap the <b>Share</b> icon in Safari's toolbar.</p></div></li><li><span class="wx-n">2</span><div><p>Scroll down and tap <b>Add to Home Screen</b>.</p></div></li><li><span class="wx-n">3</span><div><p>Tap <b>Add</b> in the top right corner.</p></div></li></ul></div><div id="sa-android" hidden><p style="margin:0 0 14px;font-size:15px;color:#4a4870">Add Tradition Local to your home screen so it opens like an app, with no app store needed.</p><button class="ah-btn" id="sa-install" type="button" hidden style="margin-bottom:14px">Install Tradition Local</button><ul class="wx" id="sa-android-manual"><li><span class="wx-n">1</span><div><p>Tap the <b>&#8942;</b> menu in Chrome, top right.</p></div></li><li><span class="wx-n">2</span><div><p>Tap <b>Add to Home screen</b>.</p></div></li><li><span class="wx-n">3</span><div><p>Tap <b>Add</b> to confirm.</p></div></li></ul></div><div id="sa-done" hidden><p style="margin:0;font-size:15px;color:#4a4870">You already have Tradition Local saved to your home screen.</p></div><div id="sa-desktop" hidden><p style="margin:0;font-size:15px;color:#4a4870">Open traditionlocal.com on your phone, then come back to this page to add it to your home screen.</p></div></section>
 </div>
 
 <section class="ah-loop" aria-label="In the Loop">
@@ -132,6 +133,29 @@ c.auth.getSession().then(function (r) { var s = r && r.data && r.data.session; i
 })();
 </script>
 <ComboKit />
+<script is:inline>
+(function () {
+var ua = navigator.userAgent || '';
+var isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+var isAndroid = /Android/.test(ua);
+var standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+function show(id) { var el = document.getElementById(id); if (el) el.hidden = false; }
+if (standalone) { show('sa-done'); }
+else if (isIOS) { show('sa-ios'); }
+else if (isAndroid) {
+show('sa-android');
+var deferred = null, btn = document.getElementById('sa-install');
+window.addEventListener('beforeinstallprompt', function (e) {
+e.preventDefault(); deferred = e; if (btn) btn.hidden = false;
+});
+if (btn) btn.addEventListener('click', function () {
+if (!deferred) return;
+deferred.prompt();
+deferred.userChoice.then(function () { deferred = null; btn.hidden = true; });
+});
+} else { show('sa-desktop'); }
+})();
+</script>
 <style is:global>
 .ah-page { background: #FAF7F0; }
 .ah-wrap { max-width: 1120px; margin: 0 auto; padding: 0 40px; }
