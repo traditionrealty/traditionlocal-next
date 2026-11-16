@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import FilterKit from '../components/FilterKit.astro';
+import MapToggle from '../components/MapToggle.astro';
 import Prefs from '../components/Prefs.astro';
 import '../styles/pages.css';
 import { url, IS_PREVIEW, apartmentCommunities } from '../lib/data';
@@ -90,6 +91,7 @@ const compare = Object.fromEntries(apartmentCommunities.map((x) => [x.slug, { n:
     </div>
   </section>
   <FilterKit />
+<MapToggle set="apartment" items=".ap-item" bar="ap-bar" key="ap-bar" noun="apartment communities" />
   <Prefs />
   <script is:inline>
 (function () {
