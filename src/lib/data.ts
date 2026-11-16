@@ -188,13 +188,17 @@ export const stars = (r: string) => (Number(r) > 0 ? Number(r) : 0);
 
 // New developments for the New Builds search. data/developments.csv comes from the "New Development" rows
 // (Published only) of the Real Estate Profiles tab. The records are a historical export, so pages say to confirm current plans.
+export type DevProgram = { builder: string; line: string };
 export type Development = {
 slug: string; name: string; area: string; city: string; zip: string; builders: string[];
-bedsMin: number; bedsMax: number; sqftMin: number; sqftMax: number; plans: string; website: string;
+bedsMin: number; bedsMax: number; sqftMin: number; sqftMax: number; plans: string;
+programs: DevProgram[]; planList: string[];
 };
 const num = (s: string) => (s && !isNaN(Number(s)) ? Number(s) : 0);
+const splitBar = (s: string) => (s || '').split('|').map((x) => x.trim()).filter(Boolean);
 export const developments: Development[] = readTable('developments.csv').filter((r) => r.name).map((r) => ({
 slug: r.slug || slugify(r.name), name: r.name, area: r.area, city: r.city, zip: r.zip, builders: list(r.builders),
 bedsMin: num(r.beds_min), bedsMax: num(r.beds_max), sqftMin: num(r.sqft_min), sqftMax: num(r.sqft_max), plans: r.plans,
-website: /^https?:\/\//.test(r.website || '') ? r.website : '',
+programs: splitBar(r.programs).map((x) => { const [b, ...rest] = x.split(' — '); return { builder: b.trim(), line: rest.join(' — ').trim() }; }),
+planList: splitBar(r.planlist),
 })).sort((a, b) => a.name.localeCompare(b.name));
