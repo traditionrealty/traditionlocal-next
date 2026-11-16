@@ -11,7 +11,11 @@ const pins: Record<string, number[]> = {};
 src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && isFinite(ln) && la > 28.8 && la < 30.9 && ln > -96.6 && ln < -93.9) pins[r.slug] = [la, ln]; });
 ---
 <style is:global>
-  .mt-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 14px}
+  .mt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0 6px}
+  .mt-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .mt-count{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 14px;font-size:14px;color:#4a4870}
+  .mt-count .meta{margin:0 !important}
+  @media (max-width:560px){.mt-seg{order:-1}}
   .mt-seg{display:inline-flex;border:1.5px solid #1D1A6D;border-radius:999px;overflow:hidden;height:38px;background:#fff}
   .mt-seg button{border:0;background:#fff;color:#1D1A6D;padding:0 20px;font:700 14px 'DM Sans',sans-serif;display:flex;align-items:center;gap:7px;cursor:pointer}
   .mt-seg button[aria-pressed="true"]{background:#1D1A6D;color:#fff}
@@ -33,11 +37,16 @@ src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && is
     var COL = { food: '#E7BC52', place: '#2E8B57', neighborhood: '#004AAD', apartment: '#E7BC52', development: '#004AAD' };
     var PIN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
     var row = document.createElement('div'); row.className = 'mt-row';
-    row.innerHTML = '<div class="mt-seg" role="group" aria-label="Choose a view"><button type="button" data-v="list" aria-pressed="true">List</button><button type="button" data-v="map" aria-pressed="false">' + PIN + 'Map</button></div><span class="mt-note" aria-live="polite"></span>';
-    var note = row.querySelector('.mt-note');
+    row.innerHTML = '<div class="mt-left"></div><div class="mt-seg" role="group" aria-label="Choose a view"><button type="button" data-v="list" aria-pressed="true">List</button><button type="button" data-v="map" aria-pressed="false">' + PIN + 'Map</button></div>';
+    var left = row.querySelector('.mt-left'), line = document.createElement('div'); line.className = 'mt-count';
+    var note = document.createElement('span'); note.className = 'mt-note'; note.setAttribute('aria-live', 'polite');
+    var pre = MT.bar ? MT.bar.replace(/-bar$/, '') : MT.key, cntEl = document.getElementById(pre + '-count');
+    if (barEl) { var kids = [].slice.call(barEl.querySelectorAll('a,button')); var sv = kids.filter(function (x) { return /^\s*Saved\b/i.test(x.textContent); })[0], em = kids.filter(function (x) { return /Email my list/i.test(x.textContent); })[0]; if (sv) left.appendChild(sv); if (em) left.appendChild(em); }
+    if (cntEl) line.appendChild(cntEl); line.appendChild(note);
     var box = document.createElement('div'); box.className = 'mt-box mt-off';
     box.innerHTML = '<div class="mt-canvas" role="region" aria-label="Map of ' + MT.noun + '"></div><p class="mt-foot">Pins on the map follow your search and filters. Map data from OpenStreetMap contributors. Open any pin for the full page.</p>';
     if (barEl && barEl.parentNode) barEl.parentNode.insertBefore(row, barEl.nextSibling); else grid.parentNode.insertBefore(row, grid);
+    row.parentNode.insertBefore(line, row.nextSibling);
     grid.parentNode.insertBefore(box, grid);
     var matched = null, view = 'list', map = null, layer = null;
     document.addEventListener('tlf:match', function (e) { if (!e.detail || e.detail.key !== MT.key) return; matched = e.detail.items; if (view === 'map') draw(true); });
