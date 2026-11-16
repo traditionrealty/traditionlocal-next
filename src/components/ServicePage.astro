@@ -4,7 +4,7 @@ import '../styles/pages.css';
 import { url } from '../lib/data';
 import { config } from '../config';
 interface Props { title: string; eyebrow: string; lead: string; who: string[]; help: [string, string][]; steps: string[]; subject: string; description: string; }
-const { title, eyebrow, lead, who, help, steps, subject, description } = Astro.props;
+const { title, eyebrow, lead, who, help, steps, subject, description, ask = 'Dillon' } = Astro.props;
 const mail = `mailto:${config.contactEmail}?subject=${encodeURIComponent(subject)}`;
 ---
 <Base title={title} active="More" sub="makeithome" description={description}>
@@ -13,7 +13,7 @@ const mail = `mailto:${config.contactEmail}?subject=${encodeURIComponent(subject
       <p class="eyebrow">{eyebrow}</p>
       <h1 style="margin-bottom:16px;max-width:880px">{title}</h1>
       <p class="lead" style="margin-bottom:28px">{lead}</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={mail}>Email Dillon</a><a class="btn line" href={url('/ask-dillon')}>Ask Dillon a question</a></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={mail}>Email {ask}</a><a class="btn line" href={url('/ask-dillon')}>Ask {ask} a question</a></div>
     </div>
   </section>
   <section class="band">
@@ -26,7 +26,7 @@ const mail = `mailto:${config.contactEmail}?subject=${encodeURIComponent(subject
       </div>
       <div class="side">
         <div class="card pad"><p class="eyebrow">Who this is for</p><ul style="padding-left:20px;margin:0;display:grid;gap:8px">{who.map((w) => <li>{w}</li>)}</ul></div>
-        <div class="card pad pick" style="margin-top:24px"><p class="eyebrow">Start here</p><h3 style="margin-bottom:8px">Tell Us What You Need</h3><p class="meta" style="margin-bottom:16px;font-size:16px">A short note is enough. We will reply personally.</p><a class="btn" href={mail} style="width:100%">Email Dillon</a></div>
+        <div class="card pad pick" style="margin-top:24px"><p class="eyebrow">Start here</p><h3 style="margin-bottom:8px">Tell Us What You Need</h3><p class="meta" style="margin-bottom:16px;font-size:16px">A short note is enough. We will reply personally.</p><a class="btn" href={mail} style="width:100%">Email {ask}</a></div>
         <div class="card pad" style="margin-top:24px"><p class="eyebrow">Explore first</p><a class="menu" href={url('/neighborhoods')}>Neighborhood guides</a><a class="menu" href={url('/find-your-fit')}>Find your fit</a><a class="menu" href={url('/make-it-home')} style="border-bottom:0">All ways we can help</a></div>
       </div>
     </div>

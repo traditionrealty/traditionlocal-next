@@ -118,8 +118,9 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
         <p class="eyebrow">Who we are</p>
         <h2>Meet Sara and Dillon</h2>
         <p>Sara visits the places she writes about. Dillon is a Realtor who answers questions personally.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px"><a class="btn line sm" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line sm" href={url('/ask-dillon')}>Ask Sara</a></div>
       </div>
-      <div class="ms-btns"><a class="btn" href={url('/about')}>Meet Sara and Dillon</a><a class="btn line" href={url('/ask-dillon')}>Ask Dillon</a></div>
+      <div class="ms-btns"><a class="btn" href={url('/about')}>Meet Sara and Dillon</a></div>
     </div>
   </section>
 

@@ -17,7 +17,7 @@ const lead = (a.summary ? a.summary.replace(/^The matched listing for .*? descri
       <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">Apartment</span>{a.area && <span class="tag soft">{a.area}</span>}{a.zip && <span class="tag soft">{a.zip}</span>}</div>
       <h1 style="margin-bottom:16px">{a.name}</h1>
       <p class="lead" style="margin-bottom:28px">{lead}</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon about {a.name}</a><a class="btn line" href={url('/apartments')}>Back to apartment search</a></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Sara about {a.name}</a><a class="btn line" href={url('/apartments')}>Back to apartment search</a></div>
     </div>
   </section>
   <section class="band">
@@ -45,7 +45,7 @@ const lead = (a.summary ? a.summary.replace(/^The matched listing for .*? descri
           ))}
         </div>
       ) : (
-        <p style="font-size:18px;margin-bottom:24px">Layouts are not recorded yet. Ask Dillon which floor plans are available.</p>
+        <p style="font-size:18px;margin-bottom:24px">Layouts are not recorded yet. Ask Sara which floor plans are available.</p>
       )}
       {features.length > 0 && (
         <div class="card pad">
@@ -53,7 +53,7 @@ const lead = (a.summary ? a.summary.replace(/^The matched listing for .*? descri
           <div style="display:flex;gap:8px;flex-wrap:wrap">{features.map((f) => <span class="tag soft">{f}</span>)}</div>
         </div>
       )}
-      <p class="meta" style="margin-top:20px">Layouts and features come from a third party listing and may change. Confirm the specific home, its finishes and its equipment with the community before you apply. Rent and availability are not listed here. Ask Dillon what is open right now.</p>
+      <p class="meta" style="margin-top:20px">Layouts and features come from a third party listing and may change. Confirm the specific home, its finishes and its equipment with the community before you apply. Rent and availability are not listed here. Ask Sara what is open right now.</p>
     </div>
   </section>
   {(a.faqs.length > 0 || a.localTake) && (
@@ -83,8 +83,8 @@ const lead = (a.summary ? a.summary.replace(/^The matched listing for .*? descri
   )}
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
-      <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious About {a.name}?</h3><p style="font-size:17px">Dillon can tell you what is open right now, how pricing compares and which community fits what you want.</p></div>
-      <a class="btn" href={url('/ask-dillon')}>Ask Dillon</a>
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious About {a.name}?</h3><p style="font-size:17px">Sara can tell you what is open right now, how pricing compares and which community fits what you want.</p></div>
+      <a class="btn" href={url('/ask-dillon')}>Ask Sara</a>
     </div>
   </section>
 </Base>

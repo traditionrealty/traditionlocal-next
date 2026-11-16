@@ -18,21 +18,21 @@ const help = [
 ];
 const steps = ['Share your budget, move date, and what you must have.', 'We suggest areas and places worth a look.', 'You tour, compare, and decide with a local on your side.'];
 const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/></svg>';
-const compare = Object.fromEntries(apartmentCommunities.map((x) => [x.slug, { n: x.name, u: url('/apartments/' + x.slug), r: x.area || '', ad: [x.address, x.zip].filter(Boolean).join(', '), l: x.layouts.join(', '), f: x.features || '', rent: 'Ask Dillon' }]));
+const compare = Object.fromEntries(apartmentCommunities.map((x) => [x.slug, { n: x.name, u: url('/apartments/' + x.slug), r: x.area || '', ad: [x.address, x.zip].filter(Boolean).join(', '), l: x.layouts.join(', '), f: x.features || '', rent: 'Ask Sara' }]));
 ---
 <Base title="Apartment Locating" active="More" sub="makeithome" description="Help finding the right apartment in Houston.">
   <section class="band hero">
     <div class="wrap">
       <p class="eyebrow">Apartment locating</p>
       <h1 style="margin-bottom:16px;max-width:880px">Apartment Communities to Compare</h1>
-      <p class="lead" style="margin-bottom:28px">Finding a rental in a big city takes time. Browse apartment communities below, then tell Dillon what matters and he will help you narrow the list.</p>
-      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon about apartments</a><a class="btn line" href={url('/find-your-fit')}>Find your fit</a></div>
+      <p class="lead" style="margin-bottom:28px">Finding a rental in a big city takes time. Browse apartment communities below, then tell Sara what matters and she will help you narrow the list.</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Sara about apartments</a><a class="btn line" href={url('/find-your-fit')}>Find your fit</a></div>
     </div>
   </section>
   <section class="band">
     <div class="wrap">
       <p class="eyebrow">Apartments</p><h2 style="margin-bottom:12px">Search Apartment Communities</h2>
-      <p class="meta" style="max-width:760px;margin-bottom:20px">Compare apartment communities by area and layout. Layouts and features come from third party listings and may change. Rent and availability are not listed here, so ask Dillon what is open right now.</p>
+      <p class="meta" style="max-width:760px;margin-bottom:20px">Compare apartment communities by area and layout. Layouts and features come from third party listings and may change. Rent and availability are not listed here, so ask Sara what is open right now.</p>
       <div class="fbar" id="ap-bar">
         <div class="fbar-row">
           <div class="fbar-search"><label for="ap-q">Search</label><input id="ap-q" type="search" placeholder="Try a community, neighborhood or ZIP" autocomplete="off" /></div>
@@ -86,8 +86,8 @@ const compare = Object.fromEntries(apartmentCommunities.map((x) => [x.slug, { n:
   </section>
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
-      <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious About a Community?</h3><p style="font-size:17px">Tell Dillon your budget, your move date, and what you must have. He will reply personally, with no pressure.</p></div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a></div>
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious About a Community?</h3><p style="font-size:17px">Tell Sara your budget, your move date, and what you must have. She will reply personally, with no pressure.</p></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Sara</a></div>
     </div>
   </section>
   <FilterKit />
