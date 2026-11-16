@@ -34,7 +34,7 @@ const more = destinations.filter((d) => d !== star).slice(0, 4);
     </div>
     <div class="isp-tiles">
       {more.map((m) => (
-        <a class="isp-tile" style={'background:' + m.color} href={url(m.ready ? m.guide : '/destinations')}>
+        <a class="isp-tile" style={'background:' + m.color} href={url(m.page)}>
           <b>{m.city}</b><span>{m.country}</span><span class="pill-note">{m.ready ? 'Read the guide' : 'Coming soon'}</span>
         </a>
       ))}
