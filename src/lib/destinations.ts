@@ -3,11 +3,13 @@
 // featured = yes marks the big spotlight card on the International Clients page. guide is the page path, for example /portugal.
 import { readTable } from './data';
 
-export type Dest = { city: string; country: string; region: string; tags: string[]; guide: string; ready: boolean; featured: boolean; color: string };
+export type Dest = { city: string; country: string; region: string; tags: string[]; guide: string; ready: boolean; featured: boolean; color: string; page: string };
+
+export const countrySlug = (c: string) => c.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
 const tints = ['#FFE29A', '#E6EEF8', '#E8F5EC', '#FFF4D6'];
 
-export const destinations: Dest[] = readTable('destinations.csv')
+const rows: Omit<Dest, 'page'>[] = readTable('destinations.csv')
   .filter((r) => r.city && !/^hid/i.test((r.status || '').trim()))
   .map((r, i) => {
     const ready = /^ready$/i.test((r.status || '').trim()) && !!(r.guide || '').trim();
@@ -18,3 +20,10 @@ export const destinations: Dest[] = readTable('destinations.csv')
       color: (r.color || '').trim() || tints[i % tints.length],
     };
   });
+
+// The page a place links to: its own guide, or the guide of another city in the same country, or the country page.
+const guideOf: Record<string, string> = {};
+rows.forEach((d) => { if (d.guide && !guideOf[d.country]) guideOf[d.country] = d.guide; });
+export const destinations: Dest[] = rows.map((d) => ({ ...d, page: d.guide || guideOf[d.country] || '/destinations/' + countrySlug(d.country) }));
+// Countries that get a simple page of their own, because no guide is open for them yet.
+export const stubCountries: string[] = [...new Set(rows.filter((d) => d.country && !guideOf[d.country]).map((d) => d.country))];
