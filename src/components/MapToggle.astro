@@ -48,6 +48,7 @@ src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && is
     if (barEl && barEl.parentNode) barEl.parentNode.insertBefore(row, barEl.nextSibling); else grid.parentNode.insertBefore(row, grid);
     row.parentNode.insertBefore(line, row.nextSibling);
     grid.style.marginTop = '16px';
+    var dock = row.closest('.fdock'); if (dock) dock.style.marginBottom = '12px';
     grid.parentNode.insertBefore(box, grid);
     var matched = null, view = 'list', map = null, layer = null;
     document.addEventListener('tlf:match', function (e) { if (!e.detail || e.detail.key !== MT.key) return; matched = e.detail.items; if (view === 'map') draw(true); });
