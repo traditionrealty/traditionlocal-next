@@ -8,7 +8,6 @@ import { apartments } from '../lib/apartments';
 const areas = [...new Set(apartments.map((a) => a.area).filter(Boolean))].sort();
 const aptAreas = [...new Set(apartmentCommunities.map((x) => x.area).filter(Boolean))].sort();
 const aptLayouts = ['Studio', '1 Bedroom', '2 Bedroom', '3 Bedroom', '4 Bedroom', 'Penthouse'].filter((l) => apartmentCommunities.some((x) => x.layouts.includes(l)));
-const mail = 'mailto:' + config.contactEmail + '?subject=Apartment%20locating';
 const help = [
   ['Matched to Your Life', 'Your commute, budget, pets, and the feel of the neighborhood all shape the shortlist.'],
   ['Neighborhood Context', 'Our guides show what is nearby, from coffee and groceries to parks and things to do.'],
@@ -45,7 +44,7 @@ const steps = ['Share your budget, move date, and what you must have.', 'We sugg
       <div class="grid g3">
         {apartmentCommunities.map((x, i) => (
           <div class={i < 24 ? 'card pad ap-item' : 'card pad ap-item hidden'} data-name={[x.name, x.area, x.address, x.zip, x.features].join(' ').toLowerCase()} data-area={x.area} data-layouts={x.layouts.join('|')}>
-            <span class="tag">Apartment community</span>
+            <span class="tag">Apartment</span>
             <h4 style="margin:12px 0 6px"><a href={url('/apartments/' + x.slug)}>{x.name}</a></h4>
             <p class="meta" style="margin-bottom:8px">{[x.area, x.city].filter((v, j, arr) => v && arr.indexOf(v) === j).join(', ')}</p>
             {x.layouts.length > 0 && <p class="meta" style="font-size:15px;margin-bottom:6px"><b>Layouts:</b> {x.layouts.join(', ')}</p>}
@@ -74,7 +73,7 @@ const steps = ['Share your budget, move date, and what you must have.', 'We sugg
   <section class="band butter">
     <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
       <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious About a Community?</h3><p style="font-size:17px">Tell Dillon your budget, your move date, and what you must have. He will reply personally, with no pressure.</p></div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line" href={mail}>Email Dillon</a></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon</a></div>
     </div>
   </section>
   <FilterKit />
