@@ -47,6 +47,7 @@ src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && is
     box.innerHTML = '<div class="mt-canvas" role="region" aria-label="Map of ' + MT.noun + '"></div><p class="mt-foot">Pins on the map follow your search and filters. Map data from OpenStreetMap contributors. Open any pin for the full page.</p>';
     if (barEl && barEl.parentNode) barEl.parentNode.insertBefore(row, barEl.nextSibling); else grid.parentNode.insertBefore(row, grid);
     row.parentNode.insertBefore(line, row.nextSibling);
+    grid.style.marginTop = '16px';
     grid.parentNode.insertBefore(box, grid);
     var matched = null, view = 'list', map = null, layer = null;
     document.addEventListener('tlf:match', function (e) { if (!e.detail || e.detail.key !== MT.key) return; matched = e.detail.items; if (view === 'map') draw(true); });
