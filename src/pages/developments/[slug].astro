@@ -1,0 +1,97 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/pages.css';
+import { developments, byName, href, url } from '../../lib/data';
+export function getStaticPaths() { return developments.map((d) => ({ params: { slug: d.slug }, props: { d } })); }
+const { d } = Astro.props;
+const area = byName(d.area);
+const place = [d.city, d.area && d.area !== d.city ? d.area : ''].filter(Boolean).join(', ');
+const nice = (s: string) => s.replace(/\d{4,}/g, (n) => Number(n).toLocaleString('en-US')).replace(/(\d)-(\d)/g, '$1 to $2').replace(/[.]$/, '');
+const fmt = (n: number) => n.toLocaleString('en-US');
+const rng = (a: number, b: number, f: (n: number) => string) => (!a && !b ? '' : a === b || !a || !b ? f(a || b) : f(a) + ' to ' + f(b));
+const beds = rng(d.bedsMin, d.bedsMax, (n) => String(n));
+const size = rng(d.sqftMin, d.sqftMax, fmt);
+const byBuilder: Record<string, string[]> = {};
+d.programs.forEach((p) => { if (p.line) (byBuilder[p.builder] = byBuilder[p.builder] || []).push(p.line); });
+const names = [...new Set([...d.builders, ...d.programs.map((p) => p.builder)])];
+const plans = (d.planList.length ? d.planList : d.plans.split(';').map((x) => x.trim()).filter(Boolean)).map(nice);
+const sibs = developments.filter((x) => x.slug !== d.slug && (d.area ? x.area === d.area : x.city === d.city)).slice(0, 6);
+const lead = d.name + ' is a new development in ' + (d.city || 'Greater Houston') + ', Texas' + (names.length ? '. Builders on record: ' + names.slice(0, 4).join(', ') + (names.length > 4 ? ' and more' : '') + '.' : '.');
+---
+<Base title={d.name} description={lead} active="New Builds">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="meta" style="margin-bottom:12px"><a href={url('/new-builds')} style="font-weight:700">New Builds</a>{area && <> &rsaquo; <a href={href(area)} style="font-weight:700">{area.name}</a></>} &rsaquo; {d.name}</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">New development</span>{d.area && <span class="tag soft">{d.area}</span>}{d.zip && <span class="tag soft">{d.zip}</span>}</div>
+      <h1 style="margin-bottom:16px">{d.name}</h1>
+      <p class="lead" style="margin-bottom:28px">{lead}</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon about {d.name}</a><a class="btn line" href={url('/new-builds')}>Back to New Builds search</a></div>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">At a glance</p>
+      <h2 style="margin-bottom:20px">{d.name} Overview</h2>
+      <div class="grid g3">
+        <div class="card pad"><p class="meta" style="margin-bottom:6px">Location</p><h4>{place || 'Greater Houston'}</h4>{d.zip && <p class="meta" style="margin-top:6px">ZIP {d.zip}</p>}</div>
+        <div class="card pad"><p class="meta" style="margin-bottom:6px">Builders</p><h4>{names.length ? names.length + (names.length === 1 ? ' builder' : ' builders') : 'Not recorded'}</h4>{names.length > 0 && <p class="meta" style="margin-top:6px">{names.slice(0, 3).join(', ')}{names.length > 3 ? ' and more' : ''}</p>}</div>
+        <div class="card pad"><p class="meta" style="margin-bottom:6px">Home sizes on record</p><h4>{beds ? beds + ' bedrooms' : 'Not recorded'}</h4>{size && <p class="meta" style="margin-top:6px">{size} sq ft</p>}</div>
+      </div>
+    </div>
+  </section>
+  <section class="band tint">
+    <div class="wrap">
+      <p class="eyebrow">Builders and styles</p>
+      <h2 style="margin-bottom:20px">Who Is Building Here</h2>
+      {names.length > 0 ? (
+        <div class="grid g3">
+          {names.map((n) => (
+            <div class="card pad">
+              <h4 style="margin-bottom:8px">{n}</h4>
+              {byBuilder[n] && byBuilder[n].length > 0 ? (
+                <><p class="meta" style="margin-bottom:6px">Product lines on record</p><p style="font-size:16px">{byBuilder[n].join(', ')}</p></>
+              ) : (
+                <p class="meta">No product lines recorded.</p>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p style="font-size:18px">No builders are recorded for this development yet. Ask Dillon who is building here.</p>
+      )}
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Home plans</p>
+      <h2 style="margin-bottom:20px">Plans on Record</h2>
+      {plans.length > 0 ? (
+        <div class="grid g3">
+          {plans.map((p) => (<div class="card pad"><p style="font-size:17px;font-weight:600">{p}</p></div>))}
+        </div>
+      ) : (
+        <p style="font-size:18px">No plan ranges are recorded for this development yet.</p>
+      )}
+      <p class="meta" style="margin-top:20px">Builder names, product lines and plans come from a historical export and may be out of date. Lot sizes, prices and availability are not listed here. Ask Dillon what is open right now.</p>
+    </div>
+  </section>
+  {sibs.length > 0 && (
+    <section class="band tint">
+      <div class="wrap">
+        <p class="eyebrow">Nearby</p>
+        <h2 style="margin-bottom:20px">More New Developments{d.area ? ' in ' + d.area : ''}</h2>
+        <div class="grid g3">
+          {sibs.map((s) => (
+            <div class="card pad"><h4 style="margin-bottom:6px"><a href={url('/developments/' + s.slug)}>{s.name}</a></h4><p class="meta">{[s.city, s.builders.slice(0, 2).join(', ')].filter(Boolean).join(' · ')}</p></div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious About {d.name}?</h3><p style="font-size:17px">Dillon can tell you what is open right now, current pricing and which builder fits what you want.</p></div>
+      <a class="btn" href={url('/ask-dillon')}>Ask Dillon</a>
+    </div>
+  </section>
+</Base>
