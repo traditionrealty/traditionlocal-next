@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import '../styles/pages.css';
 import { url } from '../lib/data';
+import { isoOf } from '../lib/countries';
 import { destinations } from '../lib/destinations';
 const goals = ['Second Homes', 'Luxury Homes', 'Investment', 'Living Abroad', 'Residency', 'Citizenship', 'Golden Visas', 'Retirement', 'New Developments', 'Emerging Destinations'];
 const regions = [
@@ -29,7 +30,7 @@ const phase1 = [
   { name: 'Costa Rica', region: 'Central America', bg: '#E8F5EC' },
   { name: 'Panama', region: 'Central America', bg: '#FFF4D6' },
 ];
-const slides = destinations.map((d) => ({ city: d.city, country: d.country, region: d.region, bg: d.color, tags: d.tags, href: d.guide, page: d.page }));
+const slides = destinations.map((d) => ({ city: d.city, country: d.country, region: d.region, bg: d.color, code: isoOf[d.country] || d.country.slice(0, 2).toUpperCase(), tags: d.tags, href: d.guide, page: d.page }));
 const pool = [
   { country: 'Portugal', cities: ['Lisbon', 'Porto'] },
   { country: 'United Arab Emirates', cities: ['Dubai', 'Abu Dhabi'] },
@@ -58,13 +59,13 @@ const tiles = pool.slice(0, 4).map((c, k) => ({ name: c.cities[0], sub: c.countr
     </div>
   </section>
 
-  <section class="band tint" id="spotlight" aria-label="International Spotlight">
+  <section class="band tint" id="spotlight" aria-label="International Spotlight" style="padding:56px 0">
     <div class="wrap">
-      <div class="dest-head"><div><p class="eyebrow">International Spotlight</p><h2>Featured destination</h2></div><p class="meta" data-count aria-live="polite"></p></div>
+      <div class="dest-head"><div><p class="eyebrow">International Spotlight</p><h2>Featured destination</h2></div></div>
       <div data-spot>
         {slides.map((s, i) => (
           <article class="spot-slide" data-slide data-city={s.city} hidden={i > 0}>
-            <div class="spot-art" style={'background:' + s.bg}>{s.city}</div>
+            <div class="spot-art" style={'background:' + s.bg} aria-hidden="true">{s.code}</div>
             <div class="spot-body">
               <p class="eyebrow">{s.region}</p>
               <h3>{s.city}</h3>
@@ -77,7 +78,7 @@ const tiles = pool.slice(0, 4).map((c, k) => ({ name: c.cities[0], sub: c.countr
       </div>
       <div class="spot-ctl" data-ctl hidden>
         <div class="spot-dots" data-dots></div>
-        <div style="display:flex;gap:10px;align-items:center"><button type="button" class="btn line sm" data-pause>Pause</button><button type="button" class="spot-nav" data-prev aria-label="Previous destination">&lsaquo;</button><button type="button" class="spot-nav" data-next aria-label="Next destination">&rsaquo;</button></div>
+        <div style="display:flex;gap:10px;align-items:center"><span class="meta" data-count aria-live="polite" style="margin-right:6px"></span><button type="button" class="btn line sm" data-pause>Pause</button><button type="button" class="spot-nav" data-prev aria-label="Previous destination">&lsaquo;</button><button type="button" class="spot-nav" data-next aria-label="Next destination">&rsaquo;</button></div>
       </div>
     </div>
   </section>
@@ -144,14 +145,14 @@ const tiles = pool.slice(0, 4).map((c, k) => ({ name: c.cities[0], sub: c.countr
 
 <style is:global>
 .dest-hero{display:grid;grid-template-columns:7fr 5fr;gap:64px;align-items:center}
-.dest-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:190px;gap:16px}
+.dest-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:150px;gap:16px}
 .dest-tile{border-radius:16px;padding:20px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;color:#1D1A6D;font-size:13px}
 .dest-tile b{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:24px;line-height:1.2}
 .dest-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:28px}
-.spot-slide{display:grid;grid-template-columns:1fr 1fr;border-radius:16px;overflow:hidden;background:#fff;border:1px solid #EFEBE2;box-shadow:0 2px 12px rgba(29,26,109,.08);min-height:380px}
+.spot-slide{display:grid;grid-template-columns:1fr 1.3fr;border-radius:16px;overflow:hidden;background:#fff;border:1px solid #EFEBE2;box-shadow:0 2px 12px rgba(29,26,109,.08);min-height:230px}
 .spot-slide[hidden]{display:none}
-.spot-art{display:flex;align-items:flex-end;padding:32px;font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:48px;line-height:1.1;color:#1D1A6D}
-.spot-body{padding:44px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.spot-art{display:flex;align-items:center;justify-content:center;font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:64px;line-height:1;color:rgba(29,26,109,.22)}
+.spot-body{padding:28px 36px;display:flex;flex-direction:column;justify-content:center;gap:12px}
 .dest-tags{display:flex;gap:8px;flex-wrap:wrap}
 .spot-ctl{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:20px}
 .spot-ctl[hidden]{display:none}
@@ -167,7 +168,7 @@ const tiles = pool.slice(0, 4).map((c, k) => ({ name: c.cities[0], sub: c.countr
 .dest-card-art{height:120px}
 .dest-cross{display:flex;justify-content:space-between;align-items:center;gap:32px}
 @media (max-width:900px){.dest-goals{grid-template-columns:repeat(3,minmax(0,1fr))}.dest-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:760px){.spot-dots{display:none}.spot-ctl{justify-content:flex-end}.dest-hero{grid-template-columns:1fr;gap:32px}.dest-tiles{grid-auto-rows:150px}.spot-slide{grid-template-columns:1fr}.spot-art{min-height:200px;font-size:36px;padding:20px}.spot-body{padding:24px 20px}.dest-goals{grid-template-columns:repeat(2,minmax(0,1fr))}.dest-regions{grid-template-columns:1fr}.dest-cross{flex-direction:column;align-items:flex-start}.dest-head{flex-direction:column;align-items:flex-start;gap:8px}}
+@media (max-width:760px){.spot-dots{display:none}.spot-ctl{justify-content:flex-end}.dest-hero{grid-template-columns:1fr;gap:32px}.dest-tiles{grid-auto-rows:120px}.spot-slide{grid-template-columns:1fr}.spot-art{min-height:120px;font-size:44px}.spot-body{padding:24px 20px}.dest-goals{grid-template-columns:repeat(2,minmax(0,1fr))}.dest-regions{grid-template-columns:1fr}.dest-cross{flex-direction:column;align-items:flex-start}.dest-head{flex-direction:column;align-items:flex-start;gap:8px}}
 </style>
 
 <script is:inline>
