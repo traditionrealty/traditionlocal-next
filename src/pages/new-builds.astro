@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import '../styles/pages.css';
 import FilterKit from '../components/FilterKit.astro';
+import MapToggle from '../components/MapToggle.astro';
 import Prefs from '../components/Prefs.astro';
 import { profiles, developments, href, url } from '../lib/data';
 const WORDS = ['new construction', 'new build', 'new homes', 'newer homes', 'master planned', 'master-planned', 'new development', 'new neighborhoods', 'builder'];
@@ -92,6 +93,7 @@ const compare = Object.fromEntries(developments.map((d) => [d.slug, { n: d.name,
     </div>
   </section>
   <FilterKit />
+<MapToggle set="development" items=".dv-item" bar="dv-bar" key="dv-bar" noun="new developments" />
   <Prefs />
   <script is:inline>
   (function () {

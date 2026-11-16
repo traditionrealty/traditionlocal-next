@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import Prefs from '../../components/Prefs.astro';
 import FilterKit from '../../components/FilterKit.astro';
+import MapToggle from '../../components/MapToggle.astro';
 import '../../styles/pages.css';
 import '../../styles/dock.css';
 import { href, url, media } from '../../lib/data';
@@ -101,6 +102,7 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
     </div>
   </section>
   <FilterKit />
+<MapToggle set="neighborhood" items=".n-item" bar="n-bar" key="n-bar" noun="neighborhoods, cities and areas" />
   <Prefs />
   <script is:inline define:vars={{ COMPARE: compare, AREAS: areaRows }}>
     (function () {

@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import MapToggle from '../../components/MapToggle.astro';
 import '../../styles/pages.css';
 import '../../styles/events.css';
 import { profiles, events, isClosed, href, eventDates, url, media } from '../../lib/data';
@@ -304,6 +305,7 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
         var q = (pf.value || '').toLowerCase().trim().split(/\s+/).filter(Boolean), match = [];
         pitems.forEach(function (i) { var ok = (!pa.value || i.dataset.area === pa.value) && q.every(function (w) { return i.dataset.find.indexOf(w) > -1; }); i.classList.add('hidden'); if (ok) match.push(i); });
         match.slice(0, shown).forEach(function (i) { i.classList.remove('hidden'); });
+        document.dispatchEvent(new CustomEvent('tlf:match', { detail: { key: 'p', items: match } }));
         pc.textContent = match.length ? 'Showing ' + Math.min(shown, match.length) + ' of ' + match.length + (match.length === 1 ? ' place' : ' places') : 'No places match. Try a shorter word or a different area.';
         pm.classList.toggle('hidden', match.length <= shown);
       }
@@ -313,4 +315,5 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
       pRender();
     })();
   </script>
+<MapToggle set="place" items=".p-item" key="p" noun="places to visit" />
 </Base>
