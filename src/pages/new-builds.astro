@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import '../styles/pages.css';
 import FilterKit from '../components/FilterKit.astro';
+import Prefs from '../components/Prefs.astro';
 import { profiles, developments, href, url } from '../lib/data';
 const WORDS = ['new construction', 'new build', 'new homes', 'newer homes', 'master planned', 'master-planned', 'new development', 'new neighborhoods', 'builder'];
 const isNew = (p: any) => { const t = [p.summary, p.description, p.localTake, p.typicalHomes, p.bestFor].join(' ').toLowerCase(); return WORDS.some((w) => t.includes(w)); };
@@ -20,6 +21,9 @@ const tips = [
   ['Ask What Is Included', 'Find out which finishes are standard and which are upgrades, and get the answer in writing.'],
   ['Consider Your Own Inspection', 'A new home can still have issues. An independent inspection is worth thinking about.'],
 ];
+const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/></svg>';
+const niceNum = (s: string) => s.replace(/\d{4,}/g, (n) => Number(n).toLocaleString('en-US')).replace(/(\d)-(\d)/g, '$1 to $2').replace(/[.]$/, '');
+const compare = Object.fromEntries(developments.map((d) => [d.slug, { n: d.name, u: url('/developments/' + d.slug), r: [d.city, d.area && d.area !== d.city ? d.area : ''].filter(Boolean).join(', '), b: d.builders.join(', '), be: bedText(d), sq: sqftText(d), pl: d.programs.map((p) => (p.line ? p.builder + ': ' + p.line : p.builder)).join('; '), pn: d.planList.map(niceNum).join('; ') }]));
 ---
 <Base title="New Builds" active="More" sub="makeithome" description="Newer and master planned communities to compare around Houston.">
   <section class="band hero">
@@ -45,19 +49,22 @@ const tips = [
 <div class="fsel"><label for="dv-sqft">Home size</label><select id="dv-sqft"><option value="0">Any</option><option value="1500">1,500 sq ft or more</option><option value="2000">2,000 sq ft or more</option><option value="2500">2,500 sq ft or more</option><option value="3000">3,000 sq ft or more</option></select></div>
 </div>
 </div>
-<div class="fbar-status"><div class="fpills" id="dv-pills"></div><button class="flink hidden" id="dv-clear" type="button">Clear all</button><span class="meta" id="dv-count">{developments.length} developments</span></div>
+<div class="fbar-status"><div class="fpills" id="dv-pills"></div><button class="flink hidden" id="dv-clear" type="button">Clear all</button><span class="meta" id="dv-count">{developments.length} developments</span><a class="btn line sm" href={url('/account#saved')}>Saved developments (<span id="dv-saved">0</span>)</a><button class="btn line sm" id="dv-mail" type="button">Email my list</button></div>
 </div>
 <div style="height:24px"></div>
 <div class="grid g3">
 {developments.map((d, i) => (
-<div class={i < 24 ? 'card pad dv-item' : 'card pad dv-item hidden'} data-name={[d.name, d.city, d.area, d.zip, d.builders.join(' ')].join(' ').toLowerCase()} data-area={d.area} data-builders={d.builders.join('|')} data-bedsmax={d.bedsMax} data-sqftmax={d.sqftMax}>
+<div class={i < 24 ? 'card tcard dv-item' : 'card tcard dv-item hidden'} data-name={[d.name, d.city, d.area, d.zip, d.builders.join(' ')].join(' ').toLowerCase()} data-area={d.area} data-builders={d.builders.join('|')} data-bedsmax={d.bedsMax} data-sqftmax={d.sqftMax}>
+<a href={url('/developments/' + d.slug)}>
 <span class="tag">New development</span>
-<h4 style="margin:12px 0 6px"><a href={url('/developments/' + d.slug)}>{d.name}</a></h4>
+<h4 style="margin:12px 0 6px">{d.name}</h4>
 <p class="meta" style="margin-bottom:8px">{[d.city, d.area && d.area !== d.city ? d.area : ''].filter(Boolean).join(', ')}</p>
 {d.builders.length > 0 && <p class="meta" style="font-size:15px;margin-bottom:6px"><b>Builders:</b> {upTo(d.builders)}</p>}
 {(bedText(d) || sqftText(d)) && <p class="meta" style="font-size:15px;margin-bottom:6px">{[bedText(d), sqftText(d)].filter(Boolean).join(', ')}</p>}
 {d.builders.length > 0 && <p class="meta" style="font-size:14px;margin-bottom:12px">Historical record. Confirm current plans.</p>}
-<p style="margin-top:14px"><a class="btn line" href={url('/developments/' + d.slug)}>View details</a></p>
+</a>
+<button class="save" type="button" data-slug={'d:' + d.slug} data-name={d.name} aria-label={'Save ' + d.name} aria-pressed="false" set:html={heart}></button>
+<div style="padding:0 24px 20px"><button class="chip cmp" type="button" data-n={d.slug} aria-pressed="false">Compare</button></div>
 </div>
 ))}
 </div>
@@ -65,6 +72,13 @@ const tips = [
 <div class="card pad hidden" id="dv-empty"><b>No developments match those filters.</b></div>
 </div>
 </section>
+  <section class="band tint" id="compare">
+    <div class="wrap">
+      <p class="eyebrow">Compare</p><h2 style="margin-bottom:8px">Side by Side, in Plain Language</h2>
+      <p class="meta" id="cmp-hint" style="margin-bottom:20px">Tap Compare on two or three developments above.</p>
+      <div id="cmp-out" class="card hidden" style="overflow:auto"></div>
+    </div>
+  </section>
   <section class="band tint">
     <div class="wrap">
       <p class="eyebrow">Before you visit</p><h2 style="margin-bottom:28px">Buying New Construction</h2>
@@ -78,6 +92,7 @@ const tips = [
     </div>
   </section>
   <FilterKit />
+  <Prefs />
   <script is:inline>
   (function () {
 var $ = function (id) { return document.getElementById(id); };
@@ -87,4 +102,29 @@ var kit = TLF.init({ bar: $('dv-bar'), items: [].slice.call(document.querySelect
 [area, builder, beds, sqft].forEach(function (s) { s.addEventListener('change', kit.refresh); });
 })();
 </script>
+  <script is:inline define:vars={{ COMPARE: compare }}>
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      var TLD = window.TL, picks = [];
+      function savedCount() { if (TLD) $('dv-saved').textContent = TLD.saved().filter(function (s) { return s.indexOf('d:') === 0; }).length; }
+      document.addEventListener('tl:saved', savedCount); savedCount();
+      $('dv-mail').addEventListener('click', function () {
+        var s = TLD.saved().filter(function (k) { return k.indexOf('d:') === 0 && COMPARE[k.slice(2)]; });
+        if (!s.length) { alert('Save a development first by tapping its heart.'); return; }
+        var body = s.map(function (k) { var c = COMPARE[k.slice(2)]; return c.n + (c.r ? ' (' + c.r + ')' : '') + ': ' + location.origin + c.u; }).join('\n');
+        location.href = 'mailto:?subject=' + encodeURIComponent('My saved new developments from Tradition Local') + '&body=' + encodeURIComponent(body);
+      });
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+      var ROWS = [['Location', 'r'], ['Builders', 'b'], ['Bedrooms', 'be'], ['Home size', 'sq'], ['Product lines', 'pl'], ['Plans on record', 'pn']];
+      function drawCompare() {
+        document.querySelectorAll('.cmp').forEach(function (b) { var on = picks.indexOf(b.dataset.n) > -1; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'Comparing' : 'Compare'; });
+        var out = $('cmp-out'); $('cmp-hint').textContent = picks.length < 2 ? 'Tap Compare on two or three developments above.' : 'Comparing ' + picks.length + ' developments. Tap Comparing again to remove one.';
+        if (picks.length < 2) { out.classList.add('hidden'); return; }
+        var h = '<table style="width:100%;border-collapse:collapse;min-width:560px"><thead><tr><th style="text-align:left;padding:14px 18px;border-bottom:1px solid var(--line)"></th>' + picks.map(function (n) { return '<th style="text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);font-family:var(--serif);font-size:20px"><a href="' + esc(COMPARE[n].u) + '">' + esc(COMPARE[n].n) + '</a></th>'; }).join('') + '</tr></thead><tbody>';
+        ROWS.forEach(function (r) { h += '<tr><td style="padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--slate);vertical-align:top">' + r[0] + '</td>' + picks.map(function (n) { var v = COMPARE[n][r[1]]; return '<td style="padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:top">' + esc(v === '' || v === undefined ? 'Not listed yet' : v) + '</td>'; }).join('') + '</tr>'; });
+        out.innerHTML = h + '</tbody></table>'; out.classList.remove('hidden');
+      }
+      document.addEventListener('click', function (e) { var b = e.target.closest('.cmp'); if (!b) return; var n = b.dataset.n, i = picks.indexOf(n); if (i > -1) picks.splice(i, 1); else { picks.push(n); if (picks.length > 3) picks.shift(); } drawCompare(); if (picks.length >= 2 && i < 0) $('compare').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); });
+    })();
+  </script>
 </Base>

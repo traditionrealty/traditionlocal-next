@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import FilterKit from '../components/FilterKit.astro';
+import Prefs from '../components/Prefs.astro';
 import '../styles/pages.css';
 import { url, IS_PREVIEW, apartmentCommunities } from '../lib/data';
 import { config } from '../config';
@@ -15,6 +16,8 @@ const help = [
   ['A Person to Ask', 'Not sure where to start? Ask, and we will point you the right way.'],
 ];
 const steps = ['Share your budget, move date, and what you must have.', 'We suggest areas and places worth a look.', 'You tour, compare, and decide with a local on your side.'];
+const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/></svg>';
+const compare = Object.fromEntries(apartmentCommunities.map((x) => [x.slug, { n: x.name, u: url('/apartments/' + x.slug), r: x.area || '', ad: [x.address, x.zip].filter(Boolean).join(', '), l: x.layouts.join(', '), f: x.features || '', rent: 'Ask Dillon' }]));
 ---
 <Base title="Apartment Locating" active="More" sub="makeithome" description="Help finding the right apartment in Houston.">
   <section class="band hero">
@@ -38,23 +41,33 @@ const steps = ['Share your budget, move date, and what you must have.', 'We sugg
             <div class="fsel"><label for="ap-layout">Layout</label><select id="ap-layout"><option value="">Any layout</option>{aptLayouts.map((x) => <option>{x}</option>)}</select></div>
           </div>
         </div>
-        <div class="fbar-status"><div class="fpills" id="ap-pills"></div><button class="flink hidden" id="ap-clear" type="button">Clear all</button><span class="meta" id="ap-count">{apartmentCommunities.length} apartment communities</span></div>
+        <div class="fbar-status"><div class="fpills" id="ap-pills"></div><button class="flink hidden" id="ap-clear" type="button">Clear all</button><span class="meta" id="ap-count">{apartmentCommunities.length} apartment communities</span><a class="btn line sm" href={url('/account#saved')}>Saved apartments (<span id="ap-saved">0</span>)</a><button class="btn line sm" id="ap-mail" type="button">Email my list</button></div>
       </div>
       <div style="height:24px"></div>
       <div class="grid g3">
         {apartmentCommunities.map((x, i) => (
-          <div class={i < 24 ? 'card pad ap-item' : 'card pad ap-item hidden'} data-name={[x.name, x.area, x.address, x.zip, x.features].join(' ').toLowerCase()} data-area={x.area} data-layouts={x.layouts.join('|')}>
+          <div class={i < 24 ? 'card tcard ap-item' : 'card tcard ap-item hidden'} data-name={[x.name, x.area, x.address, x.zip, x.features].join(' ').toLowerCase()} data-area={x.area} data-layouts={x.layouts.join('|')}>
+            <a href={url('/apartments/' + x.slug)}>
             <span class="tag">Apartment</span>
-            <h4 style="margin:12px 0 6px"><a href={url('/apartments/' + x.slug)}>{x.name}</a></h4>
+            <h4 style="margin:12px 0 6px">{x.name}</h4>
             <p class="meta" style="margin-bottom:8px">{[x.area, x.city].filter((v, j, arr) => v && arr.indexOf(v) === j).join(', ')}</p>
             {x.layouts.length > 0 && <p class="meta" style="font-size:15px;margin-bottom:6px"><b>Layouts:</b> {x.layouts.join(', ')}</p>}
             {x.features && <p class="meta" style="font-size:15px;margin-bottom:6px"><b>Features:</b> {x.features}</p>}
-            <p style="margin-top:14px"><a class="btn line" href={url('/apartments/' + x.slug)}>View details</a></p>
+            </a>
+            <button class="save" type="button" data-slug={'a:' + x.slug} data-name={x.name} aria-label={'Save ' + x.name} aria-pressed="false" set:html={heart}></button>
+            <div style="padding:0 24px 20px"><button class="chip cmp" type="button" data-n={x.slug} aria-pressed="false">Compare</button></div>
           </div>
         ))}
       </div>
       <p style="margin-top:24px"><button class="btn line hidden" id="ap-more" type="button">Show more apartments</button></p>
       <div class="card pad hidden" id="ap-empty"><b>No apartment communities match those filters.</b></div>
+    </div>
+  </section>
+  <section class="band tint" id="compare">
+    <div class="wrap">
+      <p class="eyebrow">Compare</p><h2 style="margin-bottom:8px">Side by Side, in Plain Language</h2>
+      <p class="meta" id="cmp-hint" style="margin-bottom:20px">Tap Compare on two or three apartments above.</p>
+      <div id="cmp-out" class="card hidden" style="overflow:auto"></div>
     </div>
   </section>
   <section class="band tint">
@@ -77,6 +90,7 @@ const steps = ['Share your budget, move date, and what you must have.', 'We sugg
     </div>
   </section>
   <FilterKit />
+  <Prefs />
   <script is:inline>
 (function () {
 var $ = function (id) { return document.getElementById(id); };
@@ -85,5 +99,30 @@ var byLayout = { test: function (it) { return !layout.value || (it.dataset.layou
 var kit = TLF.init({ bar: $('ap-bar'), items: [].slice.call(document.querySelectorAll('.ap-item')), search: $('ap-q'), step: 24, noun: ['apartment community', 'apartment communities'], count: $('ap-count'), empty: $('ap-empty'), more: $('ap-more'), clear: $('ap-clear'), pills: $('ap-pills'), badge: $('ap-badge'), filters: [TLF.select(area, 'area'), byLayout] });
 [area, layout].forEach(function (s) { s.addEventListener('change', kit.refresh); });
 })();
+  </script>
+  <script is:inline define:vars={{ COMPARE: compare }}>
+    (function () {
+      var $ = function (id) { return document.getElementById(id); };
+      var TLD = window.TL, picks = [];
+      function savedCount() { if (TLD) $('ap-saved').textContent = TLD.saved().filter(function (s) { return s.indexOf('a:') === 0; }).length; }
+      document.addEventListener('tl:saved', savedCount); savedCount();
+      $('ap-mail').addEventListener('click', function () {
+        var s = TLD.saved().filter(function (k) { return k.indexOf('a:') === 0 && COMPARE[k.slice(2)]; });
+        if (!s.length) { alert('Save an apartment first by tapping its heart.'); return; }
+        var body = s.map(function (k) { var c = COMPARE[k.slice(2)]; return c.n + (c.r ? ' (' + c.r + ')' : '') + ': ' + location.origin + c.u; }).join('\n');
+        location.href = 'mailto:?subject=' + encodeURIComponent('My saved apartments from Tradition Local') + '&body=' + encodeURIComponent(body);
+      });
+      function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+      var ROWS = [['Area', 'r'], ['Address', 'ad'], ['Layouts', 'l'], ['Features to compare', 'f'], ['Rent and availability', 'rent']];
+      function drawCompare() {
+        document.querySelectorAll('.cmp').forEach(function (b) { var on = picks.indexOf(b.dataset.n) > -1; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.textContent = on ? 'Comparing' : 'Compare'; });
+        var out = $('cmp-out'); $('cmp-hint').textContent = picks.length < 2 ? 'Tap Compare on two or three apartments above.' : 'Comparing ' + picks.length + ' apartments. Tap Comparing again to remove one.';
+        if (picks.length < 2) { out.classList.add('hidden'); return; }
+        var h = '<table style="width:100%;border-collapse:collapse;min-width:560px"><thead><tr><th style="text-align:left;padding:14px 18px;border-bottom:1px solid var(--line)"></th>' + picks.map(function (n) { return '<th style="text-align:left;padding:14px 18px;border-bottom:1px solid var(--line);font-family:var(--serif);font-size:20px"><a href="' + esc(COMPARE[n].u) + '">' + esc(COMPARE[n].n) + '</a></th>'; }).join('') + '</tr></thead><tbody>';
+        ROWS.forEach(function (r) { h += '<tr><td style="padding:12px 18px;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--slate);vertical-align:top">' + r[0] + '</td>' + picks.map(function (n) { var v = COMPARE[n][r[1]]; return '<td style="padding:12px 18px;border-bottom:1px solid var(--line);vertical-align:top">' + esc(v === '' || v === undefined ? 'Not listed yet' : v) + '</td>'; }).join('') + '</tr>'; });
+        out.innerHTML = h + '</tbody></table>'; out.classList.remove('hidden');
+      }
+      document.addEventListener('click', function (e) { var b = e.target.closest('.cmp'); if (!b) return; var n = b.dataset.n, i = picks.indexOf(n); if (i > -1) picks.splice(i, 1); else { picks.push(n); if (picks.length > 3) picks.shift(); } drawCompare(); if (picks.length >= 2 && i < 0) $('compare').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); });
+    })();
   </script>
 </Base>

@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Prefs from '../components/Prefs.astro';
 import '../styles/pages.css';
-import { businesses, profiles, href, url, isClosed } from '../lib/data';
+import { businesses, profiles, href, url, isClosed, apartmentCommunities, developments } from '../lib/data';
 import { areaPages, bizIn, topRating, category, isFood } from '../lib/helpers';
 import ComboKit from '../components/ComboKit.astro';
 import AuthClient from '../components/AuthClient.astro';
@@ -10,7 +10,9 @@ import { config } from '../config';
 const areas = areaPages().map((p) => p.name).sort();
 const index = businesses().filter(isFood).map((b) => ({ s: b.slug, n: b.name, a: b.area, c: category(b), r: topRating(b.name), u: href(b), x: isClosed(b) ? 1 : 0 }))
   .concat(profiles.filter((p) => p.type === 'Place' && !isClosed(p)).map((p) => ({ s: 'p:' + p.slug, n: p.name, a: p.area, c: p.subCategory || 'Place', r: 0, u: href(p) })))
-  .concat(areaPages().map((p) => ({ s: 'n:' + p.slug, n: p.name, a: '', c: p.region ? 'Neighborhood, ' + p.region : 'Neighborhood', r: 0, u: href(p), x: 0 })));
+  .concat(areaPages().map((p) => ({ s: 'n:' + p.slug, n: p.name, a: '', c: p.region ? 'Neighborhood, ' + p.region : 'Neighborhood', r: 0, u: href(p), x: 0 })))
+  .concat(apartmentCommunities.map((a) => ({ s: 'a:' + a.slug, n: a.name, a: a.area, c: 'Apartment', r: 0, u: url('/apartments/' + a.slug), x: 0 })))
+  .concat(developments.map((d) => ({ s: 'd:' + d.slug, n: d.name, a: d.area || d.city, c: 'New development', r: 0, u: url('/developments/' + d.slug), x: 0 })));
 const topics = [['food', 'Food and drink'], ['things', 'Things to do'], ['openings', 'New openings'], ['homes', 'Neighborhoods and homes']];
 ---
 <Base title="Your Account" description="Your area, the places you follow, and what you receive." noindex>
