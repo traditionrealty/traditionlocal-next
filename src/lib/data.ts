@@ -202,3 +202,14 @@ bedsMin: num(r.beds_min), bedsMax: num(r.beds_max), sqftMin: num(r.sqft_min), sq
 programs: splitBar(r.programs).map((x) => { const [b, ...rest] = x.split(' — '); return { builder: b.trim(), line: rest.join(' — ').trim() }; }),
 planList: splitBar(r.planlist),
 })).sort((a, b) => a.name.localeCompare(b.name));
+
+export type Apt = {
+slug: string; name: string; area: string; city: string; zip: string; address: string;
+layouts: string[]; features: string; homes: string; localTake: string; summary: string;
+faqs: { q: string; a: string }[];
+};
+export const apartmentCommunities: Apt[] = readTable('apartment_communities.csv').filter((r) => r.name).map((r) => ({
+slug: r.slug || slugify(r.name), name: r.name, area: r.area, city: r.city, zip: r.zip, address: r.address,
+layouts: splitBar(r.layouts), features: r.features, homes: r.homes, localTake: r.localtake, summary: r.summary,
+faqs: splitBar(r.faqs).map((x) => { const i = x.indexOf('::'); return { q: x.slice(0, i).trim(), a: x.slice(i + 2).trim() }; }).filter((f) => f.q),
+})).sort((a, b) => a.name.localeCompare(b.name));

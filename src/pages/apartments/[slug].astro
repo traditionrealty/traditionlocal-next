@@ -1,0 +1,90 @@
+---
+import Base from '../../layouts/Base.astro';
+import '../../styles/pages.css';
+import { apartmentCommunities, byName, href, url } from '../../lib/data';
+export function getStaticPaths() { return apartmentCommunities.map((a) => ({ params: { slug: a.slug }, props: { a } })); }
+const { a } = Astro.props;
+const area = byName(a.area);
+const place = [a.city, a.area && a.area !== a.city ? a.area : ''].filter(Boolean).join(', ');
+const features = a.features ? a.features.split(/,\s*|\s+and\s+/).map((x) => x.trim()).filter(Boolean) : [];
+const sibs = apartmentCommunities.filter((x) => x.slug !== a.slug && x.area === a.area).slice(0, 6);
+const lead = (a.summary ? a.summary.replace(/^The matched listing for .*? describes /i, a.name + ' offers ') : '') || (a.name + ' is an apartment community in ' + (a.city || 'Houston') + ', Texas.');
+---
+<Base title={a.name} description={lead} active="More">
+  <section class="band hero">
+    <div class="wrap">
+      <p class="meta" style="margin-bottom:12px"><a href={url('/apartments')} style="font-weight:700">Apartments</a>{area && <> &rsaquo; <a href={href(area)} style="font-weight:700">{area.name}</a></>} &rsaquo; {a.name}</p>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">Apartment</span>{a.area && <span class="tag soft">{a.area}</span>}{a.zip && <span class="tag soft">{a.zip}</span>}</div>
+      <h1 style="margin-bottom:16px">{a.name}</h1>
+      <p class="lead" style="margin-bottom:28px">{lead}</p>
+      <div style="display:flex;gap:12px;flex-wrap:wrap"><a class="btn" href={url('/ask-dillon')}>Ask Dillon about {a.name}</a><a class="btn line" href={url('/apartments')}>Back to apartment search</a></div>
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">At a glance</p>
+      <h2 style="margin-bottom:20px">{a.name} Overview</h2>
+      <div class="grid g3">
+        <div class="card pad"><p class="meta" style="margin-bottom:6px">Location</p><h4>{a.area || place || 'Houston'}</h4>{a.address && <p class="meta" style="margin-top:6px">{a.address}{a.zip ? ', ' + a.zip : ''}</p>}</div>
+        <div class="card pad"><p class="meta" style="margin-bottom:6px">Layouts</p><h4>{a.layouts.length ? a.layouts.length + (a.layouts.length === 1 ? ' layout type' : ' layout types') : 'Ask for layouts'}</h4>{a.layouts.length > 0 && <p class="meta" style="margin-top:6px">{a.layouts.join(', ')}</p>}</div>
+        <div class="card pad"><p class="meta" style="margin-bottom:6px">Features to compare</p><h4>{features.length ? features.length + (features.length === 1 ? ' feature listed' : ' features listed') : 'Ask for the list'}</h4>{features.length > 0 && <p class="meta" style="margin-top:6px">{features.slice(0, 2).join(', ')}{features.length > 2 ? ' and more' : ''}</p>}</div>
+      </div>
+    </div>
+  </section>
+  <section class="band tint">
+    <div class="wrap">
+      <p class="eyebrow">Layouts and features</p>
+      <h2 style="margin-bottom:20px">Home Styles to Compare</h2>
+      {a.layouts.length > 0 ? (
+        <div class="grid g3" style="margin-bottom:24px">
+          {a.layouts.map((l) => (
+            <div class="card pad" style="border-top:4px solid #E7BC52;padding-top:22px;text-align:center">
+              <p class="eyebrow" style="margin-bottom:10px">Layout</p>
+              <div style="font-family:'Fraunces',serif;font-size:26px;font-weight:600;color:#1D1A6D;line-height:1.1">{l}</div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p style="font-size:18px;margin-bottom:24px">Layouts are not recorded yet. Ask Dillon which floor plans are available.</p>
+      )}
+      {features.length > 0 && (
+        <div class="card pad">
+          <p class="eyebrow" style="margin-bottom:12px">Features to compare</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">{features.map((f) => <span class="tag soft">{f}</span>)}</div>
+        </div>
+      )}
+      <p class="meta" style="margin-top:20px">Layouts and features come from a third party listing and may change. Confirm the specific home, its finishes and its equipment with the community before you apply. Rent and availability are not listed here. Ask Dillon what is open right now.</p>
+    </div>
+  </section>
+  {(a.faqs.length > 0 || a.localTake) && (
+    <section class="band">
+      <div class="wrap">
+        <p class="eyebrow">Before you tour</p>
+        <h2 style="margin-bottom:20px">What to Ask and Compare</h2>
+        <div class="grid g3">
+          {a.faqs.map((f) => (<div class="card pad"><h4 style="margin-bottom:8px">{f.q}</h4><p style="font-size:16px">{f.a}</p></div>))}
+          {a.localTake && <div class="card pad"><h4 style="margin-bottom:8px">Local take</h4><p style="font-size:16px">{a.localTake}</p></div>}
+        </div>
+      </div>
+    </section>
+  )}
+  {sibs.length > 0 && (
+    <section class="band tint">
+      <div class="wrap">
+        <p class="eyebrow">Nearby</p>
+        <h2 style="margin-bottom:20px">More Apartments in {a.area}</h2>
+        <div class="grid g3">
+          {sibs.map((s) => (
+            <div class="card pad"><h4 style="margin-bottom:6px"><a href={url('/apartments/' + s.slug)}>{s.name}</a></h4><p class="meta">{s.layouts.length ? s.layouts.join(', ') : s.address}</p></div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+  <section class="band butter">
+    <div class="wrap" style="display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+      <div style="max-width:700px"><h3 style="margin-bottom:8px">Curious About {a.name}?</h3><p style="font-size:17px">Dillon can tell you what is open right now, how pricing compares and which community fits what you want.</p></div>
+      <a class="btn" href={url('/ask-dillon')}>Ask Dillon</a>
+    </div>
+  </section>
+</Base>
