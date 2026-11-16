@@ -64,32 +64,6 @@ const tips = [
 <div class="card pad hidden" id="dv-empty"><b>No developments match those filters.</b></div>
 </div>
 </section>
-<section class="band tint">
-    <div class="wrap">
-      <p class="eyebrow">Communities</p><h2 style="margin-bottom:16px">Communities and Areas to Explore</h2>
-      <div class="fbar" id="nb-bar">
-        <div class="fbar-row">
-          <div class="fbar-search"><label for="nb-q">Search</label><input id="nb-q" type="search" placeholder="Try a community or a city" autocomplete="off" /></div>
-          <button class="chip fbar-toggle" type="button" aria-expanded="false" aria-controls="nb-panel">Filters <span class="fcount hidden" id="nb-badge"></span></button>
-          <div class="fbar-panel" id="nb-panel"><div class="fsel"><label for="nb-area">Area</label><select id="nb-area"><option value="">All areas</option>{areas.map((a) => <option>{a}</option>)}</select></div></div>
-        </div>
-        <div class="fbar-status"><div class="fpills" id="nb-pills"></div><button class="flink hidden" id="nb-clear" type="button">Clear all</button><span class="meta" id="nb-count">{list.length} communities</span></div>
-      </div>
-      <div style="height:24px"></div>
-      <div class="grid g3">
-        {list.map((p, i) => (
-          <a class={i < 24 ? 'card pad nb-item' : 'card pad nb-item hidden'} data-name={[p.name, p.type === 'Subdivision' ? p.area : p.region].join(' ').toLowerCase()} href={href(p)} data-area={p.type === 'Subdivision' ? p.area : p.name} style="text-decoration:none">
-            <span class="tag">{p.type === 'Subdivision' ? 'Community' : 'Area'}</span>
-            <h4 style="margin:12px 0 6px">{p.name}</h4>
-            <p class="meta" style="margin-bottom:8px">{p.type === 'Subdivision' ? p.area : p.region}</p>
-            <p class="meta" style="font-size:15px">{p.summary.length > 150 ? p.summary.slice(0, 150).replace(/\s+\S*$/, '') + '...' : p.summary}</p>
-          </a>
-        ))}
-      </div>
-      <p style="margin-top:24px"><button class="btn line hidden" id="nb-more" type="button">Show more communities</button></p>
-      <div class="card pad hidden" id="nb-empty"><b>No communities match that area yet.</b></div>
-    </div>
-  </section>
   <section class="band tint">
     <div class="wrap">
       <p class="eyebrow">Before you visit</p><h2 style="margin-bottom:28px">Buying New Construction</h2>
@@ -104,11 +78,6 @@ const tips = [
   </section>
   <FilterKit />
   <script is:inline>
-    (function () {
-      var $ = function (id) { return document.getElementById(id); }, area = $('nb-area');
-      var kit = TLF.init({ bar: $('nb-bar'), items: [].slice.call(document.querySelectorAll('.nb-item')), search: $('nb-q'), step: 24, noun: ['community', 'communities'], count: $('nb-count'), empty: $('nb-empty'), more: $('nb-more'), clear: $('nb-clear'), pills: $('nb-pills'), badge: $('nb-badge'), filters: [TLF.select(area, 'area')] });
-      area.addEventListener('change', kit.refresh);
-    })();
   (function () {
 var $ = function (id) { return document.getElementById(id); };
 var area = $('dv-area'), builder = $('dv-builder'), beds = $('dv-beds'), sqft = $('dv-sqft');
