@@ -57,7 +57,6 @@ const tips = [
 {d.builders.length > 0 && <p class="meta" style="font-size:15px;margin-bottom:6px"><b>Builders:</b> {upTo(d.builders)}</p>}
 {(bedText(d) || sqftText(d)) && <p class="meta" style="font-size:15px;margin-bottom:6px">{[bedText(d), sqftText(d)].filter(Boolean).join(', ')}</p>}
 {d.builders.length > 0 && <p class="meta" style="font-size:14px;margin-bottom:12px">Historical record. Confirm current plans.</p>}
-<p style="display:flex;gap:16px;flex-wrap:wrap;margin:0">{d.website && <a href={d.website} target="_blank" rel="noopener noreferrer">View the listing</a>}<a href={url('/ask-dillon')}>Ask Dillon</a></p>
 </div>
 ))}
 </div>
