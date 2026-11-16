@@ -58,12 +58,12 @@ const principles = [
               <a class="card ls" href={l.link || url('/ask-dillon')} rel="noopener">
                 {l.photo && <img src={l.photo} alt={l.alt} loading="lazy" />}
                 <div class="ls-body">
-                  <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag">{l.status}</span></div>
-                  {l.price && <div class="ls-price">{l.price}{l.priceNote && <span class="ls-note">{l.priceNote}</span>}</div>}
+                  <div class="ls-top"><span class="tag">{l.status}</span>{l.price && <span class="ls-price">{l.price}</span>}</div>
                   <h4>{l.address}</h4>
-                  <p class="meta">{l.city}</p>
-                  {l.facts && <p class="meta" style="margin-top:6px">{l.facts}</p>}
-                  {l.summary && <p class="meta" style="margin-top:10px;font-size:15px">{l.summary}</p>}
+                  <p class="meta ls-city">{l.city}</p>
+                  {l.facts && <p class="meta ls-facts">{l.facts}</p>}
+                  {l.price && l.priceNote && <p class="ls-note">Price {l.priceNote}</p>}
+                  {l.summary && <p class="meta ls-sum">{l.summary}</p>}
                   <span class="ls-link">{l.link ? l.linkLabel : 'Ask about this home'}</span>
                 </div>
               </a>
@@ -106,8 +106,13 @@ const principles = [
     .ls:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(29, 26, 109, .14); }
     .ls img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
     .ls-body { padding: 20px 22px 22px; display: flex; flex-direction: column; flex: 1; }
-    .ls-price { font-family: var(--serif); font-weight: 600; font-size: 30px; line-height: 1.1; margin: 12px 0 6px; }
-    .ls-note { display: block; margin-top: 4px; font-family: var(--sans); font-size: 13px; font-weight: 400; color: var(--slate); }
+    .ls-top { display: flex; align-items: center; justify-content: space-between; gap: 8px 14px; flex-wrap: wrap; min-height: 34px; }
+    .ls-price { font-family: var(--serif); font-weight: 600; font-size: 26px; line-height: 1; color: var(--navy); }
+    .ls-body h4 { margin: 14px 0 4px; }
+    .ls-body .ls-city, .ls-body .ls-facts, .ls-body .ls-note, .ls-body .ls-sum { margin: 0; }
+    .ls-body .ls-facts { margin-top: 8px; }
+    .ls-note { font-family: var(--sans); font-size: 13px; font-weight: 400; color: var(--slate); margin-top: 4px !important; }
+    .ls-body .ls-sum { margin-top: 12px; font-size: 15px; }
     .ls-link { margin-top: auto; padding-top: 14px; font-weight: 700; color: var(--blue); }
   </style>
 </Base>
