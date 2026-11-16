@@ -6,7 +6,7 @@ const star = destinations.find((d) => d.featured) || destinations[0];
 const more = destinations.filter((d) => d !== star).slice(0, 4);
 ---
 {star && (<>
-<section class="band tint" aria-label="International Spotlight">
+<section class="band tint isp-one" aria-label="International Spotlight">
   <div class="wrap">
     <p class="eyebrow">International Spotlight</p>
     <h2 style="margin-bottom:28px">Featured destination</h2>
@@ -22,7 +22,7 @@ const more = destinations.filter((d) => d !== star).slice(0, 4);
     </article>
   </div>
 </section>
-<section class="band" aria-label="More destinations">
+<section class="band isp-two" aria-label="More destinations">
   <div class="wrap">
     <div class="isp-head">
       <div>
@@ -43,6 +43,8 @@ const more = destinations.filter((d) => d !== star).slice(0, 4);
 </section>
 </>)}
 <style is:global>
+.band.isp-one{padding:8px 0 64px}
+.band.isp-two{padding:64px 0 8px}
 .isp-feature{display:grid;grid-template-columns:1fr 1fr;border-radius:16px;overflow:hidden;background:#fff;border:1px solid #EFEBE2;box-shadow:0 2px 12px rgba(29,26,109,.08);min-height:340px}
 .isp-art{display:flex;align-items:flex-end;padding:32px;font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:48px;line-height:1.1;color:#1D1A6D}
 .isp-body{padding:40px;display:flex;flex-direction:column;justify-content:center;gap:12px}
@@ -53,5 +55,6 @@ const more = destinations.filter((d) => d !== star).slice(0, 4);
 .isp-tile b{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:24px;line-height:1.2}
 .isp-tile .pill-note{align-self:flex-start;margin-top:8px;background:#fff}
 @media (max-width:900px){.isp-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.isp-tiles{grid-template-columns:1fr}.isp-tile{min-height:120px}}
 @media (max-width:760px){.isp-feature{grid-template-columns:1fr}.isp-art{min-height:180px;font-size:36px;padding:20px}.isp-body{padding:24px 20px}.isp-head{flex-direction:column;align-items:flex-start}}
 </style>
