@@ -93,12 +93,33 @@ const moreOn = sub !== '' || active === 'More';
           <p style="margin-top:14px"><a href={url('/account')} style="color:#FFE29A;font-weight:700">Get local picks for your area</a></p>
         </div>
       </div>
+      <div class="sponsor">
+        <p class="sp-h">Our Sponsor</p>
+        <div class="sp-row">
+          <a href={url('/tradition-realty-group')} aria-label="Tradition Realty Group"><img src={url('/trg-logo.svg')} alt="Tradition Realty Group" width="146" height="76" loading="lazy" /></a>
+          <p>Funded by <a href={url('/tradition-realty-group')}>Tradition Realty Group</a> so Tradition Local stays free and open to everyone.</p>
+        </div>
+      </div>
       <div class="legal">
         <span>© {new Date().getFullYear()} Tradition Local | <a href={url('/privacy')}>Privacy</a> | <a href={url('/disclosures')}>Texas Real Estate Disclosures</a> | Real estate services by <a href={url('/tradition-realty-group')}>{config.brokerage.name}</a></span>
         <span><a href={config.social.instagram} rel="noopener">Instagram</a> | <a href="https://www.youtube.com/@TraditionLocal">YouTube</a> | <a href={config.social.facebook} rel="noopener">Facebook</a> | <a href="#top">Back to top</a></span>
       </div>
     </div>
   </footer>
+  <style is:global>
+    .foot .sponsor{margin-top:40px;text-align:center}
+    .foot .sponsor .sp-h{margin:0;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#E7BC52}
+    .foot .sp-row{margin-top:12px;display:flex;justify-content:center;align-items:center;gap:22px;flex-wrap:wrap}
+    .foot .sp-row img{height:76px;width:auto;display:block}
+    .foot .sp-row p{margin:0;font-size:16px;line-height:1.6;color:#D4D2EE;max-width:380px;text-align:left}
+    .foot .sp-row p a{color:#fff;font-weight:700}
+    @media (max-width:760px){
+      .foot .sponsor{margin-top:28px}
+      .foot .sp-row{flex-wrap:nowrap;gap:14px}
+      .foot .sp-row img{height:58px}
+      .foot .sp-row p{font-size:13px;line-height:1.5;max-width:200px}
+    }
+  </style>
   <script is:inline define:vars={{ sbRef: new URL(config.supabase.url).hostname.split('.')[0], sbUrl: config.supabase.url, sbKey: config.supabase.key }}>
     // The header button follows the sign in. It reads what sign in saved on this device. When that has gone stale (the hour is up), it asks Supabase
     // whether the session is still good, loading the sign in library only then, so the button never says "Hi" for a session that has ended.
