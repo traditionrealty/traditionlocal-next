@@ -1,0 +1,90 @@
+---
+// A simple page for each country that has no open guide yet. The cities and tags come from data/destinations.csv.
+// A country with an open guide (Portugal) links to that guide instead, so it gets no page here.
+import Base from '../../layouts/Base.astro';
+import '../../styles/pages.css';
+import { url } from '../../lib/data';
+import { destinations, stubCountries, countrySlug } from '../../lib/destinations';
+import { countryFacts } from '../../lib/countries';
+export function getStaticPaths() {
+  return stubCountries.map((c) => ({ params: { country: countrySlug(c) }, props: { country: c } }));
+}
+const { country } = Astro.props;
+const places = destinations.filter((d) => d.country === country);
+const region = places[0]?.region || '';
+const facts = countryFacts[country];
+const topics = ['Tourist and visitor stays', 'Residency and visas', 'Citizenship'];
+const readNext = [
+  ['US reporting of foreign accounts and assets (Form 8938), IRS', 'https://www.irs.gov/businesses/corporations/basic-questions-and-answers-on-form-8938'],
+  ['Form 8938 and FBAR compared, IRS', 'https://www.irs.gov/businesses/comparison-of-form-8938-and-fbar-requirements'],
+];
+---
+<Base title={country} noindex={true} active="More" description={'A Tradition Local guide to ' + country + '. Visa, residency and buying rules are added once they are checked against official sources.'}>
+  <section class="band hero">
+    <div class="wrap">
+      <p class="meta" style="margin-bottom:12px"><a href={url('/')}>Home</a> / <a href={url('/destinations')}>Destinations</a> / {region} / {country}</p>
+      <p class="eyebrow">{region}</p>
+      <h1 style="margin-bottom:16px">{country}</h1>
+      <p class="lead" style="margin-bottom:20px;max-width:680px">{facts ? country + ' has ' + facts.capital + ' as its capital, its currency is the ' + facts.currency.toLowerCase().replace('us dollar','US dollar') + ', and its main language is ' + facts.language + '. ' : ''}We publish a rule only after we have checked it against an official source.</p>
+      <div class="pt-facts">
+        {facts && <span class="tag soft">Capital: {facts.capital}</span>}
+        {facts && <span class="tag soft">Currency: {facts.currency}</span>}
+        {facts && <span class="tag soft">Language: {facts.language}</span>}
+        <span class="pill-note">Guide coming soon</span>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:24px"><a class="btn" href={url('/ask-dillon')}>Ask Sara a question</a><a class="btn line" href={url('/destinations')}>All destinations</a></div>
+    </div>
+  </section>
+
+  <section class="butter">
+    <div class="wrap">
+      <h4 style="margin-bottom:6px">Every rule here is checked against an official source</h4>
+      <p class="meta" style="font-size:16px;max-width:780px">We publish a rule only when it is marked Verified and linked to a government source. Immigration and property rules change, so confirm with an official source or a licensed professional before you act.</p>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Residency, visas and citizenship</p>
+      <h2 style="margin-bottom:12px">What this guide will cover</h2>
+      <p class="lead" style="max-width:680px;margin-bottom:28px">Owning property does not by itself give you residency or citizenship. These three come first.</p>
+      <div class="pt-routes">{topics.map((t) => (<div class="card pad"><h4 style="margin-bottom:10px">{t}</h4><p class="meta" style="font-size:16px">Rules and official sources will be added here as each one is checked.</p></div>))}</div>
+    </div>
+  </section>
+
+  <section class="band tint">
+    <div class="wrap">
+      <p class="eyebrow">Buying property as a foreigner</p>
+      <h2 style="margin-bottom:12px">Where to start checking</h2>
+      <p class="lead" style="max-width:680px;margin-bottom:24px">US citizens who own foreign accounts or assets may have US reporting duties. These IRS pages explain them. Rules for buying in {country} will be added once they are checked.</p>
+      <ul class="pt-list">{readNext.map((x) => <li><a href={x[1]} target="_blank" rel="noopener">{x[0]}</a></li>)}</ul>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <p class="eyebrow">Cities and regions</p>
+      <h2 style="margin-bottom:24px">City guides are coming</h2>
+      <div class="pt-cities">{places.map((c) => <div class="card pad" style={'border-top:6px solid ' + c.color}><h4 style="margin-bottom:8px">{c.city}</h4><p class="meta" style="margin-bottom:10px">{c.tags.join(', ')}</p><span class="pill-note">Coming soon</span></div>)}</div>
+    </div>
+  </section>
+
+  <section class="band tint">
+    <div class="wrap pt-cta">
+      <div><p class="eyebrow">Questions?</p><h3 style="margin-bottom:8px">Thinking about buying or moving abroad?</h3><p class="meta" style="font-size:16px">Ask Sara. A short note is enough, and she will reply personally.</p></div>
+      <a class="btn" href={url('/ask-dillon')}>Ask Sara a question</a>
+    </div>
+  </section>
+
+  <section class="band" style="padding:40px 0"><div class="wrap"><p class="meta" style="max-width:760px;font-size:13px">Tradition Local shares general information to help you research. It is not legal, immigration, tax or investment advice. Estimated costs, appreciation and rental income are never guaranteed.</p></div></section>
+</Base>
+
+<style is:global>
+.pt-facts{display:flex;gap:8px;flex-wrap:wrap}
+.pt-routes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+.pt-cities{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.pt-list{padding-left:20px;margin:0;display:grid;gap:10px;font-size:16px}
+.pt-cta{display:flex;justify-content:space-between;align-items:center;gap:32px}
+@media (max-width:900px){.pt-routes{grid-template-columns:1fr}.pt-cities{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:760px){.pt-cta{flex-direction:column;align-items:flex-start}}
+</style>
