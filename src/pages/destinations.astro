@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import '../styles/pages.css';
 import { url } from '../lib/data';
+import { destinations } from '../lib/destinations';
 const goals = ['Second Homes', 'Luxury Homes', 'Investment', 'Living Abroad', 'Residency', 'Citizenship', 'Golden Visas', 'Retirement', 'New Developments', 'Emerging Destinations'];
 const regions = [
   { name: 'North America', countries: ['United States', 'Canada', 'Mexico'] },
@@ -28,13 +29,7 @@ const phase1 = [
   { name: 'Costa Rica', region: 'Central America', bg: '#E8F5EC' },
   { name: 'Panama', region: 'Central America', bg: '#FFF4D6' },
 ];
-const slides = [
-  { city: 'Lisbon', country: 'Portugal', region: 'Western Europe', bg: '#FFE29A', tags: ['Living Abroad', 'Second Homes', 'Residency'], href: '/portugal' },
-  { city: 'Dubai', country: 'United Arab Emirates', region: 'Middle East & Türkiye', bg: '#E6EEF8', tags: ['Luxury Homes', 'Investment', 'New Developments'], href: '' },
-  { city: 'Bodrum', country: 'Türkiye', region: 'Middle East & Türkiye', bg: '#E8F5EC', tags: ['Second Homes', 'Luxury Homes', 'Retirement'], href: '' },
-  { city: 'Athens', country: 'Greece', region: 'Mediterranean & Balkans', bg: '#FFF4D6', tags: ['Investment', 'Residency', 'Living Abroad'], href: '' },
-  { city: 'Cabo San Lucas', country: 'Mexico', region: 'North America', bg: '#FFE29A', tags: ['Second Homes', 'Retirement', 'Luxury Homes'], href: '' },
-];
+const slides = destinations.map((d) => ({ city: d.city, country: d.country, region: d.region, bg: d.color, tags: d.tags, href: d.guide }));
 const pool = [
   { country: 'Portugal', cities: ['Lisbon', 'Porto'] },
   { country: 'United Arab Emirates', cities: ['Dubai', 'Abu Dhabi'] },
