@@ -5,9 +5,20 @@ import { IS_PREVIEW, url } from '../lib/data';
 import { config } from '../config';
 import SearchBox from '../components/SearchBox.astro';
 import Popups from '../components/Popups.astro';
-interface Props { title: string; description?: string; active?: string; sub?: string; noindex?: boolean; }
-const { title, description = 'Honest reviews, weekend plans, and neighborhood guides from people who live here.', active = '', sub = '', noindex = false } = Astro.props;
+interface Props { title: string; description?: string; active?: string; sub?: string; noindex?: boolean; image?: string; }
+const { title, description = 'Honest reviews, weekend plans, and neighborhood guides from people who live here.', active = '', sub = '', noindex = false, image = '' } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site || 'https://traditionlocal.com').href;
+const ogImage = new URL(image || url('/images/drive/1_ziFtX1a5bcCCy917eBz7ERBT2an78d3.jpg'), Astro.site || 'https://traditionlocal.com').href;
+const shareable = /\/(food|neighborhoods|things-to-do|events|post|reviews|newsletters)\/[^\/]+\/?$/.test(Astro.url.pathname);
+const shareTitle = title + ' | Tradition Local';
+const su = encodeURIComponent(canonical);
+const st = encodeURIComponent(shareTitle);
+const shareLinks = {
+  facebook: 'https://www.facebook.com/sharer/sharer.php?u=' + su,
+  x: 'https://twitter.com/intent/tweet?url=' + su + '&text=' + st,
+  linkedin: 'https://www.linkedin.com/sharing/share-offsite/?url=' + su,
+  email: 'mailto:?subject=' + st + '&body=' + st + '%0A%0A' + su,
+};
 const main = [['Food', '/food'], ['Neighborhoods', '/neighborhoods'], ['Things to Do', '/things-to-do']];
 const more: [string, [string, string, string][]][] = [
   ['Stay In the Loop', [['Newsletters', '/newsletters', 'In the Loop and Locally Plus'], ['Videos', '/videos', 'Walks, coffee runs, and reviews']]],
@@ -34,7 +45,9 @@ const moreOn = sub !== '' || active === 'More';
   <meta property="og:title" content={title + ' | Tradition Local'} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonical} />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image" content={ogImage} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content={ogImage} />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:wght@600&display=swap" rel="stylesheet" />
 </head>
@@ -66,6 +79,64 @@ const moreOn = sub !== '' || active === 'More';
     <div class="subnav"><div class="wrap"><b>Make It Home</b>{subs.map(([n, h]) => <a class={Astro.url.pathname.replace(/\/$/, '').endsWith(h) ? 'on' : ''} href={url(h)}>{n}</a>)}</div></div>
   )}
   <main id="main"><slot /></main>
+  {shareable && (
+    <section class="share-wrap" aria-label="Share this page">
+      <div class="share-card" data-share data-url={canonical} data-title={shareTitle}>
+        <div class="share-copy">
+          <p class="share-eyebrow">Pass it along</p>
+          <h2 class="share-h">Know someone who would love this?</h2>
+        </div>
+        <div>
+          <div class="share-btns">
+            <a class="sb" href={shareLinks.facebook} target="_blank" rel="noopener" aria-label="Share on Facebook" title="Facebook">f</a>
+            <a class="sb" href={shareLinks.x} target="_blank" rel="noopener" aria-label="Share on X" title="X">X</a>
+            <a class="sb" href={shareLinks.linkedin} target="_blank" rel="noopener" aria-label="Share on LinkedIn" title="LinkedIn">in</a>
+            <a class="sb" href={shareLinks.email} aria-label="Share by email" title="Email">@</a>
+            <button class="sb" type="button" data-copy aria-label="Copy link" title="Copy link"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+            <button class="sb" type="button" data-more hidden aria-label="More ways to share" title="More">•••</button>
+          </div>
+        </div>
+        <p class="share-note" data-note role="status" aria-live="polite"></p>
+      </div>
+    </section>
+  )}
+  <style is:global>
+    .share-wrap{padding:8px 24px 56px;background:#FAF7F0}
+    .share-card{max-width:760px;margin:0 auto;background:#fff;border:1px solid #e3dcc9;border-radius:24px;padding:30px 34px;box-shadow:0 14px 32px rgba(29,26,109,.08);display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+    .share-eyebrow{margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#2E7D4F}
+    .share-h{margin:0;font-family:'Fraunces',serif;font-weight:700;font-size:26px;line-height:1.2;color:#1D1A6D}
+    .share-btns{display:flex;gap:10px;flex-wrap:wrap}
+    .share-card .sb{width:46px;height:46px;min-height:0;padding:0;border-radius:50%;background:#fff;color:#1D1A6D;border:1.5px solid #1D1A6D;display:inline-flex;align-items:center;justify-content:center;font:700 17px 'DM Sans',sans-serif;line-height:1;text-decoration:none;cursor:pointer}
+    .share-card .sb:hover{background:#1D1A6D;color:#fff}
+    .share-card .sb[hidden]{display:none}
+    .share-copy{flex:1 1 260px}
+    .share-note{flex:1 1 100%;margin:-8px 0 0;font-size:13px;color:#4a4870;text-align:right}
+    .share-note:empty{display:none}
+    @media (max-width:760px){
+      .share-wrap{padding:8px 20px 44px}
+      .share-card{flex-direction:column;text-align:center;padding:24px 16px;gap:18px}
+      .share-copy,.share-note{flex:0 0 auto}
+      .share-note{text-align:center;margin:0}
+      .share-h{font-size:23px}
+      .share-btns{justify-content:center;gap:7px}
+      .share-card .sb{width:41px;height:41px;font-size:15px}
+    }
+  </style>
+  <script is:inline>
+    (function(){
+      var c=document.querySelector('[data-share]');if(!c)return;
+      var url=c.getAttribute('data-url'),title=c.getAttribute('data-title');
+      var note=c.querySelector('[data-note]'),more=c.querySelector('[data-more]'),copy=c.querySelector('[data-copy]');
+      var base='';function say(m){note.textContent=m;setTimeout(function(){note.textContent=base},3500);}
+      if(navigator.share){more.hidden=false;if(window.matchMedia&&window.matchMedia('(pointer:coarse)').matches){base='The three dots open Instagram, TikTok, Messages and your other apps.';note.textContent=base;}
+        more.addEventListener('click',function(){navigator.share({title:title,url:url}).catch(function(){});});}
+      copy.addEventListener('click',function(){
+        function ok(){say('Link copied.');}
+        function fallback(){var i=document.createElement('input');i.value=url;document.body.appendChild(i);i.select();try{document.execCommand('copy');ok();}catch(e){say(url);}document.body.removeChild(i);}
+        if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(url).catch(fallback);ok();}else{fallback();}
+      });
+    })();
+  </script>
   <footer class="foot">
     <div class="wrap">
       <div class="cols">

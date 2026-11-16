@@ -9,7 +9,7 @@ const gallery = r.showMedia ? galleryMedia(r).filter((g) => !m || g.src !== m.sr
 const paras = r.body.split(/\n\s*\n/).filter(Boolean);
 const more = biz ? reviewsFor(biz.name).filter((x) => x.slug !== r.slug) : [];
 ---
-<Base title={r.title} description={r.summary} active="Food">
+<Base image={m?.src} title={r.title} description={r.summary} active="Food">
   <section class="band hero">
     <div class="wrap">
       <p class="meta" style="margin-bottom:12px"><a href={url('/food')} style="font-weight:700">Food</a>{biz && <> &rsaquo; <a href={href(biz)} style="font-weight:700">{biz.name}</a></>} &rsaquo; Review</p>
