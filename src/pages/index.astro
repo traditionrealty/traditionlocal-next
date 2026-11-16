@@ -116,11 +116,10 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
       <div class="ms-av" aria-hidden="true"><span>S</span><span>D</span></div>
       <div class="ms-txt">
         <p class="eyebrow">Who we are</p>
-        <h2>Meet Sara and Dillon</h2>
+        <h2>The people behind the guides</h2>
         <p>Sara visits the places she writes about. Dillon is a Realtor who answers questions personally.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px"><a class="btn line sm" href={url('/ask-dillon')}>Ask Dillon</a><a class="btn line sm" href={url('/ask-dillon')}>Ask Sara</a></div>
       </div>
-      <div class="ms-btns"><a class="btn" href={url('/about')}>Meet Sara and Dillon</a></div>
+      <div class="ms-btns"><a class="btn" href={url('/about')}>Meet Sara and Dillon</a><div class="ms-ask"><a class="btn line sm" href={url('/ask-dillon')}>Ask Sara</a><a class="btn line sm" href={url('/ask-dillon')}>Ask Dillon</a></div></div>
     </div>
   </section>
 
@@ -379,6 +378,8 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     .ms-txt h2 { margin: 6px 0 10px; }
     .ms-txt p:last-child { max-width: 560px; margin: 0; font-size: 18px; }
     .ms-btns { display: flex; flex: none; flex-direction: column; gap: 12px; }
+    .ms-ask { display: flex; gap: 10px; }
+    .ms-ask .btn { flex: 1; }
     @media (max-width: 760px) {
       #meet.band { padding: 36px 0 40px; }
       .ms { flex-direction: column; align-items: flex-start; gap: 16px; }
@@ -386,6 +387,7 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
       .ms-av span + span { margin-left: -18px; }
       .ms-btns { width: 100%; }
       .ms-btns .btn { width: 100%; }
+      .ms-ask { flex-direction: column; }
     }
     .wo { margin-top: 24px; padding: 20px 24px; border-radius: var(--radius); background: var(--ivory); }
     .wo-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 6px; }
