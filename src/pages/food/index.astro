@@ -4,6 +4,7 @@ import OpeningsPanel from '../../components/OpeningsPanel.astro';
 import { openingsOf } from '../../lib/openings';
 import Prefs from '../../components/Prefs.astro';
 import FilterKit from '../../components/FilterKit.astro';
+import MapToggle from '../../components/MapToggle.astro';
 import '../../styles/pages.css';
 import '../../styles/dock.css';
 import { businesses, href, url, isClosed, media } from '../../lib/data';
@@ -105,6 +106,7 @@ const heart = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.
   )}
 
   <FilterKit />
+<MapToggle set="food" items=".f-item" bar="f-bar" key="f-bar" noun="restaurants and food spots" />
   <Prefs />
   <script is:inline define:vars={{ INDEX: index, BASE: url('') }}>
     var TLD = window.TL;
