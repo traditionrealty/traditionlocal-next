@@ -1,26 +1,23 @@
 ---
-// International spotlight for the International Clients page. Destination details match /destinations/.
+// International spotlight for the International Clients page. The places come from data/destinations.csv, the same list as the Destinations page.
 import { url } from '../lib/data';
-const featured = { city: 'Lisbon', country: 'Portugal', region: 'Western Europe', bg: '#FFE29A', tags: ['Living Abroad', 'Second Homes', 'Residency'], href: '/portugal' };
-const more = [
-  { city: 'Dubai', country: 'United Arab Emirates', bg: '#E6EEF8' },
-  { city: 'Bodrum', country: 'Türkiye', bg: '#E8F5EC' },
-  { city: 'Athens', country: 'Greece', bg: '#FFF4D6' },
-  { city: 'Cabo San Lucas', country: 'Mexico', bg: '#FFE29A' },
-];
+import { destinations } from '../lib/destinations';
+const star = destinations.find((d) => d.featured) || destinations[0];
+const more = destinations.filter((d) => d !== star).slice(0, 4);
 ---
+{star && (<>
 <section class="band tint" aria-label="International Spotlight">
   <div class="wrap">
     <p class="eyebrow">International Spotlight</p>
     <h2 style="margin-bottom:28px">Featured destination</h2>
     <article class="isp-feature">
-      <div class="isp-art" style={'background:' + featured.bg}>{featured.city}</div>
+      <div class="isp-art" style={'background:' + star.color}>{star.city}</div>
       <div class="isp-body">
-        <p class="eyebrow">{featured.region}</p>
-        <h3>{featured.city}</h3>
-        <p class="meta">{featured.country}</p>
-        <div class="isp-tags">{featured.tags.map((t) => <span class="tag soft">{t}</span>)}</div>
-        <p><a class="btn" href={url(featured.href)}>Read the {featured.country} guide</a></p>
+        <p class="eyebrow">{star.region}</p>
+        <h3>{star.city}</h3>
+        <p class="meta">{star.country}</p>
+        <div class="isp-tags">{star.tags.map((t) => <span class="tag soft">{t}</span>)}</div>
+        {star.ready ? <p><a class="btn" href={url(star.guide)}>Read the {star.country} guide</a></p> : <p class="meta"><span class="pill-note">Guide coming soon</span></p>}
       </div>
     </article>
   </div>
@@ -37,13 +34,14 @@ const more = [
     </div>
     <div class="isp-tiles">
       {more.map((m) => (
-        <a class="isp-tile" style={'background:' + m.bg} href={url('/destinations')}>
-          <b>{m.city}</b><span>{m.country}</span><span class="pill-note">Coming soon</span>
+        <a class="isp-tile" style={'background:' + m.color} href={url(m.ready ? m.guide : '/destinations')}>
+          <b>{m.city}</b><span>{m.country}</span><span class="pill-note">{m.ready ? 'Read the guide' : 'Coming soon'}</span>
         </a>
       ))}
     </div>
   </div>
 </section>
+</>)}
 <style is:global>
 .isp-feature{display:grid;grid-template-columns:1fr 1fr;border-radius:16px;overflow:hidden;background:#fff;border:1px solid #EFEBE2;box-shadow:0 2px 12px rgba(29,26,109,.08);min-height:340px}
 .isp-art{display:flex;align-items:flex-end;padding:32px;font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:48px;line-height:1.1;color:#1D1A6D}
