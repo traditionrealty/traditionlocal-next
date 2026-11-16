@@ -1,6 +1,7 @@
 ---
 // International spotlight for the International Clients page. The places come from data/destinations.csv, the same list as the Destinations page.
 import { url } from '../lib/data';
+import { isoOf } from '../lib/countries';
 import { destinations } from '../lib/destinations';
 const star = destinations.find((d) => d.featured) || destinations[0];
 const more = destinations.filter((d) => d !== star).slice(0, 4);
@@ -11,11 +12,10 @@ const more = destinations.filter((d) => d !== star).slice(0, 4);
     <p class="eyebrow">International Spotlight</p>
     <h2 style="margin-bottom:28px">Featured destination</h2>
     <article class="isp-feature">
-      <div class="isp-art" style={'background:' + star.color}>{star.city}</div>
+      <div class="isp-art" style={'background:' + star.color} aria-hidden="true">{isoOf[star.country] || star.country.slice(0, 2).toUpperCase()}</div>
       <div class="isp-body">
         <p class="eyebrow">{star.region}</p>
-        <h3>{star.city}</h3>
-        <p class="meta">{star.country}</p>
+        <h3>{star.city}, {star.country}</h3>
         <div class="isp-tags">{star.tags.map((t) => <span class="tag soft">{t}</span>)}</div>
         {star.ready ? <p><a class="btn" href={url(star.guide)}>Read the {star.country} guide</a></p> : <p class="meta"><span class="pill-note">Guide coming soon</span></p>}
       </div>
@@ -45,9 +45,9 @@ const more = destinations.filter((d) => d !== star).slice(0, 4);
 <style is:global>
 .band.isp-one{padding:8px 0 64px}
 .band.isp-two{padding:64px 0 8px}
-.isp-feature{display:grid;grid-template-columns:1fr 1fr;border-radius:16px;overflow:hidden;background:#fff;border:1px solid #EFEBE2;box-shadow:0 2px 12px rgba(29,26,109,.08);min-height:340px}
-.isp-art{display:flex;align-items:flex-end;padding:32px;font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:48px;line-height:1.1;color:#1D1A6D}
-.isp-body{padding:40px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.isp-feature{display:grid;grid-template-columns:1fr 1.3fr;border-radius:16px;overflow:hidden;background:#fff;border:1px solid #EFEBE2;box-shadow:0 2px 12px rgba(29,26,109,.08);min-height:230px}
+.isp-art{display:flex;align-items:center;justify-content:center;font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:64px;line-height:1;color:rgba(29,26,109,.22)}
+.isp-body{padding:28px 36px;display:flex;flex-direction:column;justify-content:center;gap:12px}
 .isp-tags{display:flex;gap:8px;flex-wrap:wrap}
 .isp-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:28px}
 .isp-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
@@ -56,5 +56,5 @@ const more = destinations.filter((d) => d !== star).slice(0, 4);
 .isp-tile .pill-note{align-self:flex-start;margin-top:8px;background:#fff}
 @media (max-width:900px){.isp-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:560px){.isp-tiles{grid-template-columns:1fr}.isp-tile{min-height:120px}}
-@media (max-width:760px){.isp-feature{grid-template-columns:1fr}.isp-art{min-height:180px;font-size:36px;padding:20px}.isp-body{padding:24px 20px}.isp-head{flex-direction:column;align-items:flex-start}}
+@media (max-width:760px){.isp-feature{grid-template-columns:1fr}.isp-art{min-height:120px;font-size:44px}.isp-body{padding:24px 20px}.isp-head{flex-direction:column;align-items:flex-start}}
 </style>
