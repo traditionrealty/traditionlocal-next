@@ -1,0 +1,80 @@
+---
+// List and Map toggle. Add it to any page that has a grid of cards. It adds a List | Map switch above the cards.
+// In Map view the pins follow whatever the page's filters currently match. The list view is untouched.
+// Props: set (food | place | neighborhood | apartment | development), items (CSS selector for the cards), bar (id of the filter bar, optional), key (filter key), noun (plural word for the note).
+import { readTable } from '../lib/data';
+const { set = 'place', items, bar = '', key = '', noun = 'places' } = Astro.props;
+const src = set === 'neighborhood' ? readTable('neighborhood_map_points.csv')
+  : (set === 'apartment' || set === 'development') ? readTable('homes_map_points.csv').filter((r: any) => r.kind === set)
+  : readTable('map_points.csv');
+const pins: Record<string, number[]> = {};
+src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && isFinite(ln)) pins[r.slug] = [la, ln]; });
+---
+<style is:global>
+  .mt-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 14px}
+  .mt-seg{display:inline-flex;border:1.5px solid #1D1A6D;border-radius:999px;overflow:hidden;height:38px;background:#fff}
+  .mt-seg button{border:0;background:#fff;color:#1D1A6D;padding:0 20px;font:700 14px 'DM Sans',sans-serif;display:flex;align-items:center;gap:7px;cursor:pointer}
+  .mt-seg button[aria-pressed="true"]{background:#1D1A6D;color:#fff}
+  .mt-seg button:focus-visible{outline:3px solid #E7BC52;outline-offset:-3px}
+  .mt-note{font-size:14px;color:#4a4870}
+  .mt-box{margin-bottom:18px}
+  .mt-canvas{height:620px;border-radius:16px;overflow:hidden;border:1px solid rgba(29,26,109,.15);z-index:0}
+  .mt-foot{margin:8px 0 0;font-size:13px;color:#4a4870}
+  .mt-pop b{font-family:Fraunces,serif;color:#1D1A6D;font-size:16px}
+  .mt-pop a{display:inline-block;margin-top:8px;font-weight:700}
+  .mt-off{display:none !important}
+  @media (max-width:720px){.mt-canvas{height:460px}}
+</style>
+<script is:inline define:vars={{ MT: { pins, items, bar, key, noun, set } }}>
+  (function () {
+    var items = [].slice.call(document.querySelectorAll(MT.items));
+    if (!items.length) return;
+    var grid = items[0].parentElement, barEl = MT.bar ? document.getElementById(MT.bar) : null;
+    var COL = { food: '#E7BC52', place: '#2E8B57', neighborhood: '#004AAD', apartment: '#E7BC52', development: '#004AAD' };
+    var PIN = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+    var row = document.createElement('div'); row.className = 'mt-row';
+    row.innerHTML = '<div class="mt-seg" role="group" aria-label="Choose a view"><button type="button" data-v="list" aria-pressed="true">List</button><button type="button" data-v="map" aria-pressed="false">' + PIN + 'Map</button></div><span class="mt-note" aria-live="polite"></span>';
+    var note = row.querySelector('.mt-note');
+    var box = document.createElement('div'); box.className = 'mt-box mt-off';
+    box.innerHTML = '<div class="mt-canvas" role="region" aria-label="Map of ' + MT.noun + '"></div><p class="mt-foot">Pins on the map follow your search and filters. Map data from OpenStreetMap contributors. Open any pin for the full page.</p>';
+    if (barEl && barEl.parentNode) barEl.parentNode.insertBefore(row, barEl.nextSibling); else grid.parentNode.insertBefore(row, grid);
+    grid.parentNode.insertBefore(box, grid);
+    var matched = null, view = 'list', map = null, layer = null;
+    document.addEventListener('tlf:match', function (e) { if (!e.detail || e.detail.key !== MT.key) return; matched = e.detail.items; if (view === 'map') draw(true); });
+    function load(cb) {
+      if (window.L && L.markerClusterGroup) return cb();
+      function css(h) { var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = h; document.head.appendChild(l); }
+      function js(s, n) { var t = document.createElement('script'); t.src = s; t.onload = n; document.head.appendChild(t); }
+      css('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'); css('https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css'); css('https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css');
+      js('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', function () { js('https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js', cb); });
+    }
+    function slugOf(el) { var a = el.querySelector('a[href]') || (el.matches('a[href]') ? el : null); if (!a) return ''; var p = a.getAttribute('href').split('#')[0].replace(/\/+$/, '').split('/'); return p[p.length - 1]; }
+    function nameOf(el) { var h = el.querySelector('h2,h3,h4,b'); return h ? h.textContent.trim() : slugOf(el); }
+    function draw(fit) {
+      if (!map) { map = L.map(box.querySelector('.mt-canvas'), { scrollWheelZoom: false }).setView([29.76, -95.37], 9); L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap contributors' }).addTo(map); layer = L.markerClusterGroup({ showCoverageOnHover: false, maxClusterRadius: 40 }).addTo(map); map.on('focus', function () { map.scrollWheelZoom.enable(); }); map.on('blur', function () { map.scrollWheelZoom.disable(); }); }
+      var list = matched || items, ms = [], pts = [], skipped = 0;
+      layer.clearLayers();
+      list.forEach(function (el) {
+        var s = slugOf(el), p = MT.pins[s]; if (!p) { skipped++; return; }
+        var m = L.circleMarker(p, { radius: 9, color: '#1D1A6D', weight: 2, fillColor: COL[MT.set] || '#004AAD', fillOpacity: 0.92 });
+        var a = el.querySelector('a[href]') || el, h = a.getAttribute('href');
+        var d = document.createElement('div'); d.className = 'mt-pop';
+        var b = document.createElement('b'); b.textContent = nameOf(el); d.appendChild(b); d.appendChild(document.createElement('br'));
+        var l = document.createElement('a'); l.href = h; l.textContent = 'Open the full page'; d.appendChild(l);
+        m.bindPopup(d); ms.push(m); pts.push(p);
+      });
+      layer.addLayers(ms);
+      note.textContent = ms.length ? 'Showing ' + ms.length + ' of ' + list.length + ' on the map' + (skipped ? '. ' + skipped + ' are not mapped yet and stay in the list view.' : '') : 'Nothing to show on the map for this search. Try the list view or change the filters.';
+      map.invalidateSize();
+      if (fit && pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.1), { maxZoom: 14 });
+    }
+    row.addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-v]'); if (!b) return;
+      var v = b.getAttribute('data-v'); if (v === view) return; view = v;
+      [].forEach.call(row.querySelectorAll('button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      grid.classList.toggle('mt-off', v === 'map'); box.classList.toggle('mt-off', v !== 'map');
+      var more = document.getElementById((MT.bar ? MT.bar.replace(/-bar$/, '') : MT.key) + '-more'); if (more && more.parentNode) more.parentNode.classList.toggle('mt-off', v === 'map');
+      if (v === 'map') { note.textContent = 'Loading the map'; load(function () { draw(true); }); } else { note.textContent = ''; }
+    });
+  })();
+</script>
