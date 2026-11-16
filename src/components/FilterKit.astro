@@ -50,6 +50,7 @@
           it.classList.add('hidden'); if (ok) match.push(it);
         });
         match.slice(0, shown).forEach(function (it) { it.classList.remove('hidden'); });
+        document.dispatchEvent(new CustomEvent('tlf:match', { detail: { key: c.bar && c.bar.id, items: match } }));
         var n = match.length, k = Math.min(shown, n);
         c.count.textContent = !n ? '' : k < n ? 'Showing ' + k + ' of ' + n + ' ' + c.noun[1] : n + ' ' + (n === 1 ? c.noun[0] : c.noun[1]);
         c.empty.classList.toggle('hidden', n > 0); c.more.classList.toggle('hidden', n <= shown);
