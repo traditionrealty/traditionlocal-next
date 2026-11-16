@@ -40,6 +40,10 @@ const moreOn = sub !== '' || active === 'More';
   {IS_PREVIEW && <meta name="robots" content="noindex, nofollow" />}
   {!IS_PREVIEW && noindex && <meta name="robots" content="noindex" />}
   <link rel="canonical" href={canonical} />
+<link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
+<link rel="manifest" href={url('/site.webmanifest')} />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Tradition Local" />
   <meta property="og:site_name" content="Tradition Local" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content={title + ' | Tradition Local'} />
