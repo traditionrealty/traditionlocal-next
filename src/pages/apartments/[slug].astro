@@ -8,7 +8,7 @@ const area = byName(a.area);
 const place = [a.city, a.area && a.area !== a.city ? a.area : ''].filter(Boolean).join(', ');
 const features = a.features ? a.features.split(/,\s*|\s+and\s+/).map((x) => x.trim()).filter(Boolean) : [];
 const sibs = apartmentCommunities.filter((x) => x.slug !== a.slug && x.area === a.area).slice(0, 6);
-const lead = a.summary || (a.name + ' is an apartment community in ' + (a.city || 'Houston') + ', Texas.');
+const lead = (a.summary ? a.summary.replace(/^The matched listing for .*? describes /i, a.name + ' offers ') : '') || (a.name + ' is an apartment community in ' + (a.city || 'Houston') + ', Texas.');
 ---
 <Base title={a.name} description={lead} active="More">
   <section class="band hero">
