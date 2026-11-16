@@ -1,0 +1,111 @@
+---
+import Base from '../layouts/Base.astro';
+import '../styles/pages.css';
+import { profiles, isClosed, href, readTable } from '../lib/data';
+import { category, isFood } from '../lib/helpers';
+
+// One pin per place, restaurant or business that has an address. Coordinates live in data/map_points.csv (slug, lat, lng, precision).
+// precision "exact" means a street address match. "area" means the pin sits near the right neighborhood but not on the exact spot.
+const pts = readTable('map_points.csv');
+const bySlug = new Map(profiles.map((p) => [p.slug, p]));
+const pins = pts.map((r: any) => {
+  const p: any = bySlug.get(r.slug); if (!p || isClosed(p)) return null;
+  const kind = p.type === 'Place' ? 'place' : isFood(p) ? 'food' : 'business';
+  const cat = p.type === 'Place' ? (p.subCategory || 'Place') : category(p);
+  return { n: p.name, k: kind, c: cat || '', a: p.area || '', ad: p.address || '', h: href(p), la: +r.lat, ln: +r.lng, x: r.precision === 'exact' ? 1 : 0 };
+}).filter((x: any) => x && isFinite(x.la) && isFinite(x.ln));
+const areas = [...new Set(pins.map((p: any) => p.a).filter(Boolean))].sort();
+const counts = { food: pins.filter((p: any) => p.k === 'food').length, business: pins.filter((p: any) => p.k === 'business').length, place: pins.filter((p: any) => p.k === 'place').length };
+---
+<Base title="Map" active="Map" description="Every restaurant, business and place we have reviewed, on one map of Greater Houston.">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <section class="band hero" style="padding-bottom:20px">
+    <div class="wrap">
+      <p class="eyebrow">Prototype</p>
+      <h1 style="margin-bottom:10px">The Tradition Local Map</h1>
+      <p class="lead">Restaurants, local businesses and places to visit, all in one view. Tap a pin to see the details and open the full profile.</p>
+    </div>
+  </section>
+  <section class="band" style="padding-top:8px">
+    <div class="wrap">
+      <div class="card pad search" style="margin-bottom:14px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:2;min-width:220px"><label for="m-find">Search the map</label><input id="m-find" type="search" placeholder="Try a name, a cuisine, or a park" autocomplete="off" /></div>
+        <div style="flex:1;min-width:200px"><label for="m-area">Area</label><select id="m-area"><option value="">All of Greater Houston</option>{areas.map((a: string) => <option>{a}</option>)}</select></div>
+      </div>
+      <div class="m-chips" id="m-chips" role="group" aria-label="Show on the map">
+        <button type="button" class="chip on" data-k="all">Everything ({pins.length})</button>
+        <button type="button" class="chip" data-k="food"><i class="dot food"></i>Restaurants ({counts.food})</button>
+        <button type="button" class="chip" data-k="business"><i class="dot business"></i>Businesses ({counts.business})</button>
+        <button type="button" class="chip" data-k="place"><i class="dot place"></i>Places ({counts.place})</button>
+      </div>
+      <p class="meta" id="m-count" aria-live="polite" style="margin:10px 0 12px"></p>
+      <div class="m-wrap">
+        <div id="m-map" role="region" aria-label="Map of restaurants, businesses and places"></div>
+        <ol id="m-list" class="m-list" aria-label="Results"></ol>
+      </div>
+      <p class="meta" style="margin-top:12px;font-size:14px">Pins marked with a lighter ring show the general area when we do not have a street match yet. Map data from OpenStreetMap contributors.</p>
+    </div>
+  </section>
+  <style is:global>
+    .m-chips{display:flex;flex-wrap:wrap;gap:8px}
+    .m-chips .chip{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+    .m-chips .chip.on{background:#1D1A6D;color:#fff;border-color:#1D1A6D}
+    .dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #1D1A6D}
+    .dot.food{background:#E7BC52}.dot.business{background:#004AAD}.dot.place{background:#2E8B57}
+    .m-wrap{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:16px;align-items:start}
+    #m-map{height:640px;border-radius:16px;overflow:hidden;border:1px solid rgba(29,26,109,.15);z-index:0}
+    .m-list{list-style:none;margin:0;padding:0;height:640px;overflow:auto;display:flex;flex-direction:column;gap:8px}
+    .m-list li{background:#fff;border:1px solid rgba(29,26,109,.12);border-radius:12px;padding:10px 12px;cursor:pointer}
+    .m-list li:hover,.m-list li.hl{border-color:#004AAD;box-shadow:0 2px 10px rgba(0,74,173,.15)}
+    .m-list b{display:block;color:#1D1A6D;font-family:Fraunces,serif}
+    .m-list span{font-size:14px;color:#555}
+    .m-pop b{font-family:Fraunces,serif;color:#1D1A6D;font-size:16px}
+    .m-pop a{display:inline-block;margin-top:8px;font-weight:600}
+    @media (max-width:820px){.m-wrap{grid-template-columns:1fr}#m-map{height:460px}.m-list{height:auto;max-height:420px}}
+  </style>
+  <script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script define:vars={{ PINS: pins }}>
+    (function () {
+      var COL = { food: '#E7BC52', business: '#004AAD', place: '#2E8B57' };
+      var NAME = { food: 'Restaurant', business: 'Business', place: 'Place' };
+      var map = L.map('m-map', { scrollWheelZoom: true }).setView([29.76, -95.37], 10);
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap contributors' }).addTo(map);
+      var layer = L.layerGroup().addTo(map);
+      var kind = 'all', $ = function (i) { return document.getElementById(i); };
+      var list = $('m-list'), find = $('m-find'), area = $('m-area'), count = $('m-count');
+      var esc = function (s) { return String(s || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+      PINS.forEach(function (p) {
+        p.m = L.circleMarker([p.la, p.ln], { radius: 8, color: p.x ? '#fff' : '#1D1A6D', weight: p.x ? 2 : 2, dashArray: p.x ? null : '3', fillColor: COL[p.k], fillOpacity: p.x ? 0.95 : 0.7 });
+        p.m.bindPopup('<div class="m-pop"><b>' + esc(p.n) + '</b><br>' + esc(NAME[p.k] + (p.c && p.c !== NAME[p.k] ? ', ' + p.c : '')) + (p.a ? '<br>' + esc(p.a) : '') + (p.ad ? '<br><small>' + esc(p.ad) + '</small>' : '') + '<br><a href="' + esc(p.h) + '">Open the full profile</a></div>');
+        p.find = (p.n + ' ' + p.c + ' ' + p.a + ' ' + NAME[p.k]).toLowerCase();
+        p.li = null;
+      });
+      function render(fit) {
+        var q = find.value.trim().toLowerCase(), a = area.value, shown = [];
+        layer.clearLayers(); list.innerHTML = '';
+        PINS.forEach(function (p) {
+          if (kind !== 'all' && p.k !== kind) return;
+          if (a && p.a !== a) return;
+          if (q && p.find.indexOf(q) < 0) return;
+          shown.push(p); layer.addLayer(p.m);
+        });
+        shown.sort(function (x, y) { return x.n.localeCompare(y.n); }).slice(0, 200).forEach(function (p) {
+          var li = document.createElement('li');
+          li.innerHTML = '<b>' + esc(p.n) + '</b><span>' + esc(NAME[p.k] + (p.a ? ', ' + p.a : '')) + '</span>';
+          li.addEventListener('click', function () { map.setView([p.la, p.ln], Math.max(map.getZoom(), 14)); p.m.openPopup(); });
+          p.li = li; list.appendChild(li);
+        });
+        count.textContent = shown.length ? 'Showing ' + shown.length + ' on the map' + (shown.length > 200 ? ' (first 200 in the list)' : '') : 'Nothing matches that search. Try a different area or clear the search.';
+        if (fit && shown.length) map.fitBounds(L.latLngBounds(shown.map(function (p) { return [p.la, p.ln]; })).pad(0.1), { maxZoom: 15 });
+      }
+      $('m-chips').addEventListener('click', function (e) {
+        var b = e.target.closest('button'); if (!b) return; kind = b.getAttribute('data-k');
+        [].forEach.call($('m-chips').children, function (c) { c.classList.toggle('on', c === b); });
+        render(true);
+      });
+      find.addEventListener('input', function () { render(true); });
+      area.addEventListener('change', function () { render(true); });
+      render(true);
+    })();
+  </script>
+</Base>
