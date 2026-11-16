@@ -8,7 +8,7 @@ const src = set === 'neighborhood' ? readTable('neighborhood_map_points.csv')
   : (set === 'apartment' || set === 'development') ? readTable('homes_map_points.csv').filter((r: any) => r.kind === set)
   : readTable('map_points.csv');
 const pins: Record<string, number[]> = {};
-src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && isFinite(ln)) pins[r.slug] = [la, ln]; });
+src.forEach((r: any) => { const la = +r.lat, ln = +r.lng; if (isFinite(la) && isFinite(ln) && la > 28.8 && la < 30.9 && ln > -96.6 && ln < -93.9) pins[r.slug] = [la, ln]; });
 ---
 <style is:global>
   .mt-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 14px}
