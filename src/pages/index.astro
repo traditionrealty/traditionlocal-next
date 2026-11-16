@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { businesses, ofType, liveReviews, isClosed, reviewsFor, byName, events as allEvents, upcomingEvents, eventDates, dateText, href, media, posts, siteImage, stars, url } from '../lib/data';
+import { content, businesses, ofType, liveReviews, isClosed, reviewsFor, byName, events as allEvents, upcomingEvents, eventDates, dateText, href, media, posts, siteImage, stars, url } from '../lib/data';
 import { config } from '../config';
 import { isFood, foodTab, category, topRating, venuePlace, areaPages, foodIn } from '../lib/helpers';
 import OpeningsPanel from '../components/OpeningsPanel.astro';
@@ -40,9 +40,12 @@ const hoodCount = areaPages().length;
 const ts = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? +new Date(+m[3], +m[1] - 1, +m[2]) : 0; };
 const snippet = (r: any) => { const t = (r.summary || r.body || '').replace(/\s+/g, ' ').trim(); return t.length > 150 ? t.slice(0, 150).replace(/\s+\S*$/, '') + '...' : t; };
 const written = liveReviews().filter((r) => snippet(r));
-const reviewPool = (written.length >= 6 ? written : liveReviews()).filter((r) => !looksClosed(byName(r.profile))).slice().sort((a, b) => ts(b.reviewDate) - ts(a.reviewDate));
-// Articles and guides from the Content tab join the feed: one after every two reviews. Guides first.
-const postPool = posts().filter((p) => snippet(p)).sort((a, b) => (b.type === 'Guide' ? 1 : 0) - (a.type === 'Guide' ? 1 : 0)).slice(0, 6);
+// Newest first. A row with no date is treated as just added, and rows added lower in the sheet count as newer.
+const rowNo = new Map<any, number>(content.map((c, i) => [c, i] as [any, number]));
+const newest = (a: any, b: any) => (b.reviewDate ? ts(b.reviewDate) : Infinity) - (a.reviewDate ? ts(a.reviewDate) : Infinity) || (rowNo.get(b) ?? 0) - (rowNo.get(a) ?? 0);
+const reviewPool = (written.length >= 6 ? written : liveReviews()).filter((r) => !looksClosed(byName(r.profile))).slice().sort(newest);
+// Articles and guides from the Content tab join the feed: one after every two reviews, newest first.
+const postPool = posts().filter((p) => snippet(p)).sort(newest).slice(0, 6);
 const feedPool: any[] = [];
 for (let i = 0, j = 0; feedPool.length < 18 && (i < reviewPool.length || j < postPool.length);) {
   for (let n = 0; n < 2 && i < reviewPool.length && feedPool.length < 18; n++) feedPool.push(reviewPool[i++]);
