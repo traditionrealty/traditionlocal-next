@@ -1,0 +1,38 @@
+/* The create account pop-up (the 2B design). Desktop is a split card. Phones get a bottom sheet. It reuses the .pop-back, .pop-x and .pop-hp pieces from popups.css. */
+.ap-back { align-items: center; }
+.ap-card { position: relative; display: flex; width: min(900px, 100%); max-height: calc(100vh - 48px); overflow: auto; background: #fff; border-radius: var(--radius); box-shadow: 0 24px 60px rgba(29, 26, 109, .38); animation: pop-in .18s ease-out; outline: none; }
+.ap-grab { display: none; }
+.ap-info { flex: 0 0 380px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 48px 40px; background: #FAF7F0; border-right: 1px solid #EFEBE2; }
+.ap-info .eyebrow { margin: 0; }
+.ap-info h2 { margin: 0; font-size: 30px; line-height: 1.15; }
+.ap-list { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 14px; }
+.ap-list li { position: relative; padding-left: 34px; font-size: 16px; line-height: 1.4; color: var(--navy); }
+.ap-list li::before { content: ""; position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; background: #1E7A43 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E") center / 12px no-repeat; }
+.ap-main { flex: 1; min-width: 0; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; padding: 48px 44px; }
+.ap-form { display: grid; gap: 14px; }
+.ap-form h3, .ap-done h3 { margin: 0 44px 2px 0; font-family: var(--serif); font-size: 26px; line-height: 1.15; color: var(--navy); outline: none; }
+.ap-field label { display: block; margin: 0 0 6px; font-size: 13px; font-weight: 700; color: var(--navy); }
+.ap-field input { width: 100%; box-sizing: border-box; min-height: var(--control-h); padding: 0 18px; border: 1.5px solid var(--slate); border-radius: 999px; background: #fff; font: 16px var(--sans); color: var(--navy); }
+.ap-form .btn { width: 100%; justify-content: center; }
+.ap-fine { margin: 0; font-size: 13px; line-height: 1.45; color: var(--slate); }
+.ap-fine a, .ap-in a { color: var(--blue); font-weight: 700; }
+.ap-in { margin: 0; text-align: center; font-size: 15px; color: var(--slate); }
+.ap-note { padding: 12px 14px; border-radius: 12px; font-size: 15px; line-height: 1.45; }
+.ap-note.err { background: #fdecea; border: 1px solid #f0c4be; color: #7a1f14; }
+.ap-done { display: grid; gap: 14px; }
+.ap-done p { margin: 0; font-size: 16px; color: var(--slate); }
+.ap-done .btn { justify-self: start; }
+@keyframes ap-up { from { transform: translateY(100%); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .ap-card { animation: none; } }
+@media (max-width: 700px) {
+.ap-back { align-items: flex-end; padding: 0; }
+.ap-card { flex-direction: column; width: 100%; max-height: 92vh; border-radius: 16px 16px 0 0; animation: ap-up .22s ease-out; padding-bottom: env(safe-area-inset-bottom, 0px); }
+.ap-grab { display: block; flex: none; width: 40px; height: 4px; margin: 10px auto 0; border-radius: 2px; background: #d8d3c6; }
+.ap-card .pop-x { top: 10px; right: 12px; }
+.ap-info { flex: none; gap: 10px; padding: 14px 22px 6px; background: #fff; border: 0; }
+.ap-info h2 { padding-right: 48px; font-size: 24px; }
+.ap-list { gap: 10px; margin-top: 2px; }
+.ap-list li { font-size: 15px; }
+.ap-main { flex: none; padding: 12px 22px 24px; }
+.ap-form h3 { display: none; }
+}
