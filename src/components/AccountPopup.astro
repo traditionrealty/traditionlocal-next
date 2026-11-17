@@ -64,7 +64,7 @@ if (base && path.indexOf(base) === 0) path = path.slice(base.length) || '/';
 var skip = /^\/(sign-in|account|newsletters|privacy|disclosures|contact|ask-dillon|404)(\/|$)/.test(path);
 function signedIn() { return !!(window.TL && window.TL.signedIn && window.TL.signedIn()); }
 function member() { if (signedIn()) ls(MEM, '1'); return ls(MEM) === '1'; }
-function otherOpen() { var n = document.getElementById('pop-nl'); return !!(n && !n.hidden); }
+function otherOpen() { var n = document.getElementById('pop-nl'), g = document.getElementById('pg-card'); return !!((n && !n.hidden) || (g && !g.hidden)); }
 function recent() { var t = parseInt(ls(KEY) || '0', 10) || 0; return !!t && Date.now() - t < 3 * 36e5; }
 function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 60 * 1e3; }
 function pageBusy() { var a = document.activeElement, tag = a && a.tagName; if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true; if (document.visibilityState && document.visibilityState !== 'visible') return true; var h = document.querySelector('header.top'); return !!(h && h.classList.contains('open')); }
