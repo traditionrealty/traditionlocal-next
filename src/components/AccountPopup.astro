@@ -66,7 +66,7 @@ function signedIn() { return !!(window.TL && window.TL.signedIn && window.TL.sig
 function member() { if (signedIn()) ls(MEM, '1'); return ls(MEM) === '1'; }
 function otherOpen() { var n = document.getElementById('pop-nl'); return !!(n && !n.hidden); }
 function recent() { var t = parseInt(ls(KEY) || '0', 10) || 0; return !!t && Date.now() - t < 24 * 36e5; }
-function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 30 * 6e4; }
+function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 60 * 1e3; }
 function pageBusy() { var a = document.activeElement, tag = a && a.tagName; if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true; if (document.visibilityState && document.visibilityState !== 'visible') return true; var h = document.querySelector('header.top'); return !!(h && h.classList.contains('open')); }
 function say(t) { note.textContent = t || ''; note.hidden = !t; }
 function busy(on) { go.disabled = on; if (on) { go.dataset.t = go.textContent; go.textContent = 'One moment'; } else if (go.dataset.t) go.textContent = go.dataset.t; }
