@@ -35,7 +35,7 @@ const evs = wantsEvents ? upcomingEvents(40).map((e) => {
   return { t: e.title.replace(/\s*\[[^\]]*\]\s*$/, ''), u: href(e), s: iso(a), f: iso(b), v: place ? place.name : (e.venue || e.profile || ''), tm: to12(e.startTime), r: hostsRsvp(e) ? 1 : 0 };
 }).filter(Boolean) : [];
 
-const D = { on: !!(config.popups && config.popups.enabled), kind, areas, evs, ask: url('/ask-dillon'), notices: url('/disclosures') };
+const D = { on: !!(config.popups && config.popups.enabled), kind, areas, evs, ask: url('/ask-dillon'), all: url('/things-to-do'), notices: url('/disclosures') };
 const X = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>';
 ---
 {kind && (
@@ -65,11 +65,9 @@ const X = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fi
 
 {wantsEvents && (
 <div class="pg-body" id="pg-weekend" hidden>
-<div class="pg-wk">
-<div class="pg-date" aria-hidden="true"><span id="pg-w-dow">SAT</span><b id="pg-w-day">14</b><span id="pg-w-mon">NOV</span></div>
-<div class="pg-wk-t"><p class="eyebrow" id="pg-w-eye">This Saturday</p><h2 id="pg-w-h">Event name</h2><p class="pg-meta" id="pg-w-meta"></p></div>
-</div>
-<div class="pg-actions"><a class="btn" id="pg-w-go" href="#">See details</a><button type="button" class="pop-no" id="pg-w-no">Not now</button></div>
+<div><p class="eyebrow" id="pg-w-eye">This week</p><h2 id="pg-w-h">Ideas for This Week</h2></div>
+<ul class="pg-evs" id="pg-w-list"></ul>
+<div class="pg-actions"><a class="btn" id="pg-w-go" href={D.all}>See all events</a><button type="button" class="pop-no" id="pg-w-no">Not now</button></div>
 </div>
 )}
 
@@ -152,26 +150,38 @@ if (saveBtn) saveBtn.addEventListener('click', function () {
 });
 
 // This weekend
-var MON = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'], DOW = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'], LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+var DOW = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 function parse(s) { var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s); return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null; }
-function weekendEvent() {
+function weekendPicks() {
   var now = new Date(), dow = now.getDay();
-  if (!forced && !(dow === 0 || dow >= 4)) return null;
+  if (!forced && !(dow === 0 || dow >= 4)) return [];
   var t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()), lim = new Date(+t0 + 7 * DAY);
   var done = []; try { done = JSON.parse(ls('tl_wk_done') || '[]'); } catch (e) {}
-  var c = (D.evs || []).filter(function (e) { var s = parse(e.s); return s && s >= t0 && s <= lim && done.indexOf(e.u) < 0; });
-  if (!c.length && forced) c = (D.evs || []).slice(0, 1);
-  c.sort(function (a, b) { return (b.r - a.r) || (parse(a.s) - parse(b.s)); });
-  return c[0] || null;
+  var seen = {}, c = (D.evs || []).filter(function (e) { var s = parse(e.s); if (!s || s < t0 || s > lim || done.indexOf(e.u) > -1 || seen[e.t]) return false; seen[e.t] = 1; return true; });
+  if (!c.length && forced) c = (D.evs || []).slice(0, 3);
+  var today = c.filter(function (e) { return +parse(e.s) === +t0; });
+  var pool = today.length >= 3 ? today : c;
+  pool = pool.slice().sort(function (a, b) { return (b.r - a.r) || (parse(a.s) - parse(b.s)); }).slice(0, 3);
+  pool.sort(function (a, b) { return parse(a.s) - parse(b.s); });
+  pool.isToday = today.length >= 3;
+  return pool;
 }
-function fillWeekend(e) {
-  var d = parse(e.s), now = new Date(), t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate()), diff = Math.round((d - t0) / DAY);
-  var eye = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : (d.getDay() === 6 || d.getDay() === 0) && diff < 7 ? 'This ' + LONG[d.getDay()] : 'Coming up';
-  $('pg-w-eye').textContent = eye; $('pg-w-h').textContent = e.t;
-  $('pg-w-dow').textContent = DOW[d.getDay()]; $('pg-w-day').textContent = d.getDate(); $('pg-w-mon').textContent = MON[d.getMonth()];
-  $('pg-w-meta').textContent = [e.v, e.tm].filter(Boolean).join('. ');
-  var go = $('pg-w-go'); go.textContent = e.r ? 'RSVP' : 'See details'; go.setAttribute('href', e.u + (e.r ? '#rsvp' : ''));
-  go.onclick = function () { var done = []; try { done = JSON.parse(ls('tl_wk_done') || '[]'); } catch (x) {} if (done.indexOf(e.u) < 0) done.push(e.u); ls('tl_wk_done', JSON.stringify(done.slice(-50))); };
+function fillWeekend(list) {
+  $('pg-w-eye').textContent = list.isToday ? 'Today' : 'This week';
+  $('pg-w-h').textContent = list.isToday ? 'Things to Do Today' : 'Ideas for This Week';
+  var ul = $('pg-w-list'); ul.textContent = '';
+  list.forEach(function (e) {
+    var d = parse(e.s), li = document.createElement('li'), a = document.createElement('a');
+    a.href = e.u + (e.r ? '#rsvp' : '');
+    var t = document.createElement('span'); t.className = 'pg-mini'; t.setAttribute('aria-hidden', 'true');
+    var s1 = document.createElement('span'); s1.textContent = DOW[d.getDay()]; var b1 = document.createElement('b'); b1.textContent = d.getDate();
+    t.appendChild(s1); t.appendChild(b1);
+    var w = document.createElement('span'); w.className = 'pg-ev-t';
+    var h = document.createElement('strong'); h.textContent = e.t;
+    var m = document.createElement('span'); m.className = 'pg-ev-m'; m.textContent = [e.v, e.tm].filter(Boolean).join('. ') + (e.r ? ' (RSVP)' : '');
+    w.appendChild(h); w.appendChild(m); a.appendChild(t); a.appendChild(w); li.appendChild(a); ul.appendChild(li);
+    a.addEventListener('click', function () { var done = []; try { done = JSON.parse(ls('tl_wk_done') || '[]'); } catch (x) {} if (done.indexOf(e.u) < 0) done.push(e.u); ls('tl_wk_done', JSON.stringify(done.slice(-50))); });
+  });
 }
 function dayKey() { var n = new Date(); return n.getFullYear() + '-' + (n.getMonth() + 1) + '-' + n.getDate(); }
 
@@ -186,7 +196,7 @@ function attempt(which, tries) {
   if (!forced && tries === 0 && accountDue() && Date.now() - born < 27000) { setTimeout(function () { attempt(which, 0); }, 28000 - (Date.now() - born)); return; } // signed out visitors meet the create account pop-up first
   if (!forced && which === 'community' && hasArea()) return;
   if (!forced && (busy() || gapRecent())) { if (tries < 12) setTimeout(function () { attempt(which, tries + 1); }, 5000); return; }
-  if (which === 'weekend') { var e = weekendEvent(); if (!e) return; fillWeekend(e); if (!forced) ls('tl_wk_seen', dayKey()); }
+  if (which === 'weekend') { var e = weekendPicks(); if (!e.length) return; fillWeekend(e); if (!forced) ls('tl_wk_seen', dayKey()); }
   else if (which === 'community') { if (!forced) ls('tl_pc_seen', String(Date.now())); }
   else if (which === 'ask') { fillAsk(); if (!forced) ls('tl_ad_seen', String(Date.now())); }
   stamp(); show(which);
@@ -203,7 +213,7 @@ if (!on) return;
 var wait = 12000;
 var community = !!$('pg-community') && !(parseInt(ls('tl_pc_skip') || '0', 10) && Date.now() - parseInt(ls('tl_pc_skip'), 10) < 14 * DAY) && !(parseInt(ls('tl_pc_seen') || '0', 10) && Date.now() - parseInt(ls('tl_pc_seen'), 10) < 14 * DAY);
 if (community) { setTimeout(function () { attempt('community', 0); }, wait); return; }
-if ($('pg-weekend') && ls('tl_wk_seen') !== dayKey() && weekendEvent()) { setTimeout(function () { attempt('weekend', 0); }, wait); return; }
+if ($('pg-weekend') && ls('tl_wk_seen') !== dayKey() && weekendPicks().length) { setTimeout(function () { attempt('weekend', 0); }, wait); return; }
 if ($('pg-ask')) {
   var lastAsk = parseInt(ls('tl_ad_seen') || '0', 10) || 0; if (lastAsk && Date.now() - lastAsk < 7 * DAY) return;
   var armed = false, t0 = Date.now();
