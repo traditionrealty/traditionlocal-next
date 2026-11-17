@@ -16,7 +16,7 @@ export const config = {
   formsAction: 'https://tl-forms.bold-bush-f938.workers.dev',
   // Pop-ups are built but switched off. Change enabled to true when you are ready for visitors to see them.
   // To try them first: add ?popup=newsletter to any page address, or ?popup=on to see the real behavior on your own device.
-  popups: { enabled: false },
+  popups: { enabled: true },
   // Pictures on the Food and Neighborhood cards, the same way the home page shows them. cardPhotos shows them. cardMapPhotos also uses the Google Maps
   // screenshot for places that have no real photo. To try the other setting on your own device: /food/?photos=on (real photos only) or /food/?photos=all.
   cardPhotos: true,
