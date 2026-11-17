@@ -13,13 +13,18 @@ const P = { on: !!(config.popups && config.popups.enabled), account: url('/accou
 <div class="ap-grab" aria-hidden="true"></div>
 <button type="button" class="pop-x" id="ap-x" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
 <div class="ap-info">
-<p class="eyebrow">Free account</p>
-<h2 id="ap-h">Our Short List, Saved Places, and More</h2>
+<div class="ap-lock" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></div>
+<p class="eyebrow ap-eyebrow">Free account</p>
+<h2 id="ap-h"><span class="ap-h-d">Our Short List, Saved Places, and More</span><span class="ap-h-m">Members See Our Short List</span></h2>
 <ul class="ap-list" id="ap-d">
 <li>Our Short List, with why we call them</li>
 <li>Contact details for every pro</li>
 <li>Saved places on every device</li>
 </ul>
+<div class="ap-m-actions">
+<button type="button" class="btn" id="ap-m-create">Create a free account</button>
+<a class="btn line" id="ap-m-signin" href={P.signin}>Sign in</a>
+</div>
 </div>
 <div class="ap-main">
 <form class="ap-form" id="ap-form" novalidate>
@@ -72,7 +77,10 @@ function open(force) {
 if (!back.hidden) return;
 if (!force && (shown || member() || recent() || skip || otherOpen())) return;
 shown = true; last = document.activeElement;
-document.getElementById('ap-signin').href = P.signin + '?next=' + encodeURIComponent(location.pathname);
+var nx = P.signin + '?next=' + encodeURIComponent(location.pathname);
+document.getElementById('ap-signin').href = nx; document.getElementById('ap-m-signin').href = nx;
+if (window.innerWidth < 701) card.classList.add('ap-intro'); else card.classList.remove('ap-intro');
+ls('tl_pop_last', String(Date.now()));
 back.hidden = false; document.documentElement.style.overflow = 'hidden';
 var narrow = window.innerWidth < 701;
 setTimeout(function () { var f = document.getElementById('ap-first'); if (!narrow && f) f.focus(); else card.focus(); }, 30);
@@ -83,6 +91,7 @@ back.hidden = true; document.documentElement.style.overflow = '';
 if (remember) ls(KEY, String(Date.now()));
 if (last && last.focus) { try { last.focus(); } catch (e) {} }
 }
+document.getElementById('ap-m-create').addEventListener('click', function () { card.classList.remove('ap-intro'); var f = document.getElementById('ap-first'); if (f) f.focus(); });
 document.getElementById('ap-x').addEventListener('click', function () { close(true); });
 document.getElementById('ap-done-x').addEventListener('click', function () { close(true); });
 back.addEventListener('mousedown', function (e) { if (e.target === back) close(true); });
