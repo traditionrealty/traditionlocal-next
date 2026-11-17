@@ -22,6 +22,16 @@
 .pg-date span:first-child { color: #E7BC52; }
 .pg-date b { font-family: var(--serif); font-weight: 600; font-size: 30px; line-height: 1.05; }
 .pg-dl { display: flex; align-items: center; justify-content: center; flex: none; width: 56px; height: 56px; border-radius: 50%; background: var(--navy); color: #fff; font-family: var(--serif); font-weight: 600; font-size: 21px; }
+.pg-evs { list-style: none; margin: 0; padding: 0; }
+.pg-evs li { border-top: 1px solid var(--line, #EFEBE2); }
+.pg-evs a { display: flex; gap: 14px; align-items: center; min-height: 44px; padding: 10px 0; color: var(--navy); text-decoration: none; }
+.pg-evs a:hover .pg-ev-t strong { text-decoration: underline; }
+.pg-mini { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: none; width: 48px; height: 54px; border-radius: 8px; background: var(--navy); color: #fff; }
+.pg-mini span { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #E7BC52; }
+.pg-mini b { font-family: var(--serif); font-weight: 600; font-size: 21px; line-height: 1.05; }
+.pg-ev-t { display: flex; flex-direction: column; min-width: 0; }
+.pg-ev-t strong { font-family: var(--serif); font-size: 17px; line-height: 1.25; }
+.pg-ev-m { font-size: 14px; color: var(--slate); }
 .pg-fine { margin: 0; font-size: 12px; color: var(--slate); }
 .pg-fine a { color: var(--blue); }
 @media (prefers-reduced-motion: reduce) { .pg-card { animation: none; } }
