@@ -1,6 +1,8 @@
 ---
 // The create account pop-up (the 2B design): a split card on computers, a bottom sheet on phones.
-// It opens after a signed out visitor saves a second place, once every 30 days at most, and only when config.popups.enabled is true.
+// It opens for anyone who is not signed in: on their second page view of a visit, or right after they save a second place.
+// After it is closed it waits 24 hours. People who have had an account on this device see "Welcome back" with Sign in first.
+// It only opens when config.popups.enabled is true.
 // To see it right now on any page: add ?popup=account to the address.
 // To see how it behaves for a real visitor on your own device: add ?popup=on once (then save two places while signed out). ?popup=off stops it. ?popup=reset forgets that it was closed or that this device has an account.
 import '../styles/account-popup.css';
@@ -63,7 +65,9 @@ var skip = /^\/(sign-in|account|newsletters|privacy|disclosures|contact|ask-dill
 function signedIn() { return !!(window.TL && window.TL.signedIn && window.TL.signedIn()); }
 function member() { if (signedIn()) ls(MEM, '1'); return ls(MEM) === '1'; }
 function otherOpen() { var n = document.getElementById('pop-nl'); return !!(n && !n.hidden); }
-function recent() { var t = parseInt(ls(KEY) || '0', 10) || 0; return t && Date.now() - t < 30 * 864e5; }
+function recent() { var t = parseInt(ls(KEY) || '0', 10) || 0; return !!t && Date.now() - t < 24 * 36e5; }
+function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 30 * 6e4; }
+function pageBusy() { var a = document.activeElement, tag = a && a.tagName; if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true; if (document.visibilityState && document.visibilityState !== 'visible') return true; var h = document.querySelector('header.top'); return !!(h && h.classList.contains('open')); }
 function say(t) { note.textContent = t || ''; note.hidden = !t; }
 function busy(on) { go.disabled = on; if (on) { go.dataset.t = go.textContent; go.textContent = 'One moment'; } else if (go.dataset.t) go.textContent = go.dataset.t; }
 function friendly(err) {
@@ -76,12 +80,17 @@ return 'Something went wrong. Please try again, or contact us if it keeps happen
 function focusables() { return Array.prototype.filter.call(card.querySelectorAll('button, a[href], input:not(.pop-hp), select, textarea'), function (el) { return !el.disabled && el.offsetParent !== null; }); }
 function open(force) {
 if (!back.hidden) return;
-if (!force && (shown || member() || recent() || skip || otherOpen())) return;
+if (!force && (shown || signedIn() || recent() || skip || otherOpen())) return;
 shown = true; last = document.activeElement;
 var nx = P.signin + '?next=' + encodeURIComponent(location.pathname);
 document.getElementById('ap-signin').href = nx; document.getElementById('ap-m-signin').href = nx;
 if (window.innerWidth < 701) card.classList.add('ap-intro'); else card.classList.remove('ap-intro');
 ls('tl_pop_last', String(Date.now()));
+if (!force) ls(KEY, String(Date.now()));
+var ret = ls(MEM) === '1';
+card.querySelector('.ap-eyebrow').textContent = ret ? 'Welcome back' : 'Free account';
+document.getElementById('ap-signin').className = ret ? 'btn' : 'btn line'; document.getElementById('ap-go').className = ret ? 'btn line' : 'btn';
+document.getElementById('ap-m-signin').className = ret ? 'btn' : 'btn line'; document.getElementById('ap-m-create').className = ret ? 'btn line' : 'btn';
 back.hidden = false; document.documentElement.style.overflow = 'hidden';
 var narrow = window.innerWidth < 701;
 setTimeout(function () { var f = document.getElementById('ap-first'); if (!narrow && f) f.focus(); else card.focus(); }, 30);
@@ -133,6 +142,9 @@ var n = (window.TL && window.TL.saved && window.TL.saved().length) || 0;
 if (n >= 2) setTimeout(function () { open(false); }, 900);
 });
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', member); else member();
+// Visitors who are not signed in see this on their second page view of a visit, even if they have saved places on this device.
+var pv = 0; try { pv = (parseInt(sessionStorage.getItem('tl_ap_pv'), 10) || 0) + 1; sessionStorage.setItem('tl_ap_pv', String(pv)); } catch (e) {}
+if ((P.on || ls('tl_pop_preview') === '1') && pv >= 2 && !skip && q !== 'account') setTimeout(function () { if (!signedIn() && !pageBusy() && !gapRecent()) open(false); }, 6000);
 window.TLAccountPopup = { open: function () { open(true); }, close: function () { close(false); } };
 if (q === 'account') setTimeout(function () { open(true); }, 400);
 })();
