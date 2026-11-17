@@ -109,11 +109,11 @@ if (e.key === 'Escape') { e.preventDefault(); close('esc'); return; }
 var ap = $('ap-back'); if (ap && !ap.hidden) return true;
       return false;
     }
-    // One pop-up at a time: nothing new within thirty minutes of the last one (the create account pop-up stamps the same time).
-function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 30 * 6e4; }
+    // One pop-up at a time: nothing new within a minute of the last one (the create account pop-up stamps the same time).
+function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 60 * 1e3; }
 function attempt(tries) {
-if (ss(SHOWN) || gapRecent()) return;
-      if (busy()) { if (tries < 6) setTimeout(function () { attempt(tries + 1); }, 5000); return; }
+if (ss(SHOWN)) return;
+if (busy() || gapRecent()) { if (tries < 10) setTimeout(function () { attempt(tries + 1); }, 5000); return; }
       open(true);
     }
     if (forced) { setTimeout(function () { open(false); }, 600); return; }
@@ -123,7 +123,8 @@ var lastNl = m.nl ? Math.max(m.nl.shown || 0, m.nl.closed || 0) : 0;
 if (lastNl && Date.now() - lastNl < 3 * 36e5) return; // not joined yet: ask again every three hours
     if (ss(SHOWN) || skip.test(location.pathname)) return;
     var pv = (parseInt(ss(PV), 10) || 0) + 1; ss(PV, String(pv));
-    setTimeout(function () { attempt(0); }, pv >= 2 ? 8000 : 45000);
+    var inn = !!(window.TL && window.TL.signedIn && window.TL.signedIn()); // signed out visitors meet the sign in pop-up first, so In the Loop waits a little longer for them
+setTimeout(function () { attempt(0); }, inn ? (pv >= 2 ? 8000 : 45000) : (pv >= 2 ? 40000 : 90000));
   })();
 </script>
 <AccountPopup />
