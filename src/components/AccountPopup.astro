@@ -1,6 +1,6 @@
 ---
 // The create account pop-up (the 2B design): a split card on computers, a bottom sheet on phones.
-// It opens for anyone who is not signed in: on their second page view of a visit, or right after they save a second place.
+// It opens for anyone who is not signed in: 20 seconds into their first page, 6 seconds into each page after that, or right after they save a second place.
 // After it is closed it waits 24 hours. People who have had an account on this device see "Welcome back" with Sign in first.
 // It only opens when config.popups.enabled is true.
 // To see it right now on any page: add ?popup=account to the address.
@@ -142,9 +142,13 @@ var n = (window.TL && window.TL.saved && window.TL.saved().length) || 0;
 if (n >= 2) setTimeout(function () { open(false); }, 900);
 });
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', member); else member();
-// Visitors who are not signed in see this on their second page view of a visit, even if they have saved places on this device.
+// Visitors who are not signed in see this 20 seconds into their first page (6 seconds on later pages), even if they have saved places on this device.
 var pv = 0; try { pv = (parseInt(sessionStorage.getItem('tl_ap_pv'), 10) || 0) + 1; sessionStorage.setItem('tl_ap_pv', String(pv)); } catch (e) {}
-if ((P.on || ls('tl_pop_preview') === '1') && pv >= 2 && !skip && q !== 'account') setTimeout(function () { if (!signedIn() && !pageBusy() && !gapRecent()) open(false); }, 6000);
+if ((P.on || ls('tl_pop_preview') === '1') && !skip && q !== 'account') {
+var tries = 0;
+var passive = function () { if (signedIn() || gapRecent()) return; if (pageBusy() && tries++ < 4) { setTimeout(passive, 5000); return; } open(false); };
+setTimeout(passive, pv >= 2 ? 6000 : 20000); // 20 seconds on the first page, 6 seconds on the next ones
+}
 window.TLAccountPopup = { open: function () { open(true); }, close: function () { close(false); } };
 if (q === 'account') setTimeout(function () { open(true); }, 400);
 })();
