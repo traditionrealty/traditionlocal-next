@@ -58,14 +58,14 @@ var done = document.getElementById('ap-done'), doneT = document.getElementById('
 var KEY = 'tl_ap_seen', MEM = 'tl_member', shown = false, last = null;
 function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
 var q = ''; try { q = new URLSearchParams(location.search).get('popup') || ''; } catch (e) {}
-if (q === 'reset') { ls(KEY, null); ls(MEM, null); ls('tl_pop_last', null); }
+if (q === 'reset') { ls(KEY, null); ls(MEM, null); ls('tl_ap_joined', null); ls('tl_pop_last', null); }
 var base = P.account.replace(/\/account\/?$/, ''), path = location.pathname;
 if (base && path.indexOf(base) === 0) path = path.slice(base.length) || '/';
 var skip = /^\/(sign-in|account|newsletters|privacy|disclosures|contact|ask-dillon|404)(\/|$)/.test(path);
 function signedIn() { return !!(window.TL && window.TL.signedIn && window.TL.signedIn()); }
 function member() { if (signedIn()) ls(MEM, '1'); return ls(MEM) === '1'; }
 function otherOpen() { var n = document.getElementById('pop-nl'); return !!(n && !n.hidden); }
-function recent() { var t = parseInt(ls(KEY) || '0', 10) || 0; return !!t && Date.now() - t < 24 * 36e5; }
+function recent() { var t = parseInt(ls(KEY) || '0', 10) || 0; return !!t && Date.now() - t < 3 * 36e5; }
 function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 60 * 1e3; }
 function pageBusy() { var a = document.activeElement, tag = a && a.tagName; if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true; if (document.visibilityState && document.visibilityState !== 'visible') return true; var h = document.querySelector('header.top'); return !!(h && h.classList.contains('open')); }
 function say(t) { note.textContent = t || ''; note.hidden = !t; }
@@ -80,7 +80,7 @@ return 'Something went wrong. Please try again, or contact us if it keeps happen
 function focusables() { return Array.prototype.filter.call(card.querySelectorAll('button, a[href], input:not(.pop-hp), select, textarea'), function (el) { return !el.disabled && el.offsetParent !== null; }); }
 function open(force) {
 if (!back.hidden) return;
-if (!force && (shown || signedIn() || recent() || skip || otherOpen())) return;
+if (!force && (shown || signedIn() || ls('tl_ap_joined') === '1' || recent() || skip || otherOpen())) return;
 shown = true; last = document.activeElement;
 var nx = P.signin + '?next=' + encodeURIComponent(location.pathname);
 document.getElementById('ap-signin').href = nx; document.getElementById('ap-m-signin').href = nx;
@@ -130,7 +130,7 @@ c.auth.signUp({ email: email, password: pass, options: { emailRedirectTo: locati
 busy(false);
 if (r && r.error) { say(friendly(r.error)); return; }
 if (r && r.data && r.data.session) { ls(MEM, '1'); location.href = P.account; return; }
-el.password.value = ''; ls(KEY, String(Date.now())); ls(MEM, '1');
+el.password.value = ''; ls(KEY, String(Date.now())); ls(MEM, '1'); ls('tl_ap_joined', '1');
 doneT.textContent = 'We sent a link to ' + email + '. Open it to finish creating your account. If you already have an account, use Sign in instead. Your saved places come with you.';
 form.hidden = true; done.hidden = false; document.getElementById('ap-done-h').focus();
 }, function () { busy(false); say(friendly(null)); });
