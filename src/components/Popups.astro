@@ -73,7 +73,7 @@ function narrow() { return window.innerWidth < 701; }
       card.setAttribute('aria-modal', narrow() ? 'true' : 'false');
 back.hidden = false;
 if (narrow()) { prevOverflow = document.documentElement.style.overflow; document.documentElement.style.overflow = 'hidden'; locked = true; }
-      if (real) { var m = mem(); m.nl = m.nl || {}; m.nl.shown = Date.now(); save(m); ss(SHOWN, '1'); }
+      if (real) { var m = mem(); m.nl = m.nl || {}; m.nl.shown = Date.now(); save(m); ss(SHOWN, '1'); ls('tl_pop_last', String(Date.now())); }
       try { card.focus({ preventScroll: true }); } catch (e) {}
     }
     function close(why) {
@@ -108,8 +108,10 @@ if (e.key === 'Escape') { e.preventDefault(); close('esc'); return; }
 var ap = $('ap-back'); if (ap && !ap.hidden) return true;
       return false;
     }
-    function attempt(tries) {
-      if (ss(SHOWN)) return;
+    // One pop-up at a time: nothing new within three days of the last one (the create account pop-up stamps the same time).
+function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 3 * 864e5; }
+function attempt(tries) {
+if (ss(SHOWN) || gapRecent()) return;
       if (busy()) { if (tries < 6) setTimeout(function () { attempt(tries + 1); }, 5000); return; }
       open(true);
     }
