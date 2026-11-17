@@ -90,7 +90,7 @@ var $ = function (id) { return document.getElementById(id); };
 function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
 function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} return null; }
 var flag = ''; try { flag = new URLSearchParams(location.search).get('popup') || ''; } catch (e) {}
-if (flag === 'reset') { ['tl_pc_seen', 'tl_pc_skip', 'tl_wk_seen', 'tl_wk_done', 'tl_ad_seen'].forEach(function (k) { ls(k, null); }); }
+if (flag === 'reset') { ['tl_pg_mem', 'tl_wk_done'].forEach(function (k) { ls(k, null); }); }
 var on = D.on || ls('tl_pop_preview') === '1';
 var forced = flag === 'community' || flag === 'weekend' || flag === 'ask';
 var DAY = 864e5, current = '', lastFocus = null, shownThisView = false;
@@ -102,6 +102,11 @@ function hasArea() { var f = window.TL && window.TL.follows ? window.TL.follows(
 function signedIn() { return !!(window.TL && window.TL.signedIn && window.TL.signedIn()); }
 function accountDue() { var seen = parseInt(ls('tl_ap_seen') || '0', 10) || 0; return !signedIn() && ls('tl_ap_joined') !== '1' && !(seen && Date.now() - seen < 3 * 36e5); }
 var born = Date.now();
+// How long a page pop-up rests after it opens or is closed: 12 minutes the first time, 30 minutes the second, then 3 hours (the longest wait).
+var WAITS = [12 * 6e4, 30 * 6e4, 3 * 36e5];
+function pgMem() { var m = jget('tl_pg_mem', {}); return m && typeof m === 'object' ? m : {}; }
+function restOver(name) { var r = pgMem()[name]; if (!r || !r.n) return true; return Date.now() - (r.last || 0) >= WAITS[Math.min(r.n - 1, WAITS.length - 1)]; }
+function note(name, opened) { var m = pgMem(), r = m[name] || { n: 0, last: 0 }; if (opened) r.n += 1; r.last = Date.now(); m[name] = r; ls('tl_pg_mem', JSON.stringify(m)); }
 function busy() {
   var a = document.activeElement, tag = a && a.tagName;
   if ((tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') && !card.contains(a)) return true;
@@ -124,7 +129,7 @@ function show(which) {
 function stamp() { ls('tl_pop_last', String(Date.now())); shownThisView = true; }
 function close() {
   if (card.hidden) return; card.hidden = true;
-  if (current === 'community') ls('tl_pc_skip', String(Date.now()));
+  if (current === 'community' || current === 'weekend' || current === 'ask') note(current, false);
   try { if (lastFocus && lastFocus.focus) lastFocus.focus(); } catch (e) {}
 }
 $('pg-x').addEventListener('click', close);
@@ -140,7 +145,6 @@ var saveBtn = $('pg-c-save');
 if (saveBtn) saveBtn.addEventListener('click', function () {
   var v = sel ? sel.value : ''; if (!v) { $('pg-c-err').hidden = false; return; }
   if (window.TL && window.TL.setArea) window.TL.setArea(v); else ls('tl_area', JSON.stringify(v));
-  ls('tl_pc_skip', null);
   var guide = '#'; D.areas.forEach(function (a) { if (a.n === v) guide = a.u; });
   var f = $('f-area'), applied = false;
   if (f) { [].forEach.call(f.options, function (o) { if (o.value === v) applied = true; }); if (applied) { f.value = v; f.dispatchEvent(new Event('change', { bubbles: true })); } }
@@ -183,7 +187,6 @@ function fillWeekend(list) {
     a.addEventListener('click', function () { var done = []; try { done = JSON.parse(ls('tl_wk_done') || '[]'); } catch (x) {} if (done.indexOf(e.u) < 0) done.push(e.u); ls('tl_wk_done', JSON.stringify(done.slice(-50))); });
   });
 }
-function dayKey() { var n = new Date(); return n.getFullYear() + '-' + (n.getMonth() + 1) + '-' + n.getDate(); }
 
 // Ask Dillon
 function fillAsk() {
@@ -196,9 +199,9 @@ function attempt(which, tries) {
   if (!forced && tries === 0 && accountDue() && Date.now() - born < 27000) { setTimeout(function () { attempt(which, 0); }, 28000 - (Date.now() - born)); return; } // signed out visitors meet the create account pop-up first
   if (!forced && which === 'community' && hasArea()) return;
   if (!forced && (busy() || gapRecent())) { if (tries < 12) setTimeout(function () { attempt(which, tries + 1); }, 5000); return; }
-  if (which === 'weekend') { var e = weekendPicks(); if (!e.length) return; fillWeekend(e); if (!forced) ls('tl_wk_seen', dayKey()); }
-  else if (which === 'community') { if (!forced) ls('tl_pc_seen', String(Date.now())); }
-  else if (which === 'ask') { fillAsk(); if (!forced) ls('tl_ad_seen', String(Date.now())); }
+  if (which === 'weekend') { var e = weekendPicks(); if (!e.length) return; fillWeekend(e); }
+  else if (which === 'ask') fillAsk();
+  if (!forced) note(which, true);
   stamp(); show(which);
 }
 
@@ -209,18 +212,14 @@ if (forced) {
 }
 if (!on) return;
 
-// Real visitor rules
-var wait = 12000;
-var community = !!$('pg-community') && !(parseInt(ls('tl_pc_skip') || '0', 10) && Date.now() - parseInt(ls('tl_pc_skip'), 10) < 14 * DAY) && !(parseInt(ls('tl_pc_seen') || '0', 10) && Date.now() - parseInt(ls('tl_pc_seen'), 10) < 14 * DAY);
-if (community) { setTimeout(function () { attempt('community', 0); }, wait); return; }
-if ($('pg-weekend') && ls('tl_wk_seen') !== dayKey() && weekendPicks().length) { setTimeout(function () { attempt('weekend', 0); }, wait); return; }
-if ($('pg-ask')) {
-  var lastAsk = parseInt(ls('tl_ad_seen') || '0', 10) || 0; if (lastAsk && Date.now() - lastAsk < 7 * DAY) return;
-  var armed = false, t0 = Date.now();
-  var go = function () { if (armed) return; armed = true; attempt('ask', 0); };
-  window.addEventListener('scroll', function () { var h = document.documentElement; if (Date.now() - t0 > 8000 && (window.scrollY + window.innerHeight) / Math.max(h.scrollHeight, 1) >= 0.6) go(); }, { passive: true });
-  document.addEventListener('mouseout', function (e) { if (!e.relatedTarget && e.clientY <= 0 && Date.now() - t0 > 8000 && !narrow()) go(); });
-}
+// Real visitor rules. Each one opens when the visitor has scrolled about halfway, or after 30 seconds if they have not scrolled.
+var which = $('pg-community') && restOver('community') && !hasArea() ? 'community' : $('pg-weekend') && restOver('weekend') && weekendPicks().length ? 'weekend' : $('pg-ask') && restOver('ask') ? 'ask' : '';
+if (!which) return;
+var armed = false, t0 = Date.now();
+var go = function () { if (armed) return; armed = true; attempt(which, 0); };
+window.addEventListener('scroll', function () { var h = document.documentElement; if (Date.now() - t0 > 6000 && (window.scrollY + window.innerHeight) / Math.max(h.scrollHeight, 1) >= 0.5) go(); }, { passive: true });
+setTimeout(go, 30000);
+if (which === 'ask') document.addEventListener('mouseout', function (e) { if (!e.relatedTarget && e.clientY <= 0 && Date.now() - t0 > 8000 && !narrow()) go(); });
 })();
 </script>
 )}
