@@ -1,7 +1,8 @@
 ---
 // The create account pop-up (the 2B design): a split card on computers, a bottom sheet on phones.
 // It opens after a signed out visitor saves a second place, once every 30 days at most, and only when config.popups.enabled is true.
-// To try it on your own device: add ?popup=account to any page address. ?popup=reset forgets that it was closed.
+// To see it right now on any page: add ?popup=account to the address.
+// To see how it behaves for a real visitor on your own device: add ?popup=on once (then save two places while signed out). ?popup=off stops it. ?popup=reset forgets that it was closed or that this device has an account.
 import '../styles/account-popup.css';
 import { config } from '../config';
 import { url } from '../lib/data';
@@ -55,7 +56,7 @@ var done = document.getElementById('ap-done'), doneT = document.getElementById('
 var KEY = 'tl_ap_seen', MEM = 'tl_member', shown = false, last = null;
 function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
 var q = ''; try { q = new URLSearchParams(location.search).get('popup') || ''; } catch (e) {}
-if (q === 'reset') ls(KEY, null);
+if (q === 'reset') { ls(KEY, null); ls(MEM, null); ls('tl_pop_last', null); }
 var base = P.account.replace(/\/account\/?$/, ''), path = location.pathname;
 if (base && path.indexOf(base) === 0) path = path.slice(base.length) || '/';
 var skip = /^\/(sign-in|account|newsletters|privacy|disclosures|contact|ask-dillon|404)(\/|$)/.test(path);
@@ -127,7 +128,7 @@ form.hidden = true; done.hidden = false; document.getElementById('ap-done-h').fo
 });
 });
 document.addEventListener('tl:saved', function () {
-if (!P.on) return;
+if (!P.on && ls('tl_pop_preview') !== '1') return;
 var n = (window.TL && window.TL.saved && window.TL.saved().length) || 0;
 if (n >= 2) setTimeout(function () { open(false); }, 900);
 });
