@@ -1,39 +1,35 @@
 ---
-// Pop-ups. Right now there is one: the newsletter card (1A on the pop-up options board).
+// Pop-ups. This one is the In the Loop newsletter pop-up: a quiet corner card on computers (1B) and a bottom sheet on phones (1D) on the pop-up options board.
+// The create account pop-up lives in AccountPopup.astro.
 // It is switched off in src/config.ts. To preview it on any page add ?popup=newsletter to the address.
 // To see how it behaves for a real visitor on your own device, add ?popup=on once (and ?popup=off to stop). ?popup=reset clears what this device remembers.
 import '../styles/popups.css';
+import AccountPopup from './AccountPopup.astro';
 import { config } from '../config';
 import { url } from '../lib/data';
 const enabled = !!config.popups.enabled;
 ---
 <div class="tl-popups" id="pop-root">
-  <div class="pop-back" id="pop-nl" hidden>
-    <div class="pop-card" id="pop-nl-card" role="dialog" aria-modal="true" aria-labelledby="pop-nl-title" aria-describedby="pop-nl-desc" tabindex="-1">
-      <div class="pop-side">
-        {config.mark && <img src={url(config.mark)} alt="" width="54" height="54" />}
-        <div>
-          <p class="pop-big">Houston,<br />every Monday.</p>
-          <p class="pop-kick">IN THE LOOP</p>
-        </div>
-      </div>
-      <div class="pop-main">
-        <button type="button" class="pop-x" id="pop-nl-x" aria-label="Close"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
-        <p class="eyebrow">Free newsletter</p>
-        <h2 id="pop-nl-title">What Is Opening, What Is Happening, Where to Eat</h2>
-        <p class="pop-lede" id="pop-nl-desc">A short email each Monday about the neighborhoods you care about.</p>
-        <form class="pop-form" id="pop-nl-form" action={config.newsletterAction} method="post">
-          <div class="pop-field"><label for="pop-nl-email">Email</label><input id="pop-nl-email" name="email" type="email" required placeholder="name@email.com" autocomplete="email" /></div>
-          <input class="pop-hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
-          <input type="hidden" name="return" id="pop-nl-return" />
-          <button type="submit" class="btn gold" id="pop-nl-join">Join</button>
-        </form>
-        <p class="pop-fine">Free, and one click to leave. We never sell your email.</p>
-        <div><button type="button" class="pop-no" id="pop-nl-no">No thanks</button></div>
-      </div>
-    </div>
-  </div>
-  <div class="pop-toast" id="pop-toast" role="status" hidden>
+  <div class="pop-back pop-nl-back" id="pop-nl" hidden>
+<div class="pop-nl-card" id="pop-nl-card" role="dialog" aria-modal="false" aria-labelledby="pop-nl-title" aria-describedby="pop-nl-desc" tabindex="-1">
+<div class="pop-grab" aria-hidden="true"></div>
+<button type="button" class="pop-x" id="pop-nl-x" aria-label="Close"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
+<div class="pop-main">
+<p class="eyebrow">In the Loop</p>
+<h2 id="pop-nl-title">Houston, Every Monday</h2>
+<p class="pop-lede" id="pop-nl-desc"><span class="pop-d">Free, short, and about your neighborhoods.</span><span class="pop-m">What is opening, what is happening, where to eat. Free.</span></p>
+<form class="pop-form" id="pop-nl-form" action={config.newsletterAction} method="post">
+<div class="pop-field"><label for="pop-nl-email">Email</label><input id="pop-nl-email" name="email" type="email" required placeholder="name@email.com" autocomplete="email" /></div>
+<input class="pop-hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+<input type="hidden" name="return" id="pop-nl-return" />
+<button type="submit" class="btn gold" id="pop-nl-join">Join</button>
+</form>
+<p class="pop-fine">Free, and one click to leave. We never sell your email.</p>
+<div class="pop-no-wrap"><button type="button" class="pop-no" id="pop-nl-no">No thanks</button></div>
+</div>
+</div>
+</div>
+<div class="pop-toast" id="pop-toast" role="status" hidden>
     <span id="pop-toast-t"></span>
     <button type="button" class="pop-tx" id="pop-toast-x" aria-label="Close"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg></button>
   </div>
@@ -69,18 +65,20 @@ const enabled = !!config.popups.enabled;
       }
     }
 
-    var lastFocus = null, prevOverflow = '';
+    var lastFocus = null, prevOverflow = '', locked = false;
+function narrow() { return window.innerWidth < 701; }
     function open(real) {
       lastFocus = document.activeElement;
       $('pop-nl-return').value = location.origin + location.pathname;
-      back.hidden = false;
-      prevOverflow = document.documentElement.style.overflow; document.documentElement.style.overflow = 'hidden';
+      card.setAttribute('aria-modal', narrow() ? 'true' : 'false');
+back.hidden = false;
+if (narrow()) { prevOverflow = document.documentElement.style.overflow; document.documentElement.style.overflow = 'hidden'; locked = true; }
       if (real) { var m = mem(); m.nl = m.nl || {}; m.nl.shown = Date.now(); save(m); ss(SHOWN, '1'); }
-      try { email.focus(); } catch (e) {}
+      try { card.focus({ preventScroll: true }); } catch (e) {}
     }
     function close(why) {
       if (back.hidden) return;
-      back.hidden = true; document.documentElement.style.overflow = prevOverflow;
+      back.hidden = true; if (locked) { document.documentElement.style.overflow = prevOverflow; locked = false; }
       if (!forced) { var m = mem(); m.nl = m.nl || {}; m.nl.closed = Date.now(); m.nl.how = why; save(m); }
       try { if (lastFocus && lastFocus.focus) lastFocus.focus(); } catch (e) {}
     }
@@ -88,9 +86,10 @@ const enabled = !!config.popups.enabled;
     $('pop-nl-no').addEventListener('click', function () { close('no'); });
     back.addEventListener('mousedown', function (e) { if (e.target === back) close('outside'); });
     $('pop-nl-form').addEventListener('submit', function () { ss(FROM, 'pop'); var b = $('pop-nl-join'); setTimeout(function () { b.disabled = true; b.textContent = 'Joining'; }, 0); });
-    back.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { e.preventDefault(); close('esc'); return; }
-      if (e.key !== 'Tab') return;
+    document.addEventListener('keydown', function (e) {
+if (back.hidden) return;
+if (e.key === 'Escape') { e.preventDefault(); close('esc'); return; }
+      if (e.key !== 'Tab' || !narrow()) return;
       var f = [].slice.call(card.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]):not([tabindex="-1"]):not([type="hidden"]), select, textarea')).filter(function (x) { return !x.closest('[hidden]'); });
       if (!f.length) return;
       var first = f[0], last = f[f.length - 1], cur = document.activeElement;
@@ -106,6 +105,7 @@ const enabled = !!config.popups.enabled;
       if (document.visibilityState && document.visibilityState !== 'visible') return true;
       var h = document.querySelector('header.top'); if (h && h.classList.contains('open')) return true;
       if (document.querySelector('.tt-cal.open')) return true;
+var ap = $('ap-back'); if (ap && !ap.hidden) return true;
       return false;
     }
     function attempt(tries) {
@@ -117,8 +117,8 @@ const enabled = !!config.popups.enabled;
     if (!on || back_) return;
     var m = mem(); if (m.nl && (m.nl.joined || m.nl.shown)) return;
     if (ss(SHOWN) || skip.test(location.pathname)) return;
-    if (window.innerWidth < 761) return; // the phone version comes next
     var pv = (parseInt(ss(PV), 10) || 0) + 1; ss(PV, String(pv));
     setTimeout(function () { attempt(0); }, pv >= 2 ? 8000 : 45000);
   })();
 </script>
+<AccountPopup />
