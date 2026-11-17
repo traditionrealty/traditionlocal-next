@@ -1,6 +1,7 @@
 ---
 // Pop-ups. This one is the In the Loop newsletter pop-up: a quiet corner card on computers (1B) and a bottom sheet on phones (1D) on the pop-up options board.
 // The create account pop-up lives in AccountPopup.astro.
+// In the Loop comes back every three hours for anyone who has not joined (the join is remembered on this device, including from the header button and the Newsletters page).
 // It is switched off in src/config.ts. To preview it on any page add ?popup=newsletter to the address.
 // To see how it behaves for a real visitor on your own device, add ?popup=on once (and ?popup=off to stop). ?popup=reset clears what this device remembers.
 import '../styles/popups.css';
@@ -108,8 +109,8 @@ if (e.key === 'Escape') { e.preventDefault(); close('esc'); return; }
 var ap = $('ap-back'); if (ap && !ap.hidden) return true;
       return false;
     }
-    // One pop-up at a time: nothing new within three days of the last one (the create account pop-up stamps the same time).
-function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 3 * 864e5; }
+    // One pop-up at a time: nothing new within thirty minutes of the last one (the create account pop-up stamps the same time).
+function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t && Date.now() - t < 30 * 6e4; }
 function attempt(tries) {
 if (ss(SHOWN) || gapRecent()) return;
       if (busy()) { if (tries < 6) setTimeout(function () { attempt(tries + 1); }, 5000); return; }
@@ -117,7 +118,9 @@ if (ss(SHOWN) || gapRecent()) return;
     }
     if (forced) { setTimeout(function () { open(false); }, 600); return; }
     if (!on || back_) return;
-    var m = mem(); if (m.nl && (m.nl.joined || m.nl.shown)) return;
+    var m = mem(); if (m.nl && m.nl.joined) return; // anyone who joined never sees it again
+var lastNl = m.nl ? Math.max(m.nl.shown || 0, m.nl.closed || 0) : 0;
+if (lastNl && Date.now() - lastNl < 3 * 36e5) return; // not joined yet: ask again every three hours
     if (ss(SHOWN) || skip.test(location.pathname)) return;
     var pv = (parseInt(ss(PV), 10) || 0) + 1; ss(PV, String(pv));
     setTimeout(function () { attempt(0); }, pv >= 2 ? 8000 : 45000);
