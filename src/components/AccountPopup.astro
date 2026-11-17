@@ -1,0 +1,138 @@
+---
+// The create account pop-up (the 2B design): a split card on computers, a bottom sheet on phones.
+// It opens after a signed out visitor saves a second place, once every 30 days at most, and only when config.popups.enabled is true.
+// To try it on your own device: add ?popup=account to any page address. ?popup=reset forgets that it was closed.
+import '../styles/account-popup.css';
+import { config } from '../config';
+import { url } from '../lib/data';
+const P = { on: !!(config.popups && config.popups.enabled), account: url('/account'), signin: url('/sign-in'), mark: config.mark };
+---
+<div class="tl-popups" id="ap-root">
+<div class="pop-back ap-back" id="ap-back" hidden>
+<div class="ap-card" id="ap-card" role="dialog" aria-modal="true" aria-labelledby="ap-h" aria-describedby="ap-d" tabindex="-1">
+<div class="ap-grab" aria-hidden="true"></div>
+<button type="button" class="pop-x" id="ap-x" aria-label="Close"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<div class="ap-info">
+<div class="ap-lock" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg></div>
+<p class="eyebrow ap-eyebrow">Free account</p>
+<h2 id="ap-h"><span class="ap-h-d">Our Short List, Saved Places, and More</span><span class="ap-h-m">Members See Our Short List</span></h2>
+<ul class="ap-list" id="ap-d">
+<li>Our Short List, with why we call them</li>
+<li>Contact details for every pro</li>
+<li>Saved places on every device</li>
+</ul>
+<div class="ap-m-actions">
+<button type="button" class="btn" id="ap-m-create">Create a free account</button>
+<a class="btn line" id="ap-m-signin" href={P.signin}>Sign in</a>
+</div>
+</div>
+<div class="ap-main">
+<form class="ap-form" id="ap-form" novalidate>
+<h3>Create Your Account</h3>
+<div class="ap-note err" id="ap-note" role="alert" hidden></div>
+<div class="ap-field"><label for="ap-first">First name</label><input id="ap-first" name="first_name" type="text" autocomplete="given-name" /></div>
+<div class="ap-field"><label for="ap-email">Email</label><input id="ap-email" name="email" type="email" autocomplete="email" inputmode="email" /></div>
+<div class="ap-field"><label for="ap-pass">Password</label><input id="ap-pass" name="password" type="password" autocomplete="new-password" placeholder="At least 8 characters" /></div>
+<input class="pop-hp" type="text" name="company" tabindex="-1" autocomplete="off" aria-hidden="true" />
+<button class="btn" type="submit" id="ap-go">Create my account</button>
+<p class="ap-fine">It is free. We never sell your information, and we will email you a link to confirm your address.</p>
+<a class="btn line" id="ap-signin" href={P.signin}>I already have an account, sign in</a>
+</form>
+<div class="ap-done" id="ap-done" hidden>
+<h3 id="ap-done-h" tabindex="-1">Check your email</h3>
+<p id="ap-done-t"></p>
+<button type="button" class="btn line" id="ap-done-x">Close</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script is:inline define:vars={{ P }}>
+(function () {
+var back = document.getElementById('ap-back'); if (!back) return;
+var card = document.getElementById('ap-card'), form = document.getElementById('ap-form'), note = document.getElementById('ap-note');
+var done = document.getElementById('ap-done'), doneT = document.getElementById('ap-done-t'), go = document.getElementById('ap-go');
+var KEY = 'tl_ap_seen', MEM = 'tl_member', shown = false, last = null;
+function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
+var q = ''; try { q = new URLSearchParams(location.search).get('popup') || ''; } catch (e) {}
+if (q === 'reset') ls(KEY, null);
+var base = P.account.replace(/\/account\/?$/, ''), path = location.pathname;
+if (base && path.indexOf(base) === 0) path = path.slice(base.length) || '/';
+var skip = /^\/(sign-in|account|newsletters|privacy|disclosures|contact|ask-dillon|404)(\/|$)/.test(path);
+function signedIn() { return !!(window.TL && window.TL.signedIn && window.TL.signedIn()); }
+function member() { if (signedIn()) ls(MEM, '1'); return ls(MEM) === '1'; }
+function otherOpen() { var n = document.getElementById('pop-nl'); return !!(n && !n.hidden); }
+function recent() { var t = parseInt(ls(KEY) || '0', 10) || 0; return t && Date.now() - t < 30 * 864e5; }
+function say(t) { note.textContent = t || ''; note.hidden = !t; }
+function busy(on) { go.disabled = on; if (on) { go.dataset.t = go.textContent; go.textContent = 'One moment'; } else if (go.dataset.t) go.textContent = go.dataset.t; }
+function friendly(err) {
+var c = String((err && err.code) || ''), m = String((err && err.message) || '');
+if (c === 'weak_password' || /at least|weak/i.test(m)) return 'Please choose a stronger password, with at least 8 characters.';
+if (/rate|too many|over_/i.test(c + ' ' + m)) return 'Too many tries. Please wait a few minutes and try again.';
+if (c === 'signup_disabled') return 'New accounts are paused right now. Please try again later.';
+return 'Something went wrong. Please try again, or contact us if it keeps happening.';
+}
+function focusables() { return Array.prototype.filter.call(card.querySelectorAll('button, a[href], input:not(.pop-hp), select, textarea'), function (el) { return !el.disabled && el.offsetParent !== null; }); }
+function open(force) {
+if (!back.hidden) return;
+if (!force && (shown || member() || recent() || skip || otherOpen())) return;
+shown = true; last = document.activeElement;
+var nx = P.signin + '?next=' + encodeURIComponent(location.pathname);
+document.getElementById('ap-signin').href = nx; document.getElementById('ap-m-signin').href = nx;
+if (window.innerWidth < 701) card.classList.add('ap-intro'); else card.classList.remove('ap-intro');
+ls('tl_pop_last', String(Date.now()));
+back.hidden = false; document.documentElement.style.overflow = 'hidden';
+var narrow = window.innerWidth < 701;
+setTimeout(function () { var f = document.getElementById('ap-first'); if (!narrow && f) f.focus(); else card.focus(); }, 30);
+}
+function close(remember) {
+if (back.hidden) return;
+back.hidden = true; document.documentElement.style.overflow = '';
+if (remember) ls(KEY, String(Date.now()));
+if (last && last.focus) { try { last.focus(); } catch (e) {} }
+}
+document.getElementById('ap-m-create').addEventListener('click', function () { card.classList.remove('ap-intro'); var f = document.getElementById('ap-first'); if (f) f.focus(); });
+document.getElementById('ap-x').addEventListener('click', function () { close(true); });
+document.getElementById('ap-done-x').addEventListener('click', function () { close(true); });
+back.addEventListener('mousedown', function (e) { if (e.target === back) close(true); });
+document.addEventListener('keydown', function (e) {
+if (back.hidden) return;
+if (e.key === 'Escape') { close(true); return; }
+if (e.key !== 'Tab') return;
+var f = focusables(); if (!f.length) return;
+var a = document.activeElement, i = f.indexOf(a);
+if (e.shiftKey && (i <= 0 || a === card)) { e.preventDefault(); f[f.length - 1].focus(); }
+else if (!e.shiftKey && (i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+});
+form.addEventListener('submit', function (e) {
+e.preventDefault(); say('');
+var el = form.elements;
+if (el.company && el.company.value) return;
+var first = el.first_name.value.trim(), email = el.email.value.trim(), pass = el.password.value;
+if (!first) { say('Please tell us your first name.'); el.first_name.focus(); return; }
+if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { say('Please check your email address.'); el.email.focus(); return; }
+if (pass.length < 8) { say('Please use at least 8 characters for your password.'); el.password.focus(); return; }
+if (!window.TLSb) { say(friendly(null)); return; }
+busy(true);
+window.TLSb.get(function (c) {
+if (!c) { busy(false); say(friendly(null)); return; }
+c.auth.signUp({ email: email, password: pass, options: { emailRedirectTo: location.origin + P.account, data: { first_name: first, last_name: '', area_of_interest: '' } } }).then(function (r) {
+busy(false);
+if (r && r.error) { say(friendly(r.error)); return; }
+if (r && r.data && r.data.session) { ls(MEM, '1'); location.href = P.account; return; }
+el.password.value = ''; ls(KEY, String(Date.now())); ls(MEM, '1');
+doneT.textContent = 'We sent a link to ' + email + '. Open it to finish creating your account. If you already have an account, use Sign in instead. Your saved places come with you.';
+form.hidden = true; done.hidden = false; document.getElementById('ap-done-h').focus();
+}, function () { busy(false); say(friendly(null)); });
+});
+});
+document.addEventListener('tl:saved', function () {
+if (!P.on) return;
+var n = (window.TL && window.TL.saved && window.TL.saved().length) || 0;
+if (n >= 2) setTimeout(function () { open(false); }, 900);
+});
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', member); else member();
+window.TLAccountPopup = { open: function () { open(true); }, close: function () { close(false); } };
+if (q === 'account') setTimeout(function () { open(true); }, 400);
+})();
+</script>
