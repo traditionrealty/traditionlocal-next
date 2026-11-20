@@ -11,19 +11,26 @@ const sbRef = new URL(config.supabase.url).hostname.split('.')[0];
     function raw(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
     var UID = 'tl_sync_uid', SNAP = 'tl_sync_snap', AT = 'tl_sync_at';
     function me() { try { var t = JSON.parse(localStorage.getItem('sb-' + sbRef + '-auth-token')); return t && t.user && t.user.id && (t.access_token || t.refresh_token) ? String(t.user.id) : ''; } catch (e) { return ''; } }
-    function mine() { var a = g('tl_area', ''); return { saved_places: g('tl_saved', []), followed_areas: g('tl_follows', []), home_area: typeof a === 'string' ? a : '' }; }
-    function snapOf(o) { return JSON.stringify([o.saved_places || [], o.followed_areas || [], o.home_area || '']); }
+    function mine() { var a = g('tl_area', ''); return { saved_places: g('tl_saved', []), followed_areas: g('tl_follows', []), home_area: typeof a === 'string' ? a : '', going_events: g('tl_going', []), interested_events: g('tl_interested', []) }; }
+    function snapOf(o) { return JSON.stringify([o.saved_places || [], o.followed_areas || [], o.home_area || '', o.going_events || [], o.interested_events || []]); }
+    // Going and Interested need supabase/member_events.sql. Until it has been run, they stay on this device and the rest syncs as before.
+    function evOn() { try { return sessionStorage.getItem('tl_ev_off') !== '1'; } catch (e) { return true; } }
+    function evOff() { try { sessionStorage.setItem('tl_ev_off', '1'); } catch (e) {} }
     function clean(a, n) { return (Array.isArray(a) ? a : []).filter(function (x) { return typeof x === 'string' && x && x.length <= 120; }).slice(0, n); }
     function union(a, b, n) { var out = clean(a, n); clean(b, n).forEach(function (x) { if (out.indexOf(x) < 0 && out.length < n) out.push(x); }); return out; }
     function tell(name) { try { document.dispatchEvent(new Event(name)); } catch (e) {} }
     // The account is the master copy once a device has synced. This takes what the account has and makes it this device's copy.
     function apply(o) {
       s('tl_saved', clean(o.saved_places, 500)); s('tl_follows', clean(o.followed_areas, 100)); s('tl_area', String(o.home_area || '').slice(0, 80));
+      if (Array.isArray(o.going_events)) s('tl_going', clean(o.going_events, 200)); if (Array.isArray(o.interested_events)) s('tl_interested', clean(o.interested_events, 200));
       raw(SNAP, snapOf(mine())); tell('tl:repaint'); tell('tl:saved'); tell('tl:pulled'); tell('tl:synced');
     }
     function push(c, id, done) {
       var m = mine();
-      c.from('profiles').update({ saved_places: clean(m.saved_places, 500), followed_areas: clean(m.followed_areas, 100), home_area: m.home_area ? m.home_area.slice(0, 80) : null }).eq('id', id).then(function (r) {
+      var row = { saved_places: clean(m.saved_places, 500), followed_areas: clean(m.followed_areas, 100), home_area: m.home_area ? m.home_area.slice(0, 80) : null };
+      var withEv = evOn(); if (withEv) { row.going_events = clean(m.going_events, 200); row.interested_events = clean(m.interested_events, 200); }
+      c.from('profiles').update(row).eq('id', id).then(function (r) {
+        if (r && r.error && withEv) { evOff(); push(c, id, done); return; }
         if (!r || r.error) { if (done) done(false); return; }
         raw(UID, id); raw(SNAP, snapOf(m)); tell('tl:synced'); if (done) done(true);
       }, function () { if (done) done(false); });
@@ -32,13 +39,15 @@ const sbRef = new URL(config.supabase.url).hostname.split('.')[0];
       var id = me(); if (!id || !window.TLSb) return;
       window.TLSb.get(function (c) {
         if (!c) return;
-        c.from('profiles').select('saved_places,followed_areas,home_area').eq('id', id).maybeSingle().then(function (r) {
+        var withEv = evOn();
+        c.from('profiles').select('saved_places,followed_areas,home_area' + (withEv ? ',going_events,interested_events' : '')).eq('id', id).maybeSingle().then(function (r) {
+          if (r && r.error && withEv) { evOff(); run(); return; }
           if (!r || r.error || !r.data) return; // not set up yet, or no member row: everything stays on this device
           try { sessionStorage.setItem(AT, String(Date.now())); } catch (e) {}
           var acc = r.data, prev = raw(UID), now = mine();
           if (prev && prev !== id) { apply(acc); raw(UID, id); return; } // another member's lists were on this device: use this member's
           if (!prev) { // first time on this device: keep what is here and what is in the account
-            apply({ saved_places: union(acc.saved_places, now.saved_places, 500), followed_areas: union(acc.followed_areas, now.followed_areas, 100), home_area: now.home_area || acc.home_area || '' });
+            apply({ saved_places: union(acc.saved_places, now.saved_places, 500), followed_areas: union(acc.followed_areas, now.followed_areas, 100), home_area: now.home_area || acc.home_area || '', going_events: Array.isArray(acc.going_events) ? union(acc.going_events, now.going_events, 200) : undefined, interested_events: Array.isArray(acc.interested_events) ? union(acc.interested_events, now.interested_events, 200) : undefined });
             push(c, id); return;
           }
           if (snapOf(now) !== raw(SNAP)) { push(c, id); return; } // changed on this device since the last sync, on any page
@@ -64,6 +73,12 @@ const sbRef = new URL(config.supabase.url).hostname.split('.')[0];
       follows: function () { return g('tl_follows', []); }, setFollows: function (a) { s('tl_follows', a); later(); },
       saved: function () { return g('tl_saved', []); },
       toggleSaved: function (slug) { var a = g('tl_saved', []), i = a.indexOf(slug); if (i > -1) a.splice(i, 1); else a.push(slug); s('tl_saved', a); later(); return i < 0; },
+      eventState: function (slug) { return g('tl_going', []).indexOf(slug) > -1 ? 'going' : g('tl_interested', []).indexOf(slug) > -1 ? 'interested' : ''; },
+      setEvent: function (slug, st) {
+        var go = g('tl_going', []).filter(function (x) { return x !== slug; }), it = g('tl_interested', []).filter(function (x) { return x !== slug; });
+        if (st === 'going') go.push(slug); else if (st === 'interested') it.push(slug);
+        s('tl_going', go); s('tl_interested', it); later(); tell('tl:events');
+      },
       signedIn: function () { return !!me(); },
       sync: function (force) { start(force !== false); },
       pushNow: function (done) { var id = me(); if (!id || !window.TLSb) { if (done) done(false); return; } window.TLSb.get(function (c) { if (!c) { if (done) done(false); return; } push(c, id, done); }); }
@@ -80,6 +95,17 @@ const sbRef = new URL(config.supabase.url).hostname.split('.')[0];
         b.setAttribute('aria-label', (on ? 'Remove ' : 'Save ') + (b.dataset.name || 'place') + (on ? ' from saved' : ''));
       });
     }
+    function paintEv() {
+      document.querySelectorAll('.ev-btn').forEach(function (b) {
+        var on = TL.eventState(b.dataset.ev) === b.dataset.kind;
+        b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    }
+    document.addEventListener('click', function (e) {
+      var v = e.target.closest && e.target.closest('.ev-btn');
+      if (v) { e.preventDefault(); if (v.dataset.panel && v.dataset.kind === 'going' && TL.eventState(v.dataset.ev) !== 'going') { document.dispatchEvent(new CustomEvent('tl:rsvp-open')); return; } TL.setEvent(v.dataset.ev, TL.eventState(v.dataset.ev) === v.dataset.kind ? '' : v.dataset.kind); paintEv(); return; }
+    });
+    document.addEventListener('tl:events', paintEv); document.addEventListener('tl:repaint', paintEv); document.addEventListener('tl:pulled', paintEv); paintEv();
     document.addEventListener('click', function (e) {
       var b = e.target.closest && e.target.closest('.save, .save-btn'); if (!b) return;
       e.preventDefault(); TL.toggleSaved(b.dataset.slug); paint(); document.dispatchEvent(new Event('tl:saved'));
