@@ -19,8 +19,9 @@ const toDate = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec
 const pad = (n: number) => String(n).padStart(2, '0');
 const iso = (d: Date) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 const evs = events().map((e) => { const a = toDate(e.starts), b = toDate(e.ends || e.starts), pl = venuePlace(e); return a && b && pl && pl.area ? { t: e.title, s: iso(a), f: iso(b), u: href(e), a: pl.area, v: pl.name } : null; }).filter(Boolean);
+const allEv = events().map((e) => { const a = toDate(e.starts), b = toDate(e.ends || e.starts), pl = venuePlace(e); return a && b ? { s: e.slug, t: e.title, f: iso(a), l: iso(b), u: href(e), v: pl ? pl.name : (e.venue || e.profile || '') } : null; }).filter(Boolean);
 const latest = issues.length ? { title: issues[0].title, date: issues[0].date, preview: issues[0].preview || '', u: url('/newsletters/' + issues[0].slug) } : null;
-const U = { settings: url('/account/settings'), locally: url('/locally'), food: url('/food'), news: url('/newsletters') };
+const U = { settings: url('/account/settings'), locally: url('/locally'), food: url('/food'), news: url('/newsletters'), things: url('/things-to-do') };
 const pin = '<path d="M12 21s-7-6.2-7-11a7 7 0 0114 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/>';
 const house = '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>';
 ---
@@ -47,6 +48,8 @@ const house = '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>';
 </div>
 </section>
 
+<section class="ah-card ah-events" id="events" aria-label="Your events"><div class="ah-ch"><h2>Your events</h2><a href={U.things}>Find events</a></div><div class="ah-evcols"><div><h3 class="ah-evh">Going</h3><div id="ah-going"></div></div><div><h3 class="ah-evh">Interested</h3><div id="ah-interested"></div></div></div></section>
+
 <div class="ah-two">
 <section class="ah-card" id="saved" aria-label="Saved list"><div class="ah-ch"><h2>Saved list</h2><a href={U.settings + '#saved'} id="ah-sall" hidden>Open full list</a></div><div id="ah-slist"></div><div class="ah-cf"><button class="ah-btn line" id="ah-mail" type="button">Email my list</button><a href={U.food} class="ah-more">Find more places</a></div></section>
 <section class="ah-card" id="follow" aria-label="Places you follow"><div class="ah-ch"><h2>Places you follow</h2><a href={U.settings + '#areas'}>Manage</a></div><div class="ah-chips" id="ah-chips"></div>
@@ -63,7 +66,7 @@ const house = '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>';
 </div></div>
 
 <Prefs />
-<script is:inline define:vars={{ FOOD: food, GUIDES: guides, EVENTS: evs, INDEX: index, U: U }}>
+<script is:inline define:vars={{ FOOD: food, GUIDES: guides, EVENTS: evs, ALLEV: allEv, INDEX: index, U: U }}>
 (function () {
 var TLD = window.TL, $ = function (id) { return document.getElementById(id); };
 function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
@@ -93,6 +96,14 @@ var s = TLD.saved(), rows = s.map(function (slug) { return INDEX.filter(function
 $('ah-slist').innerHTML = rows.length ? rows.slice(0, 6).map(function (x) { return '<div class="ah-srow"><a href="' + esc(x.u) + '">' + esc(x.n) + '</a>' + (x.x ? ' <span class="ah-closed">Closed</span>' : '') + '<span>' + esc(x.c) + '</span></div>'; }).join('') : '<div class="ah-srow"><span>Nothing saved yet. Tap the heart on any place to add it here.</span></div>';
 $('ah-sall').hidden = rows.length <= 6;
 }
+var MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function evWhen(e) { var a = e.f.split('-'), b = e.l.split('-'), x = MON[+a[1] - 1] + ' ' + (+a[2]); return e.f === e.l ? x : x + ' to ' + MON[+b[1] - 1] + ' ' + (+b[2]); }
+function evList(slugs, box, none) {
+var t = iso(new Date()), rows = slugs.map(function (sl) { return ALLEV.filter(function (x) { return x.s === sl; })[0]; }).filter(function (e) { return e && e.l >= t; }).sort(function (x, y) { return x.f < y.f ? -1 : 1; });
+$(box).innerHTML = rows.length ? rows.slice(0, 6).map(function (e) { return '<div class="ah-srow"><div><a href="' + esc(e.u) + '">' + esc(e.t) + '</a><span class="ah-evm">' + esc(evWhen(e) + (e.v ? ', ' + e.v : '')) + '</span></div><button class="ah-evx" type="button" data-s="' + esc(e.s) + '" aria-label="Remove ' + esc(e.t) + '">&times;</button></div>'; }).join('') : '<div class="ah-srow"><span>' + none + '</span></div>';
+}
+function evs2() { evList(TLD.get('tl_going', []), 'ah-going', 'No events yet. Tap Going on an event page.'); evList(TLD.get('tl_interested', []), 'ah-interested', 'No events yet. Tap Interested on an event page.'); }
+$('events').addEventListener('click', function (e) { var b = e.target.closest('.ah-evx'); if (!b) return; TLD.setEvent(b.dataset.s, ''); evs2(); });
 function chips() {
 var f = TLD.follows();
 $('ah-chips').innerHTML = f.length ? f.map(function (a) { return '<button class="ah-chip" data-a="' + esc(a) + '" type="button" title="Unfollow">' + esc(a) + ' &times;</button>'; }).join('') : '<span class="ah-none">You are not following any areas yet.</span>';
@@ -113,8 +124,8 @@ $('ah-av').textContent = name ? name.charAt(0).toUpperCase() : 'T';
 var first = '';
 try { var u = JSON.parse(localStorage.getItem('tl_user') || 'null'); if (u) first = u.first_name || (u.name ? String(u.name).split(' ')[0] : ''); } catch (e) {}
 greet(first);
-document.addEventListener('tl:pulled', function () { picks(); saved(); chips(); });
-picks(); saved(); chips();
+document.addEventListener('tl:pulled', function () { picks(); saved(); chips(); evs2(); });
+picks(); saved(); chips(); evs2();
 if (TLD.sync) TLD.sync(true);
 window.__ahGreet = greet;
 })();
@@ -207,6 +218,13 @@ deferred.userChoice.then(function () { deferred = null; btn.hidden = true; });
 .ah-ch h2 { margin: 0; font-size: 24px; }
 .ah-ch a { font-size: 14px; font-weight: 700; }
 .ah-srow { display: flex; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid #efe9d8; font-size: 15px; }
+.ah-events { flex: 0 0 auto; margin-bottom: 24px; }
+.ah-events .ah-srow > div { flex: 1; min-width: 0; }
+.ah-evcols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+.ah-evh { font-size: 13px; letter-spacing: .12em; text-transform: uppercase; color: #1E7A43; margin: 0 0 4px; font-family: inherit; font-weight: 700; }
+.ah-srow .ah-evm { display: block; text-align: left; font-size: 14px; color: #5a5880; font-weight: 400; }
+.ah-evx { border: 0; background: none; font-size: 22px; line-height: 1; color: #5a5880; cursor: pointer; min-width: 44px; min-height: 44px; }
+@media (max-width: 700px) { .ah-evcols { grid-template-columns: 1fr; gap: 12px; } }
 .ah-srow:last-child { border-bottom: 0; }
 .ah-srow a { font-weight: 700; text-decoration: none; }
 .ah-srow span { color: #4a4870; text-align: right; }
