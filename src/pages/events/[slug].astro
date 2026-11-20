@@ -1,5 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
+import Prefs from '../../components/Prefs.astro';
 import '../../styles/pages.css';
 import { events, upcomingEvents, href, media, eventDates, dateText, url } from '../../lib/data';
 import { venuePlace, to12, timeRange } from '../../lib/helpers';
@@ -13,6 +14,16 @@ const dates = e.starts && e.ends && e.ends !== e.starts ? `${dateText(e.starts)}
 const where = place ? place.name : e.venue || e.profile;
 const more = upcomingEvents(8).filter((x) => x.slug !== e.slug).slice(0, 3);
 const rsvp = hostsRsvp(e);
+// A long sponsor credit moves under the title so the title can stay on one line.
+const tm = /^(.*?)\s+(presented by|brought to you by|sponsored by)\s+(.+)$/i.exec(e.title);
+const mainTitle = tm ? tm[1] : e.title, credit = tm ? tm[2].charAt(0).toUpperCase() + tm[2].slice(1) + ' ' + tm[3] : '';
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], DOW = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+const toD = (v: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(v || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; };
+const da = toD(e.starts), db = toD(e.ends || e.starts), range = !!(da && db && +da !== +db);
+const free = /^free\b/i.test(e.cost || '');
+const vh = /visithoustontexas\.com/i.test(e.eventLink || '');
+const paras = (e.body || '').split(/\n+/).map((t) => t.trim()).filter((t) => t && !/^\*?note:/i.test(t) && !/^(venue|address|date|time|when|where)\s*:/i.test(t));
+const mapUrl = e.address ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent([where, e.address, e.city, e.zip].filter(Boolean).join(' ')) : '';
 const rsvpUrl = String(config.newsletterAction).replace(/\/$/, '') + '/rsvp';
 const when = [dates, to12(e.startTime)].filter(Boolean).join(', ');
 const loc = e.address && where && e.address.toLowerCase().indexOf(where.toLowerCase()) === 0 ? e.address : [where, e.address].filter(Boolean).join(', ');
@@ -21,29 +32,33 @@ const pageTitle = e.starts && events().filter((x) => x.title === e.title).length
 ---
 <Base title={pageTitle} description={e.summary} active="Things to Do">
   <section class="band hero">
-    <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
-      <div style="grid-column:span 8">
-        <p class="meta" style="margin-bottom:12px"><a href={url('/things-to-do')} style="font-weight:700">Things to do</a> &rsaquo; {e.eventType || 'Event'}</p>
-        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap"><span class="tag">{e.eventType || 'Event'}</span><span class="tag soft">{eventDates(e)}</span></div>
-        <h1 style="margin-bottom:16px">{e.title}</h1>
-        {e.summary && <p class="lead" style="margin-bottom:28px">{e.summary}</p>}
-        <div style="display:flex;gap:12px;flex-wrap:wrap">{e.eventLink && <a class="btn" href={e.eventLink} rel="noopener">Visit {web}</a>}<button class="btn line" id="ics">Add to calendar</button></div>
-      </div>
-      <div style="grid-column:span 4">{m ? <img class="photo" style="height:300px;border-radius:16px" src={m.src} alt={m.alt} /> : <div class="ph" style="height:300px;border-radius:16px">Event image</div>}</div>
-    </div>
-  </section>
-  <section class="band">
     <div class="wrap">
-      <p class="eyebrow">The details</p><h2 style="margin-bottom:28px">Plan Your Visit</h2>
-      <div class="grid g3">
-        <div class="card pad"><p class="eyebrow">When</p><p style="font-size:20px;font-weight:700">{dates}</p>{(e.startTime || e.endTime) && <p class="meta" style="margin-top:6px">{timeRange(e.startTime, e.endTime)}</p>}</div>
-        <div class="card pad"><p class="eyebrow">Where</p>{where ? <p style="font-size:20px;font-weight:700">{place ? <a href={href(place)}>{place.name}</a> : where}</p> : <p class="meta">Location coming soon.</p>}{e.address && <p class="meta" style="margin-top:6px">{e.address}</p>}</div>
-        <div class="card pad"><p class="eyebrow">Cost</p><p style="font-size:20px;font-weight:700">{e.cost || 'Check the event site'}</p></div>
+      <p class="meta" style="margin-bottom:12px"><a href={url('/things-to-do')} style="font-weight:700">Things to do</a> &rsaquo; Events</p>
+      <h1 id="ev-title" class="ev-title" style={credit ? 'margin-bottom:6px' : 'margin-bottom:12px'} title={e.title}>{mainTitle}</h1>
+      {credit && <p class="ev-credit">{credit}</p>}
+      {e.summary && <p class="lead" style="margin-bottom:24px;max-width:70ch">{e.summary}</p>}
+      <div class="hub">
+        <div class="hub-d" aria-label={dates}>
+          {da && !range && <><span>{DOW[da.getDay()]}</span><b>{da.getDate()}</b><span>{MON[da.getMonth()].toUpperCase()}</span></>}
+          {da && range && db && <><b class="rg">{MON[da.getMonth()].toUpperCase()} {da.getDate()}</b><span>TO</span><b class="rg">{MON[db.getMonth()].toUpperCase()} {db.getDate()}</b></>}
+          {!da && <span>DATE<br />SOON</span>}
+        </div>
+        <div class="hub-m">
+          <div class="hub-top">{!/^free$/i.test(e.eventType || '') && <span class="tag">{e.eventType || 'Event'}</span>}<span class="tag now" id="ev-now" data-starts={e.starts} data-ends={e.ends || e.starts} hidden>Happening now</span>{rsvp && <span class="hub-k">Tradition Local event</span>}</div>
+          <div class="hub-cells">
+            <div><span class="eyebrow">Time</span><b>{(e.startTime || e.endTime) ? timeRange(e.startTime, e.endTime) : 'To be announced'}</b></div>
+            {!(rsvp && !e.cost) && <div><span class="eyebrow">Cost</span><b>{e.cost ? (free ? 'Free' : e.cost) : 'Check the event site'}</b></div>}
+            <div><span class="eyebrow">Where</span><b>{where ? (place ? <a href={href(place)}>{place.name}</a> : where) : 'Coming soon'}</b></div>
+          </div>
+          <div class="hub-foot">
+            <div class="hub-where">{e.address ? <span class="meta">{e.address}{e.city ? ', ' + e.city : ''}{e.zip ? ' ' + e.zip : ''}</span> : <span class="meta">Address coming soon</span>}{mapUrl && <a href={mapUrl} rel="noopener" style="font-weight:700;font-size:14px">Get directions</a>}</div>
+            <div class="hub-act">{e.eventLink && <a class="btn" href={e.eventLink} rel="noopener">Visit {web}</a>}<span class="ev-pick" id="ev-pick" data-rsvp={rsvp ? "1" : "0"} data-slug={e.slug} role="group" aria-label="Your plans for this event">{rsvp && <button class="ev-btn" type="button" data-ev={e.slug} data-kind="going" data-panel="rsvp" aria-pressed="false">Going</button>}<button class="ev-btn" type="button" data-ev={e.slug} data-kind="interested" aria-pressed="false">Interested</button></span><button class="btn line" id="ics" hidden>Add to calendar</button></div>
+          </div>
+        </div>
       </div>
-      <p class="meta" style="margin-top:20px">Dates and prices can change, so check the event site before you go.</p>
-      {e.tags.length > 0 && <div class="chips" style="margin-top:20px">{e.tags.map((t) => <span class="chip">{t}</span>)}</div>}
+      <p class="ev-yours"><a class="ev-link" href={url('/account#events')}>See your events</a></p>
       {rsvp && (
-        <div class="card pad" id="rsvp" data-starts={e.starts} data-ends={e.ends || e.starts} style="padding:32px;margin-top:40px;max-width:760px">
+<div class="card pad ev-rsvp" id="rsvp" hidden data-starts={e.starts} data-ends={e.ends || e.starts}>
           <p class="eyebrow">RSVP</p><h3 style="margin-bottom:8px">Save Your Spot</h3>
           {e.starts ? (
             <>
@@ -68,6 +83,18 @@ const pageTitle = e.starts && events().filter((x) => x.title === e.title).length
             <p class="meta" style="font-size:16px">The date is coming soon. RSVP opens once it is set.</p>
           )}
         </div>
+      )}
+    </div>
+  </section>
+  <section class="band">
+    <div class="wrap">
+      <div class="grid g3 ev-info">
+        <div class="card pad"><p class="eyebrow">About</p><h3 style="margin-bottom:8px">About this event</h3>{paras.length > 0 ? paras.map((t) => <p style="margin-bottom:10px">{t}</p>) : <p>{e.summary}</p>}</div>
+        <div class="card pad"><p class="eyebrow">Know before you go</p><h3 style="margin-bottom:8px">Plan ahead</h3><p>Dates, times and prices come from the organizer and can change. Check the event site before you go.</p>{e.eventLink && <p style="margin-top:10px"><a href={e.eventLink} rel="noopener" style="font-weight:700">Event site</a></p>}</div>
+        {place && <div class="card pad"><p class="eyebrow">The venue</p><h3 style="margin-bottom:8px">{place.name}</h3><p>See what else is there, and what is nearby.</p><p style="margin-top:10px"><a href={href(place)} style="font-weight:700">View the {place.name} guide</a></p></div>}
+      </div>
+      {!rsvp && (
+        <p class="ev-disc">{vh ? 'Listed from Visit Houston. ' : ''}This is not a Tradition Local event. We highlight fun events across the Greater Houston area, and details come from the organizer. {e.eventLink && <a href={e.eventLink} rel="noopener">{vh ? 'See it on Visit Houston' : 'Visit the event site'}</a>}</p>
       )}
       <div class="card pad pick" style="padding:32px;margin-top:40px;max-width:760px">
         <p class="eyebrow">In the Loop</p><h3 style="margin-bottom:8px">Do Not Miss the Next One</h3>
@@ -116,13 +143,89 @@ const pageTitle = e.starts && events().filter((x) => x.title === e.title).length
           var out = await res.json(); if (!out.ok) throw new Error('rejected');
           form.hidden = true; $('rsvp-intro').hidden = true;
           var ok = $('rsvp-ok'); ok.textContent = out.duplicate ? 'You are already on the list for this event. See you there.' : 'You are on the list. Check your email for a confirmation.'; ok.hidden = false;
+          if (window.TL) { window.TL.setEvent(form.dataset.slug, 'going'); }
         } catch (err) {
           fail.textContent = 'We could not send your RSVP. Please try again in a moment, or email us at ' + form.dataset.contact + '.'; fail.hidden = false;
         } finally { btn.disabled = false; btn.textContent = 'RSVP'; }
       });
     })();
   </script>
+  <script is:inline>
+    (function () {
+      var n = document.getElementById('ev-now'); if (!n) return;
+      function d(s) { var m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s || ''); return m ? new Date(+m[3], +m[1] - 1, +m[2]) : null; }
+      var a = d(n.getAttribute('data-starts')), b = d(n.getAttribute('data-ends')) || a, t = Date.now();
+      if (a && b && t >= a.getTime() && t < b.getTime() + 86400000) n.hidden = false;
+    })();
+  </script>
+  <script is:inline>
+    // Keep the title on one line on wide screens by easing the size down, never below 28px.
+    (function () {
+      var h = document.getElementById('ev-title'); if (!h) return;
+      function fit() {
+        h.style.fontSize = ''; if (window.innerWidth <= 860) return;
+        var size = parseFloat(getComputedStyle(h).fontSize);
+        while (h.scrollWidth > h.clientWidth + 1 && size > 28) { size -= 2; h.style.fontSize = size + 'px'; }
+      }
+      fit(); window.addEventListener('resize', fit); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    })();
+  </script>
+  <script is:inline>
+    // Going opens the RSVP form under the buttons. The reader counts as Going once the RSVP is sent.
+    document.addEventListener('tl:rsvp-open', function () {
+      var c = document.getElementById('rsvp'); if (!c) return;
+      c.hidden = !c.hidden;
+      var f = document.getElementById('rsvp-first'), btn = document.querySelector('.ev-btn[data-kind=going]');
+      if (btn) { btn.classList.toggle('on', !c.hidden); btn.setAttribute('aria-expanded', c.hidden ? 'false' : 'true'); }
+      if (!c.hidden) { c.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); if (f && !f.closest('[hidden]')) f.focus({ preventScroll: true }); }
+    });
+  </script>
+  <script is:inline>
+    // Add to calendar shows once the reader has signed up. On a Tradition Local event that means Going. On any other event it means Interested.
+    (function () {
+      function sync() {
+        var box = document.getElementById('ev-pick'), ics = document.getElementById('ics'); if (!box || !ics || !window.TL) return;
+        var st = window.TL.eventState(box.dataset.slug);
+        ics.hidden = !(box.dataset.rsvp === '1' ? st === 'going' : st !== '');
+      }
+      ['tl:events', 'tl:pulled', 'tl:repaint'].forEach(function (n) { document.addEventListener(n, sync); });
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', sync); else sync();
+    })();
+  </script>
   <style>
+    .ev-pick{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .ev-btn{font:inherit;font-weight:700;font-size:15px;min-height:44px;padding:0 20px;border-radius:999px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);cursor:pointer}
+    .ev-btn.on{background:var(--navy);color:#fff}
+    .ev-btn:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+    .btn[hidden]{display:none}
+    .ev-rsvp{margin-top:18px;max-width:560px;padding:24px;box-shadow:0 8px 24px rgba(29,26,109,.12)}
+    .ev-rsvp[hidden]{display:none}
+    .tag.now{background:var(--green);color:#fff}
+    .tag.now[hidden]{display:none}
+    .ev-info{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    .ev-disc{margin-top:20px;font-size:14px;padding:14px 18px;border-radius:12px;background:var(--ivory,#F7F5F0);border:1px solid var(--line);max-width:none}
+    .hub{display:grid;grid-template-columns:240px 1fr;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:#fff;box-shadow:0 10px 28px rgba(29,26,109,.12)}
+    .hub-d{background:var(--navy);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:26px 14px;gap:2px;position:relative}
+    .hub-d b{font-family:'Fraunces',Georgia,serif;font-size:84px;line-height:1;color:#fff;font-weight:700}
+    .hub-d b.rg{font-size:46px;line-height:1.05}
+    .hub-d span{font-size:15px;letter-spacing:.22em;font-weight:700;color:var(--gold)}
+    .hub-d:after{content:"";position:absolute;right:-11px;top:50%;width:22px;height:22px;border-radius:50%;background:var(--ivory,#F7F5F0);transform:translateY(-50%);box-shadow:inset 0 0 0 1px var(--line)}
+    .hub-m{display:grid;grid-template-rows:auto auto 1fr;min-width:0}
+    .hub-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:16px 24px 16px 36px;border-bottom:2px dashed var(--line)}
+    .hub-k{margin-left:auto;font-size:12px;letter-spacing:.2em;font-weight:700;color:var(--green);text-transform:uppercase}
+    .hub-cells{display:flex;border-bottom:2px dashed var(--line)}
+    .hub-cells>div{flex:1 1 0;min-width:0;padding:16px 24px;border-right:2px dashed var(--line)}.hub-cells>div:first-child{padding-left:36px}.hub-cells>div:last-child{border:0}
+    .hub-cells b{display:block;font-family:'Fraunces',Georgia,serif;font-size:21px;line-height:1.25;color:var(--navy);margin-top:2px}
+    .hub-foot{display:flex;gap:16px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:16px 24px 18px 36px}
+    .hub-where{display:grid;gap:2px;min-width:0}.hub-where b{color:var(--navy)}
+    .hub-act{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.hub-act .ev-pick{margin:0;display:flex;gap:10px}
+    .ev-title{font-size:clamp(28px,3.6vw,40px);line-height:1.15;max-width:900px}
+    .ev-yours{margin:10px 0 0}
+    .ev-credit{margin:0 0 12px;font-size:16px;font-weight:700;color:var(--green)}
+    @media (min-width:861px){.ev-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:none}}
+    @media (max-width:860px){.hub{grid-template-columns:1fr}.hub-d{flex-direction:row;gap:14px;padding:18px}.hub-d b{font-size:56px}.hub-d b.rg{font-size:32px}.hub-d:after{display:none}.hub-cells{flex-direction:column}.hub-cells>div{border-right:0;border-bottom:2px dashed var(--line);padding-left:24px!important}.hub-cells>div:last-child{border:0}.hub-top,.hub-foot{padding-left:24px}}
+    .ev-link{font-size:14px;font-weight:700;margin-left:6px}
     .msg-err { color: var(--danger); font-size: 14px; font-weight: 700; margin-top: 6px; }
   </style>
+  <Prefs />
 </Base>
