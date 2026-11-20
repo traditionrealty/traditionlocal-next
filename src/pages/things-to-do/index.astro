@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import MapToggle from '../../components/MapToggle.astro';
+import Prefs from '../../components/Prefs.astro';
 import '../../styles/pages.css';
 import '../../styles/events.css';
 import { profiles, events, isClosed, href, eventDates, url, media } from '../../lib/data';
@@ -145,7 +146,8 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
       <p class="meta" id="p-count" style="margin-bottom:16px" aria-live="polite"></p>
       <div class={'grid g3' + (config.cardPhotos ? ' cp-on' : '') + (config.cardPhotos && config.cardMapPhotos ? ' cp-maps' : '')} id="p-grid">
         {places.map((p, i) => { const pc = pic(p); return (
-          <div class={i < 12 ? 'card tcard p-item' : 'card tcard p-item hidden'} data-area={p.area} data-find={[p.name, p.summary, p.subCategory, p.area].join(' ').toLowerCase()}>
+          <div class={i < 12 ? 'card tcard p-item' : 'card tcard p-item hidden'} data-area={p.area} data-find={[p.name, p.summary, p.subCategory, p.area].join(' ').toLowerCase()} style="position:relative">
+            <button class="save" type="button" data-slug={'p:' + p.slug} data-name={p.name} aria-label={'Save ' + p.name} aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9z"/></svg></button>
             <a href={href(p)}>
               <div class={pc.mapPhoto ? 'tc-photo has-map' : 'tc-photo'}>
                 {pc.photo ? <img src={pc.photo} alt="" width="640" height="480" loading="lazy" decoding="async" /> : (
@@ -316,4 +318,5 @@ const features = list.filter((x) => hostsRsvp(x.e)).slice(0, 4).map((x) => ({
     })();
   </script>
 <MapToggle set="place" items=".p-item" key="p" noun="places to visit" />
+  <Prefs />
 </Base>
