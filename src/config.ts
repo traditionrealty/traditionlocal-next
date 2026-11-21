@@ -1,6 +1,6 @@
 // Things you can change without touching page code. Carried over from the live site.
 export const config = {
-  contactEmail: 'traditionlocal@gmail.com',
+  contactEmail: 'info@traditionhtx.com',
   youtube: 'https://www.youtube.com/@TraditionLocal',
   social: {
     facebook: 'https://www.facebook.com/TraditionLocal',
