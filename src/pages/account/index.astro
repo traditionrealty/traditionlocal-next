@@ -27,7 +27,7 @@ const house = '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>';
 ---
 <Base title="Your Account" description="Your picks, saved places, and the latest In the Loop." noindex>
 <div class="ah-page"><section class="ah-hero"><div class="ah-wrap ah-herowrap">
-<details class="ah-set"><summary>Settings <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+<details class="ah-set"><summary><span class="ah-ld">Settings</span><span class="ah-lm">My account</span> <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
 <div class="ah-menu">
 <a href={U.settings + '#locally'}><b>Locally Plus preferences</b><span>Interests, area, how often</span></a>
 <a href={U.settings + '#areas'}><b>Places you follow</b><span>Add or remove areas</span></a>
@@ -54,7 +54,7 @@ const house = '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>';
 <section class="ah-card" id="saved" aria-label="Saved list"><div class="ah-ch"><h2>Saved list</h2><a href={U.settings + '#saved'} id="ah-sall" hidden>Open full list</a></div><div id="ah-slist"></div><div class="ah-cf"><button class="ah-btn line" id="ah-mail" type="button">Email my list</button><a href={U.food} class="ah-more">Find more places</a></div></section>
 <section class="ah-card" id="follow" aria-label="Places you follow"><div class="ah-ch"><h2>Places you follow</h2><a href={U.settings + '#areas'}>Manage</a></div><div class="ah-chips" id="ah-chips"></div>
 <div class="ah-cf"><div class="ah-sel"><label class="sr" for="ah-add">Follow another area</label><select id="ah-add" data-combo><option value="">Follow another area</option>{areas.map((a) => <option>{a}</option>)}</select></div><button class="ah-btn" id="ah-addbtn" type="button">Follow</button></div></section>
-<section class="ah-card" id="save-app" aria-label="Save as an app"><div class="ah-ch"><h2>Save as an App</h2></div><div id="sa-ios" hidden><p style="margin:0 0 14px;font-size:15px;color:#4a4870">Add Tradition Local to your home screen so it opens like an app, with no app store needed.</p><ul class="wx"><li><span class="wx-n">1</span><div><p>Tap the <b>Share</b> icon in Safari's toolbar.</p></div></li><li><span class="wx-n">2</span><div><p>Scroll down and tap <b>Add to Home Screen</b>.</p></div></li><li><span class="wx-n">3</span><div><p>Tap <b>Add</b> in the top right corner.</p></div></li></ul></div><div id="sa-android" hidden><p style="margin:0 0 14px;font-size:15px;color:#4a4870">Add Tradition Local to your home screen so it opens like an app, with no app store needed.</p><button class="ah-btn" id="sa-install" type="button" hidden style="margin-bottom:14px">Install Tradition Local</button><ul class="wx" id="sa-android-manual"><li><span class="wx-n">1</span><div><p>Tap the <b>&#8942;</b> menu in Chrome, top right.</p></div></li><li><span class="wx-n">2</span><div><p>Tap <b>Add to Home screen</b>.</p></div></li><li><span class="wx-n">3</span><div><p>Tap <b>Add</b> to confirm.</p></div></li></ul></div><div id="sa-done" hidden><p style="margin:0;font-size:15px;color:#4a4870">You already have Tradition Local saved to your home screen.</p></div><div id="sa-desktop" hidden><p style="margin:0;font-size:15px;color:#4a4870">Open traditionlocal.com on your phone, then come back to this page to add it to your home screen.</p></div></section>
+
 </div>
 
 <section class="ah-loop" aria-label="In the Loop">
@@ -63,6 +63,8 @@ const house = '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>';
 {latest && latest.preview && <p class="ah-lprev">{latest.preview}</p>}
 <div class="ah-lbtns"><a class="ah-gold" href={latest ? latest.u : U.news}>{latest ? 'Read the issue' : 'See In the Loop'}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="ah-plain" href={U.news + '#past-issues'}>Past issues</a></div></div>
 </section>
+
+<div class="ah-two"><section class="ah-card" id="save-app" aria-label="Save as an app"><div class="ah-ch"><h2>Save as an App</h2></div><div id="sa-ios" hidden><p style="margin:0 0 14px;font-size:15px;color:#4a4870">Add Tradition Local to your home screen so it opens like an app, with no app store needed.</p><ul class="wx"><li><span class="wx-n">1</span><div><p>Tap the <b>Share</b> icon in Safari's toolbar.</p></div></li><li><span class="wx-n">2</span><div><p>Scroll down and tap <b>Add to Home Screen</b>.</p></div></li><li><span class="wx-n">3</span><div><p>Tap <b>Add</b> in the top right corner.</p></div></li></ul></div><div id="sa-android" hidden><p style="margin:0 0 14px;font-size:15px;color:#4a4870">Add Tradition Local to your home screen so it opens like an app, with no app store needed.</p><button class="ah-btn" id="sa-install" type="button" hidden style="margin-bottom:14px">Install Tradition Local</button><ul class="wx" id="sa-android-manual"><li><span class="wx-n">1</span><div><p>Tap the <b>&#8942;</b> menu in Chrome, top right.</p></div></li><li><span class="wx-n">2</span><div><p>Tap <b>Add to Home screen</b>.</p></div></li><li><span class="wx-n">3</span><div><p>Tap <b>Add</b> to confirm.</p></div></li></ul></div><div id="sa-done" hidden><p style="margin:0;font-size:15px;color:#4a4870">You already have Tradition Local saved to your home screen.</p></div><div id="sa-desktop" hidden><p style="margin:0;font-size:15px;color:#4a4870">Open traditionlocal.com on your phone, then come back to this page to add it to your home screen.</p></div></section></div>
 </div></div>
 
 <Prefs />
@@ -177,6 +179,7 @@ deferred.userChoice.then(function () { deferred = null; btn.hidden = true; });
 .ah-set { position: absolute; right: 40px; top: 0; text-align: left; z-index: 5; }
 .ah-set summary { list-style: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid rgba(255,255,255,.6); border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 700; color: #fff; min-height: 44px; box-sizing: border-box; }
 .ah-set summary::-webkit-details-marker { display: none; }
+.ah-lm { display: none; }
 .ah-set[open] summary { background: rgba(255,255,255,.14); }
 .ah-menu { position: absolute; right: 0; top: 52px; width: 290px; background: #fff; color: #1D1A6D; border-radius: 16px; box-shadow: 0 18px 40px rgba(0,0,0,.28); padding: 8px; display: flex; flex-direction: column; }
 .ah-menu a { display: block; padding: 11px 14px; border-radius: 10px; text-decoration: none; color: #1D1A6D; }
@@ -253,7 +256,10 @@ deferred.userChoice.then(function () { deferred = null; btn.hidden = true; });
   .ah-av { display: none; }
   .ah-hero h1 { font-size: 27px; margin: 0; max-width: 11em; }
   .ah-set { position: static; order: 2; }
-  .ah-set summary { padding: 8px 13px; font-size: 13px; }
+  .ah-set summary { padding: 10px 18px; font-size: 15px; font-weight: 800; background: #E7BC52; color: #1D1A6D; border-color: #E7BC52; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+  .ah-set[open] summary { background: #F2CC6B; }
+  .ah-ld { display: none; }
+  .ah-lm { display: inline; }
   .ah-menu { right: 14px; top: 62px; position: absolute; width: min(290px, calc(100vw - 28px)); }
   .ah-body { margin-top: -44px; gap: 14px; padding-bottom: 40px; }
   .ah-lp { border-radius: 20px; padding: 20px 18px 18px; gap: 14px; }
