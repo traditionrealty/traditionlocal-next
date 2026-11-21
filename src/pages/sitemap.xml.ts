@@ -1,9 +1,10 @@
 // The list Google reads to find every page. Live mode only: the draft preview publishes an empty list.
-import { businesses, reviews, posts, profiles, events, byName, isClosed, href, url, IS_PREVIEW } from '../lib/data';
+import { businesses, reviews, posts, profiles, events, byName, isClosed, href, url, IS_PREVIEW, apartmentCommunities, developments } from '../lib/data';
+import { stubCountries, countrySlug } from '../lib/destinations';
 import { areaPages } from '../lib/helpers';
 import { issues } from '../lib/issues';
 
-const fixed = ['/', '/food', '/neighborhoods', '/things-to-do', '/videos', '/openings-and-closings', '/newsletters', '/make-it-home', '/find-your-fit', '/new-builds', '/relocation', '/apartments', '/commercial', '/international', '/off-market', '/tradition-realty-group', '/ask-dillon', '/local-directory', '/about', '/how-we-review', '/contact', '/privacy', '/disclosures'];
+const fixed = ['/', '/food', '/neighborhoods', '/things-to-do', '/videos', '/openings-and-closings', '/newsletters', '/make-it-home', '/find-your-fit', '/new-builds', '/relocation', '/apartments', '/commercial', '/international', '/off-market', '/tradition-realty-group', '/ask-dillon', '/ask-sara', '/destinations', '/portugal', '/local-directory', '/about', '/how-we-review', '/contact', '/privacy', '/disclosures'];
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 export function GET({ site }: { site?: URL }) {
@@ -18,6 +19,9 @@ export function GET({ site }: { site?: URL }) {
     for (const p of areaPages()) add(href(p));
     for (const e of events()) add(href(e));
     for (const p of posts()) add(href(p));
+    for (const a of apartmentCommunities) add(url('/apartments/' + a.slug));
+    for (const d of developments) add(url('/developments/' + d.slug));
+    for (const c of stubCountries) add(url('/destinations/' + countrySlug(c)));
     for (const s of issues) add(url('/newsletters/' + s.slug));
   }
   const rows = [...out].sort().map((p) => '  <url><loc>' + esc(new URL(p, origin).href) + '</loc></url>').join('\n');
