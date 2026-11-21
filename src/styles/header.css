@@ -72,6 +72,10 @@ html { scroll-padding-top: 104px; }
   .nav-end .srch-open { display: none; }
   .nav-end .btn { order: 1; }
   .nav-end .signin { order: 2; text-align: center; padding: 12px 0; font-size: 16px; border-bottom: 0; }
+  /* Signed in: the name reads as a button, with a person mark and an arrow, so it is clear it opens the account. */
+  .nav-end .signin.in { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 10px 18px; border: 1.5px solid rgba(255, 255, 255, .6); border-radius: 999px; font-weight: 700; background: rgba(255, 255, 255, .08); }
+  .nav-end .signin.in::before { content: ""; flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--gold, #E7BC52) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231D1A6D' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='9' r='3.2'/%3E%3Cpath d='M5.5 19c1.2-3.4 3.6-5 6.5-5s5.3 1.6 6.5 5'/%3E%3C/svg%3E") center / 18px no-repeat; }
+  .nav-end .signin.in::after { content: ""; flex: none; width: 9px; height: 9px; border-top: 2.5px solid var(--gold, #E7BC52); border-right: 2.5px solid var(--gold, #E7BC52); transform: rotate(45deg); margin-left: 2px; }
 }
 
 /* Phones: the mark and the name scale with the screen, so they stay on one row with the search and menu buttons from 320 to 400 pixels wide. */
