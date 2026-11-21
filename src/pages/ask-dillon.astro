@@ -11,7 +11,7 @@ const topics = [['Neighborhood guide', 'Get a feel for the area and daily life.'
   ['Homes and market trends', 'Home styles, prices, and market updates.'], ['Schools', 'Districts and what to check for an address.'], ['Moving to the area', 'Practical resources for your next move.']];
 ---
 <Base title="Ask Dillon" active="More" sub="makeithome" description="Tell us which Houston neighborhoods you are curious about, and Dillon will reply personally.">
-  <section class="band hero"><div class="wrap"><p class="eyebrow">A neighbor to ask</p><h1 style="margin-bottom:16px">Get to Know a Neighborhood</h1><p class="lead">Tell us what matters to you, and Dillon will reply personally. Questions are always welcome, with no pressure.</p></div></section>
+  <section class="band hero"><div class="wrap"><p class="eyebrow">Neighborhoods, homes, and moving</p><h1 style="margin-bottom:16px">Ask Dillon</h1><p class="lead">Wondering which Houston neighborhood fits your life? Send Dillon a note, and he will reply personally. Questions are always welcome, with no pressure.</p></div></section>
   <section class="band">
     <div class="wrap split">
       <div class="main">
@@ -49,9 +49,11 @@ const topics = [['Neighborhood guide', 'Get a feel for the area and daily life.'
             <li><span class="wx-n" aria-hidden="true">3</span><div><b>No Pressure</b><span class="meta">Take your time. Ask as much as you like.</span></div></li>
           </ol></div>
         <div class="card pad" style="margin-top:24px;background:var(--butter);border-color:var(--butter)"><p class="eyebrow" style="color:var(--navy)">Prefer to explore first?</p><p style="margin-bottom:16px">Try the quiz to see which neighborhoods match what you love.</p><a class="btn" href={url('/find-your-fit')}>Find your fit</a></div>
+        <div class="card pad" style="margin-top:24px"><p class="eyebrow">Want food and culture tips?</p><p style="margin-bottom:16px">Ask Sara about where to eat, what to do, and life beyond Houston.</p><a class="btn" href={url('/ask-sara')}>Ask Sara</a></div>
       </div>
     </div>
   </section>
+  <style>#ask-areas, #ask-topics { gap: 8px; } #ask-areas .chip, #ask-topics .chip { min-height: 34px; padding: 0 12px; font-size: 13px; }</style>
   <script is:inline>
     var form = document.getElementById('ask-form'), $ = function (id) { return document.getElementById(id); };
     function paint() { form.querySelectorAll('label.chip').forEach(function (l) { var c = l.querySelector('input'); l.classList.toggle('on', c.checked); }); $('ask-else-wrap').hidden = !form.querySelector('input[value="Somewhere else"]').checked; }
