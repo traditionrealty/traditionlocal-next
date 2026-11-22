@@ -60,8 +60,8 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
     <div class="wrap" style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:24px;align-items:center">
       <div style="grid-column:span 7">
         <p class="eyebrow">Houston, with a local perspective</p>
-        <h1 style="margin-bottom:20px">Where Should We Go?</h1>
-        <p class="lead" style="margin-bottom:28px">Honest reviews, weekend plans, and neighborhood guides from people who live here. Tell us what you're in the mood for.</p>
+        <h1 style="margin-bottom:20px">What Are You in the Mood For?</h1>
+        <p class="lead" style="margin-bottom:28px">Honest reviews, weekend plans, and neighborhood guides from people who live here. Pick an area and a craving, and we will show you where to go.</p>
         <form class="card" id="finder" method="get" action={url('/food')} style="padding:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:end">
           <div><label for="h-area">Area</label><select id="h-area" name="area"><option value="">Anywhere</option>{areas.map((a) => <option>{a}</option>)}</select></div>
           <div><label for="h-craving">Craving</label><select id="h-craving"><option value="">Anything</option><option value="coffee">Coffee and cafes</option><option value="restaurant">Restaurants</option><option value="sweets">Bakeries and sweets</option><option value="market">Markets</option></select></div>
