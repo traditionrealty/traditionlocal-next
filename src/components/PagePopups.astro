@@ -10,6 +10,7 @@ import { config } from '../config';
 import { url, href, upcomingEvents } from '../lib/data';
 import { areaPages, bizIn, subsIn, venuePlace, to12 } from '../lib/helpers';
 import { hostsRsvp } from '../lib/rsvp';
+import AuthClient from './AuthClient.astro';
 
 const BASE = url('');
 const rel = BASE && Astro.url.pathname.startsWith(BASE) ? Astro.url.pathname.slice(BASE.length) : Astro.url.pathname;
@@ -29,13 +30,14 @@ const toD = (s: string) => { const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(s 
 const pad = (n: number) => String(n).padStart(2, '0');
 const iso = (d: Date) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
 const wantsEvents = kind === 'food' || kind === 'things';
+const wantsPoll = kind === 'food' || kind === 'neighborhoods' || kind === 'things';
 const evs = wantsEvents ? upcomingEvents(40).map((e) => {
   const a = toD(e.starts), b = toD(e.ends || e.starts); if (!a || !b) return null;
   const place = venuePlace(e);
   return { t: e.title.replace(/\s*\[[^\]]*\]\s*$/, ''), u: href(e), s: iso(a), f: iso(b), v: place ? place.name : (e.venue || e.profile || ''), tm: to12(e.startTime), r: hostsRsvp(e) ? 1 : 0 };
 }).filter(Boolean) : [];
 
-const D = { on: !!(config.popups && config.popups.enabled), kind, areas, evs, ask: url('/ask-dillon'), all: url('/things-to-do'), notices: url('/disclosures') };
+const D = { on: !!(config.popups && config.popups.enabled), kind, areas, evs, ask: url('/ask-dillon'), signin: url('/sign-in'), all: url('/things-to-do'), notices: url('/disclosures') };
 const X = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1D1A6D" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>';
 ---
 {kind && (
@@ -71,6 +73,15 @@ const X = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fi
 </div>
 )}
 
+{wantsPoll && (
+<div class="pg-body" id="pg-poll" hidden>
+<div><p class="eyebrow">Community poll</p><h2 id="pg-p-h">Community poll</h2></div>
+<div class="pg-popts" id="pg-p-opts" aria-live="polite"></div>
+<p class="pg-lede" id="pg-p-note"></p>
+<div class="pg-actions"><button type="button" class="pop-no" id="pg-p-no">Not now</button></div>
+</div>
+)}
+
 {kind === 'hood' && (
 <div class="pg-body" id="pg-ask" hidden>
 <div class="pg-wk"><div class="pg-dl" aria-hidden="true">DL</div>
@@ -82,6 +93,7 @@ const X = '<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fi
 </aside>
 </div>
 )}
+{wantsPoll && <AuthClient />}
 {kind && (
 <script is:inline define:vars={{ D }}>
 (function () {
@@ -90,11 +102,11 @@ var $ = function (id) { return document.getElementById(id); };
 function ls(k, v) { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} return null; }
 function ss(k, v) { try { if (v === undefined) return sessionStorage.getItem(k); if (v === null) sessionStorage.removeItem(k); else sessionStorage.setItem(k, v); } catch (e) {} return null; }
 var flag = ''; try { flag = new URLSearchParams(location.search).get('popup') || ''; } catch (e) {}
-if (flag === 'reset') { ['tl_pg_mem', 'tl_wk_done'].forEach(function (k) { ls(k, null); }); }
+if (flag === 'reset') { ['tl_pg_mem', 'tl_wk_done', 'tl_poll_voted'].forEach(function (k) { ls(k, null); }); }
 var on = D.on || ls('tl_pop_preview') === '1';
-var forced = flag === 'community' || flag === 'weekend' || flag === 'ask';
+var forced = flag === 'community' || flag === 'weekend' || flag === 'ask' || flag === 'poll';
 var DAY = 864e5, current = '', lastFocus = null, shownThisView = false;
-var BODIES = { community: 'pg-community', weekend: 'pg-weekend', ask: 'pg-ask', done: 'pg-done' };
+var BODIES = { community: 'pg-community', weekend: 'pg-weekend', ask: 'pg-ask', poll: 'pg-poll', done: 'pg-done' };
 function narrow() { return window.innerWidth < 701; }
 function jget(k, d) { try { var v = JSON.parse(ls(k)); return v == null ? d : v; } catch (e) { return d; } }
 function area() { var a = window.TL && window.TL.area ? window.TL.area() : jget('tl_area', ''); return typeof a === 'string' ? a : ''; }
@@ -120,7 +132,7 @@ function gapRecent() { var t = parseInt(ls('tl_pop_last'), 10) || 0; return !!t 
 function show(which) {
   current = which; lastFocus = document.activeElement;
   Object.keys(BODIES).forEach(function (k) { var b = $(BODIES[k]); if (b) b.hidden = k !== which; });
-  var h = which === 'community' ? 'pg-c-h' : which === 'weekend' ? 'pg-w-h' : which === 'ask' ? 'pg-a-h' : 'pg-d-h';
+  var h = which === 'community' ? 'pg-c-h' : which === 'weekend' ? 'pg-w-h' : which === 'ask' ? 'pg-a-h' : which === 'poll' ? 'pg-p-h' : 'pg-d-h';
   card.setAttribute('aria-labelledby', h);
   card.classList.toggle('pg-left', which === 'weekend');
   card.hidden = false;
@@ -129,12 +141,12 @@ function show(which) {
 function stamp() { ls('tl_pop_last', String(Date.now())); shownThisView = true; }
 function close() {
   if (card.hidden) return; card.hidden = true;
-  if (current === 'community' || current === 'weekend' || current === 'ask') note(current, false);
+  if (current === 'community' || current === 'weekend' || current === 'ask' || current === 'poll') note(current, false);
   try { if (lastFocus && lastFocus.focus) lastFocus.focus(); } catch (e) {}
 }
 $('pg-x').addEventListener('click', close);
 document.addEventListener('keydown', function (e) { if (!card.hidden && e.key === 'Escape') { e.preventDefault(); close(); } });
-['pg-c-skip', 'pg-w-no', 'pg-a-no', 'pg-d-close'].forEach(function (id) { var b = $(id); if (b) b.addEventListener('click', function () { if (id === 'pg-d-close') { card.hidden = true; } else close(); }); });
+['pg-c-skip', 'pg-w-no', 'pg-a-no', 'pg-p-no', 'pg-d-close'].forEach(function (id) { var b = $(id); if (b) b.addEventListener('click', function () { if (id === 'pg-d-close') { card.hidden = true; } else close(); }); });
 
 // Pick your community
 var sel = $('pg-c-sel'), chips = card.querySelectorAll('#pg-c-chips .chip');
@@ -194,6 +206,47 @@ function fillAsk() {
   $('pg-a-h').textContent = name ? 'Thinking about ' + name + '?' : 'Thinking about this area?';
 }
 
+// Community poll: the vote happens right in the card. Loads the newest active poll first, and only opens if there is one the visitor has not voted in.
+var PL = null;
+function esc(t) { return String(t).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
+function pollAsk() {
+  $('pg-p-h').textContent = PL.q;
+  $('pg-p-opts').innerHTML = PL.opts.map(function (x) { return '<button type="button" class="pg-popt" data-o="' + x.id + '">' + esc(x.label) + '</button>'; }).join('');
+  $('pg-p-note').textContent = PL.uid ? 'One tap. Your pick helps decide what we cover next.' : 'Tap an answer. You will sign in or create a free account to vote.';
+  $('pg-p-no').textContent = 'Not now';
+}
+function pollBars(mine, counts) {
+  var tot = 0; PL.opts.forEach(function (x) { tot += counts[x.id] || 0; });
+  $('pg-p-opts').innerHTML = PL.opts.map(function (x) { var n = counts[x.id] || 0, pc = tot ? Math.round(n * 100 / tot) : 0; return '<div class="pg-pbar"><u style="width:' + pc + '%"></u><span><b>' + esc(x.label) + (x.id === mine ? ' &#10003;' : '') + '</b><b>' + pc + '%</b></span></div>'; }).join('');
+  $('pg-p-note').textContent = 'Thanks for voting. ' + tot + (tot === 1 ? ' vote' : ' votes') + ' so far.';
+  $('pg-p-no').textContent = 'Close'; ls('tl_poll_voted', '1');
+}
+function pollResults(c, mine) {
+  c.rpc('poll_results', { p_poll: PL.id }).then(function (r) { var m = {}; ((r && r.data) || []).forEach(function (x) { m[x.option_id] = Number(x.votes); }); pollBars(mine, m); });
+}
+function loadPoll(cb) {
+  var A = window.TLAuth, c = A && A.client(); if (!c) { cb(false); return; }
+  c.from('community_polls').select('id,question').eq('active', true).order('created_at', { ascending: false }).limit(1).then(function (r) {
+    var poll = r && r.data && r.data[0]; if (!poll) { cb(false); return; }
+    c.from('community_poll_options').select('id,label,sort_order').eq('poll_id', poll.id).order('sort_order').then(function (o) {
+      var opts = (o && o.data) || []; if (!opts.length) { cb(false); return; }
+      c.auth.getSession().then(function (s) {
+        var ses = s && s.data && s.data.session, uid = ses ? ses.user.id : null;
+        PL = { id: poll.id, q: poll.question, opts: opts, uid: uid, c: c };
+        if (!uid) { cb(true); return; }
+        c.from('community_poll_votes').select('option_id').eq('poll_id', poll.id).eq('profile_id', uid).maybeSingle().then(function (v) { if (v && v.data) { ls('tl_poll_voted', '1'); cb(false); } else cb(true); });
+      });
+    });
+  });
+}
+var pOpts = $('pg-p-opts');
+if (pOpts) pOpts.addEventListener('click', function (e) {
+  var b = e.target.closest('.pg-popt'); if (!b || !PL) return;
+  if (!PL.uid) { location.href = D.signin + '?next=' + encodeURIComponent(location.pathname); return; }
+  b.disabled = true;
+  PL.c.from('community_poll_votes').insert({ poll_id: PL.id, option_id: b.dataset.o, profile_id: PL.uid }).then(function (r) { if (r && !r.error) pollResults(PL.c, b.dataset.o); else { b.disabled = false; $('pg-p-note').textContent = 'Could not save your vote. Please try again.'; } });
+});
+
 function attempt(which, tries) {
   if (shownThisView || !card.hidden) return;
   if (!forced && tries === 0 && accountDue() && Date.now() - born < 27000) { setTimeout(function () { attempt(which, 0); }, 28000 - (Date.now() - born)); return; } // signed out visitors meet the create account pop-up first
@@ -201,25 +254,30 @@ function attempt(which, tries) {
   if (!forced && (busy() || gapRecent())) { if (tries < 12) setTimeout(function () { attempt(which, tries + 1); }, 5000); return; }
   if (which === 'weekend') { var e = weekendPicks(); if (!e.length) return; fillWeekend(e); }
   else if (which === 'ask') fillAsk();
+  else if (which === 'poll') { if (!PL) return; pollAsk(); }
   if (!forced) note(which, true);
   stamp(); show(which);
 }
 
 if (forced) {
-  var w = flag === 'community' ? 'community' : flag === 'weekend' ? 'weekend' : 'ask';
-  if ((w === 'community' && !$('pg-community')) || (w === 'weekend' && !$('pg-weekend')) || (w === 'ask' && !$('pg-ask'))) return;
+  var w = flag === 'community' ? 'community' : flag === 'weekend' ? 'weekend' : flag === 'poll' ? 'poll' : 'ask';
+  if ((w === 'community' && !$('pg-community')) || (w === 'weekend' && !$('pg-weekend')) || (w === 'ask' && !$('pg-ask')) || (w === 'poll' && !$('pg-poll'))) return;
+  if (w === 'poll') { loadPoll(function (ok) { if (!ok) { PL = { id: '', q: 'Which neighborhood guide should we write next?', opts: ['Montrose', 'The Heights', 'Spring Branch', 'Bellaire'].map(function (l, i) { return { id: 'x' + i, label: l }; }), uid: null, c: null }; } setTimeout(function () { attempt('poll', 0); }, 300); }); return; }
   setTimeout(function () { attempt(w, 0); }, 600); return;
 }
 if (!on) return;
 
 // Real visitor rules. Each one opens when the visitor has scrolled about halfway, or after 30 seconds if they have not scrolled.
 var which = $('pg-community') && restOver('community') && !hasArea() ? 'community' : $('pg-weekend') && restOver('weekend') && weekendPicks().length ? 'weekend' : $('pg-ask') && restOver('ask') ? 'ask' : '';
-if (!which) return;
-var armed = false, t0 = Date.now();
-var go = function () { if (armed) return; armed = true; attempt(which, 0); };
-window.addEventListener('scroll', function () { var h = document.documentElement; if (Date.now() - t0 > 6000 && (window.scrollY + window.innerHeight) / Math.max(h.scrollHeight, 1) >= 0.5) go(); }, { passive: true });
-setTimeout(go, 30000);
-if (which === 'ask') document.addEventListener('mouseout', function (e) { if (!e.relatedTarget && e.clientY <= 0 && Date.now() - t0 > 8000 && !narrow()) go(); });
+function arm(which) {
+  var armed = false, t0 = Date.now();
+  var go = function () { if (armed) return; armed = true; attempt(which, 0); };
+  window.addEventListener('scroll', function () { var h = document.documentElement; if (Date.now() - t0 > 6000 && (window.scrollY + window.innerHeight) / Math.max(h.scrollHeight, 1) >= 0.5) go(); }, { passive: true });
+  setTimeout(go, 30000);
+  if (which === 'ask') document.addEventListener('mouseout', function (e) { if (!e.relatedTarget && e.clientY <= 0 && Date.now() - t0 > 8000 && !narrow()) go(); });
+}
+if (which) arm(which);
+else if ($('pg-poll') && restOver('poll') && ls('tl_poll_voted') !== '1') loadPoll(function (ok) { if (ok) arm('poll'); });
 })();
 </script>
 )}
