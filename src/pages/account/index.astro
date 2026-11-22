@@ -50,6 +50,7 @@ const house = '<path d="M3 11l9-8 9 8M5 10v10h14V10"/>';
 
 <section class="ah-card ah-events" id="events" aria-label="Your events"><div class="ah-ch"><h2>Your events</h2><a href={U.things}>Find events</a></div><div class="ah-evcols"><div><h3 class="ah-evh">Going</h3><div id="ah-going"></div></div><div><h3 class="ah-evh">Interested</h3><div id="ah-interested"></div></div></div></section>
 
+<section class="ah-card ah-votes" id="votes" aria-label="Your votes"><div class="ah-ch"><h2>Your votes</h2></div><div id="ah-poll"><p class="ah-none">No open polls right now. Check back soon.</p></div></section>
 <div class="ah-two">
 <section class="ah-card" id="saved" aria-label="Saved list"><div class="ah-ch"><h2>Saved list</h2><a href={U.settings + '#saved'} id="ah-sall" hidden>Open full list</a></div><div id="ah-slist"></div><div class="ah-cf"><button class="ah-btn line" id="ah-mail" type="button">Email my list</button><a href={U.food} class="ah-more">Find more places</a></div></section>
 <section class="ah-card" id="follow" aria-label="Places you follow"><div class="ah-ch"><h2>Places you follow</h2><a href={U.settings + '#areas'}>Manage</a></div><div class="ah-chips" id="ah-chips"></div>
@@ -142,7 +143,40 @@ var m = user.user_metadata || {};
 if (m.first_name) window.__ahGreet(m.first_name);
 c.from('profiles').select('first_name').eq('id', user.id).maybeSingle().then(function (r) { var p = r && r.data; if (p && p.first_name) window.__ahGreet(p.first_name); });
 }
-c.auth.getSession().then(function (r) { var s = r && r.data && r.data.session; if (s) name(s.user); });
+function esc(t) { return String(t).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
+var box = document.getElementById('ah-poll'), uid = null;
+function bars(opts, mine, counts) {
+var tot = 0; opts.forEach(function (x) { tot += counts[x.id] || 0; });
+return '<div class="ah-pbars">' + opts.map(function (x) { var n = counts[x.id] || 0, pc = tot ? Math.round(n * 100 / tot) : 0; return '<div class="ah-pbar"><u style="width:' + pc + '%"></u><span><b>' + esc(x.label) + (x.id === mine ? ' &#10003;' : '') + '</b><b>' + pc + '%</b></span></div>'; }).join('') + '</div><p class="ah-pn">' + tot + (tot === 1 ? ' vote' : ' votes') + ' so far. Your pick is checked.</p>';
+}
+function render(poll, opts, mine, counts) {
+if (!poll) return;
+var h = '<p class="ah-pq">' + esc(poll.question) + '</p>';
+if (mine) { h += bars(opts, mine, counts || {}); try { localStorage.setItem('tl_poll_voted', '1'); } catch (e) {} }
+else { h += '<div class="ah-popts">' + opts.map(function (x) { return '<button type="button" class="ah-popt" data-o="' + x.id + '">' + esc(x.label) + '</button>'; }).join('') + '</div>'; }
+box.innerHTML = h;
+box.onclick = function (e) {
+var b = e.target.closest('.ah-popt'); if (!b || !uid) return;
+b.disabled = true;
+c.from('community_poll_votes').insert({ poll_id: poll.id, option_id: b.dataset.o, profile_id: uid }).then(function (r) { if (r && !r.error) results(poll, opts, b.dataset.o); else { b.disabled = false; box.insertAdjacentHTML('beforeend', '<p class="ah-none">Could not save your vote. Try again.</p>'); } });
+};
+}
+function results(poll, opts, mine) {
+c.rpc('poll_results', { p_poll: poll.id }).then(function (r) { var m = {}; ((r && r.data) || []).forEach(function (x) { m[x.option_id] = Number(x.votes); }); render(poll, opts, mine, m); });
+}
+window.__ahVotes = render;
+function polls(user) {
+if (!user || !box) return;
+uid = user.id;
+c.from('community_polls').select('id,question').eq('active', true).order('created_at', { ascending: false }).limit(1).then(function (r) {
+var poll = r && r.data && r.data[0]; if (!poll) return;
+Promise.all([
+c.from('community_poll_options').select('id,label,sort_order').eq('poll_id', poll.id).order('sort_order'),
+c.from('community_poll_votes').select('option_id').eq('poll_id', poll.id).eq('profile_id', uid).maybeSingle()
+]).then(function (a) { var o = (a[0] && a[0].data) || [], m = a[1] && a[1].data ? a[1].data.option_id : null; if (m) results(poll, o, m); else render(poll, o, null); });
+});
+}
+c.auth.getSession().then(function (r) { var s = r && r.data && r.data.session; if (s) { name(s.user); polls(s.user); } });
 })();
 </script>
 <ComboKit />
@@ -216,6 +250,14 @@ deferred.userChoice.then(function () { deferred = null; btn.hidden = true; });
 .ah-empty p { margin: 0 0 8px; color: #4a4870; }
 .ah-empty a { font-weight: 700; }
 .ah-two { display: flex; flex-wrap: wrap; gap: 24px; align-items: stretch; }
+.ah-pq { font-family: var(--serif, 'Fraunces', serif); font-weight: 700; color: #1D1A6D; font-size: 20px; line-height: 1.25; margin: 6px 0 14px; }
+.ah-popts { display: flex; flex-wrap: wrap; gap: 8px; }
+.ah-popt { min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1.5px solid #1D1A6D; background: #fff; color: #1D1A6D; font-weight: 700; font-size: 14px; font-family: inherit; cursor: pointer; }
+.ah-popt:hover { background: #1D1A6D; color: #fff; }
+.ah-pbar { position: relative; overflow: hidden; border-radius: 12px; background: #f1ede1; padding: 13px 14px; margin-bottom: 8px; font-size: 15px; color: #1D1A6D; }
+.ah-pbar u { position: absolute; left: 0; top: 0; bottom: 0; background: #E7BC52; opacity: .55; text-decoration: none; }
+.ah-pbar span { position: relative; display: flex; justify-content: space-between; gap: 10px; }
+.ah-pn { margin: 6px 0 0; font-size: 13px; color: #6b6990; }
 .ah-card { flex: 1 1 440px; background: #fff; border: 1px solid #e3dcc9; border-radius: 22px; padding: 26px 28px; display: flex; flex-direction: column; }
 .ah-ch { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; gap: 12px; }
 .ah-ch h2 { margin: 0; font-size: 24px; }
