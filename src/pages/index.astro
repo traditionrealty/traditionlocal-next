@@ -7,6 +7,7 @@ import OpeningsPanel from '../components/OpeningsPanel.astro';
 import { openingsOf } from '../lib/openings';
 import VideoCard from '../components/VideoCard.astro';
 import VideoScript from '../components/VideoScript.astro';
+import PollBand from '../components/PollBand.astro';
 import { videos } from '../lib/videos';
 import { spots, rotating } from '../lib/spotlight';
 const events = upcomingEvents(5);
@@ -138,6 +139,8 @@ const foodIdx = businesses().filter((b) => isFood(b) && !isClosed(b)).map((b) =>
       </div>
     </section>
   )}
+
+  <PollBand />
 
   {feed.length > 0 && (
     <section class="band" id="feed">
