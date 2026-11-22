@@ -1,0 +1,77 @@
+---
+// Community poll band for the homepage, between the videos and the feed. Reads the newest active poll from Supabase.
+// Hidden until a poll loads. Signed out visitors see the answers and are sent to sign in when they tap one.
+// Results show only after a member has voted, as percentages (totals come from the poll_results function, never individual votes).
+import AuthClient from './AuthClient.astro';
+import { url } from '../lib/data';
+const P = { signin: url('/sign-in') };
+---
+<section class="band poll-band" id="poll" aria-label="Community poll" hidden>
+<div class="wrap poll-grid">
+<div class="poll-l">
+<p class="eyebrow">Community poll</p>
+<h2 id="pb-q"></h2>
+<p class="poll-lede" id="pb-lede">One tap. Your pick helps decide what we cover next.</p>
+</div>
+<div class="poll-r"><div id="pb-body" aria-live="polite"></div><p class="poll-note" id="pb-note"></p></div>
+</div>
+</section>
+<AuthClient />
+<script is:inline define:vars={{ P }}>
+(function () {
+var sec = document.getElementById('poll'); if (!sec) return;
+var A = window.TLAuth, c = A && A.client(); if (!c) return;
+var body = document.getElementById('pb-body'), note = document.getElementById('pb-note'), lede = document.getElementById('pb-lede'), uid = null, poll = null, opts = [];
+function esc(t) { return String(t).replace(/[&<>"]/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[m]; }); }
+function remember() { try { localStorage.setItem('tl_poll_voted', '1'); } catch (e) {} }
+function ask() {
+body.innerHTML = opts.map(function (x) { return '<button type="button" class="poll-opt" data-o="' + x.id + '">' + esc(x.label) + '</button>'; }).join('');
+note.textContent = uid ? '' : 'Sign in or create a free account to vote.';
+lede.textContent = 'One tap. Your pick helps decide what we cover next.';
+}
+function bars(mine, counts) {
+var tot = 0; opts.forEach(function (x) { tot += counts[x.id] || 0; });
+body.innerHTML = opts.map(function (x) { var n = counts[x.id] || 0, pc = tot ? Math.round(n * 100 / tot) : 0; return '<div class="poll-bar"><u style="width:' + pc + '%"></u><span><b>' + esc(x.label) + (x.id === mine ? ' &#10003;' : '') + '</b><b>' + pc + '%</b></span></div>'; }).join('');
+note.textContent = tot + (tot === 1 ? ' vote' : ' votes') + ' so far. Your pick is checked.';
+lede.textContent = 'Thanks for voting. Here is how everyone voted so far.';
+remember();
+}
+function results(mine) {
+c.rpc('poll_results', { p_poll: poll.id }).then(function (r) { var m = {}; ((r && r.data) || []).forEach(function (x) { m[x.option_id] = Number(x.votes); }); bars(mine, m); });
+}
+body.addEventListener('click', function (e) {
+var b = e.target.closest('.poll-opt'); if (!b) return;
+if (!uid) { location.href = P.signin + '?next=' + encodeURIComponent('/'); return; }
+b.disabled = true;
+c.from('community_poll_votes').insert({ poll_id: poll.id, option_id: b.dataset.o, profile_id: uid }).then(function (r) { if (r && !r.error) results(b.dataset.o); else { b.disabled = false; note.textContent = 'Could not save your vote. Please try again.'; } });
+});
+c.from('community_polls').select('id,question').eq('active', true).order('created_at', { ascending: false }).limit(1).then(function (r) {
+poll = r && r.data && r.data[0]; if (!poll) return;
+c.from('community_poll_options').select('id,label,sort_order').eq('poll_id', poll.id).order('sort_order').then(function (o) {
+opts = (o && o.data) || []; if (!opts.length) return;
+document.getElementById('pb-q').textContent = poll.question;
+c.auth.getSession().then(function (s) {
+var ses = s && s.data && s.data.session; uid = ses ? ses.user.id : null;
+sec.hidden = false;
+if (!uid) { ask(); return; }
+c.from('community_poll_votes').select('option_id').eq('poll_id', poll.id).eq('profile_id', uid).maybeSingle().then(function (v) { var m = v && v.data ? v.data.option_id : null; if (m) results(m); else ask(); });
+});
+});
+});
+})();
+</script>
+<style is:global>
+.poll-band { background: #1D1A6D; }
+.poll-band[hidden] { display: none; }
+.poll-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.poll-band .eyebrow { color: #E7BC52; }
+.poll-band h2 { color: #fff; margin: 0 0 12px; }
+.poll-lede { color: #d6d4f0; margin: 0; font-size: 17px; }
+.poll-opt { display: block; width: 100%; min-height: 52px; margin: 0 0 10px; padding: 0 18px; border: 0; border-radius: 12px; background: rgba(255,255,255,.12); color: #fff; font-weight: 700; font-size: 16px; font-family: inherit; text-align: left; cursor: pointer; }
+.poll-opt:hover, .poll-opt:focus-visible { background: #E7BC52; color: #1D1A6D; }
+.poll-bar { position: relative; overflow: hidden; border-radius: 12px; background: rgba(255,255,255,.12); padding: 15px 16px; margin-bottom: 10px; color: #fff; }
+.poll-bar u { position: absolute; left: 0; top: 0; bottom: 0; background: #E7BC52; opacity: .5; text-decoration: none; }
+.poll-bar span { position: relative; display: flex; justify-content: space-between; gap: 10px; }
+.poll-note { color: #d6d4f0; font-size: 14px; margin: 6px 0 0; min-height: 1em; }
+@media (max-width: 760px) { .poll-grid { grid-template-columns: 1fr; gap: 24px; } }
+</style>
