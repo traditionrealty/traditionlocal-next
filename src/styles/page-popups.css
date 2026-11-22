@@ -34,6 +34,12 @@
 .pg-ev-m { font-size: 14px; color: var(--slate); }
 .pg-fine { margin: 0; font-size: 12px; color: var(--slate); }
 .pg-fine a { color: var(--blue); }
+.pg-popts { display: flex; flex-direction: column; gap: 8px; }
+.pg-popt { min-height: 46px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--navy); background: #fff; color: var(--navy); font-weight: 700; font-size: 15px; font-family: inherit; text-align: left; cursor: pointer; }
+.pg-popt:hover, .pg-popt:focus-visible { background: var(--navy); color: #fff; }
+.pg-pbar { position: relative; overflow: hidden; border-radius: 12px; background: var(--ivory, #FAF7F0); padding: 12px 14px; color: var(--navy); font-size: 15px; }
+.pg-pbar u { position: absolute; left: 0; top: 0; bottom: 0; background: #E7BC52; opacity: .55; text-decoration: none; }
+.pg-pbar span { position: relative; display: flex; justify-content: space-between; gap: 10px; }
 @media (prefers-reduced-motion: reduce) { .pg-card { animation: none; } }
 @media (max-width: 700px) {
 .pg-card, .pg-card.pg-left { left: 12px; right: 12px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); width: auto; padding: 18px; }
